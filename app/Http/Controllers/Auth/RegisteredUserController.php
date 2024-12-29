@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\Payment;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -27,26 +28,43 @@ class RegisteredUserController extends Controller
      *
      * @throws \Illuminate\Validation\ValidationException
      */
-    public function store(Request $request): RedirectResponse
-    {
-        $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
-            'phone_number' => ['required', 'string', 'max:255', 'unique:'.User::class],
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
-        ]);
+        public function store(Request $request): RedirectResponse
+        {
+            $request->validate([
+                'name' => ['required', 'string', 'max:255'],
+                'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
+                'phone_number' => ['required', 'string', 'max:255', 'unique:'.User::class],
+                'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            ]);
 
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'phone_number' => $request->phone_number,
-            'password' => Hash::make($request->password),
-        ]);
+            // Welcome amount (stored as a numeric value)
+            $welcomeAmount = 2035.00;
 
-        event(new Registered($user));
+            // Create user
+            $user = User::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'balance' => $welcomeAmount, // Use the numeric value
+                'phone_number' => $request->phone_number,
+                'password' => Hash::make($request->password),
+            ]);
 
-        Auth::login($user);
+            // Log payment
+            $payment = Payment::create([
+                'user_id' => $user->id,
+                'currency' => "NGN",
+                'amount' => $welcomeAmount,
+                'description' => "BONUS FOR WELCOME REGISTRATION",
+                'payment_method' => "PAYSTACK",
+                'status' => "PAID",
+            ]);
 
-        return redirect(route('dashboard', absolute: false));
-    }
+            // Fire registered event and log in user
+            event(new Registered($user));
+            Auth::login($user);
+
+            // Redirect to dashboard
+            return redirect()->route('dashboard');
+        }
+
 }

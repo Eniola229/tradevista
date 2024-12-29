@@ -8,18 +8,21 @@ use App\Http\Controllers\Admin\AdminAuthController;
 use App\Http\Controllers\Admin\TeamController;
 use App\Http\Controllers\Admin\CategoryController;
 
+
+use App\Http\Controllers\Front\SetupController;
+
 Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::get('dashboard', [SetupController::class, 'setup'])->name('dashboard');
+    Route::post('/create-setup', [SetupController::class, 'createSetup'])->name('create.setup');
+    Route::get('/payment/callback', [SetupController::class, 'paymentCallback'])->name('payment.callback');
 });
 
 

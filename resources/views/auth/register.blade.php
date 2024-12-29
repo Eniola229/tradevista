@@ -60,33 +60,33 @@
                                     @csrf 
 
                                     <!-- Name Field -->
-                                    <input type="text" name="name" placeholder="Name" value="{{ old('name') }}" required>
+                                    <input type="text" name="name" placeholder="Name" value="{{ old('name') }}">
                                     @error('name')
-                                        <div class="error-message">{{ $message }}</div>
+                                        <div class="alert alert-danger mb-2">{{ $message }}</div>
                                     @enderror
 
                                     <!-- Email Field -->
                                     <input type="email" name="email" placeholder="Email" value="{{ old('email') }}" required>
                                     @error('email')
-                                        <div class="error-message">{{ $message }}</div>
+                                       <div class="alert alert-danger mb-2">{{ $message }}</div>
                                     @enderror
 
                                     <!-- Phone Number Field -->
                                     <input type="number" name="phone_number" placeholder="Phone Number" value="{{ old('phone_number') }}" required>
                                     @error('phone_number')
-                                        <div class="error-message">{{ $message }}</div>
+                                       <div class="alert alert-danger mb-2">{{ $message }}</div>
                                     @enderror
 
                                     <!-- Password Field -->
                                     <input type="password" name="password" placeholder="Password" required>
                                     @error('password')
-                                        <div class="error-message">{{ $message }}</div>
+                                       <div class="alert alert-danger mb-2">{{ $message }}</div>
                                     @enderror
 
                                     <!-- Confirm Password Field -->
                                     <input type="password" name="password_confirmation" placeholder="Confirm Password" required>
                                     @error('password_confirmation')
-                                        <div class="error-message">{{ $message }}</div>
+                                       <div class="alert alert-danger mb-2">{{ $message }}</div>
                                     @enderror
 
                                     <!-- Submit Button -->

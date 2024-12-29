@@ -30,8 +30,14 @@
                 <div class="col-lg-3">
                     <div class="header__right">
                         <div class="header__right__auth">
-                            <a href="{{ url('login') }}">Login</a>
-                            <a href="{{ url('register') }}">Register</a>
+                            @if(Auth::check())
+                                <!-- Show profile if the user is authenticated -->
+                                <a href="{{ url('dashboard') }}">Dashbaord</a>
+                            @else
+                                <!-- Show login and register links if the user is not authenticated -->
+                                <a href="{{ url('login') }}">Login</a>
+                                <a href="{{ url('register') }}">Register</a>
+                            @endif
                         </div>
                         <ul class="header__right__widget">
                             <li><span class="icon_search search-switch"></span></li>

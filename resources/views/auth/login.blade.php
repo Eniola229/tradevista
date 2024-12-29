@@ -57,19 +57,33 @@
                         <div class="contact__form">
                             <h5>Welcome Back | Kindly Login</h5>
                                <form method="POST" action="{{ route('login') }}">
+                                      @if($errors->any())
+                                    <div class="alert alert-danger text-red-800 bg-red-200 p-4 rounded mb-4">
+                                        <ul class="list-disc list-inside">
+                                            @foreach($errors->all() as $error)
+                                                <li>{{ $error }}</li>
+                                            @endforeach
+                                        </ul>
+                                    </div>
+                                @endif
+                                @if(session('error'))
+                                    <div class="alert alert-danger text-red-800 bg-red-200 p-4 rounded mb-4">
+                                        {{ session('error') }}
+                                    </div>
+                                @endif
                                     @csrf 
                                     <!-- Email Field -->
                                     <input type="email" name="email" placeholder="Email" value="{{ old('email') }}" required>
                                     @error('email')
                                         <div class="error-message">{{ $message }}</div>
                                     @enderror
-
+                                     <p>Forgot your password? <a href="{{ url('forgot-password') }}">Click here</a></p>
                                     <!-- Password Field -->
                                     <input type="password" name="password" placeholder="Password" required>
                                     @error('password')
                                         <div class="error-message">{{ $message }}</div>
                                     @enderror
-                                    <p>Forgot your password? <a href="{{ url('forgot-password') }}">Click here</a></p>
+                                    <p>Dont have an account? <a href="{{ url('register') }}">Click here</a></p>
                                     <!-- Submit Button -->
                                     <button type="submit" class="site-btn">Login</button>
                                 </form>
