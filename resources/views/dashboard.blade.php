@@ -78,7 +78,7 @@
                   <div class="numbers">
                     <p class="text-sm mb-0 text-capitalize font-weight-bold">Products</p>
                     <h5 class="font-weight-bolder mb-0">
-                      0
+                      {{ $productCount }}
                       <span class="text-success text-sm font-weight-bolder">+3%</span>
                     </h5>
                   </div>
@@ -162,7 +162,14 @@
                 Your Payment is still <strong>PENDING.</strong> We advise you contact our support team and your bank if you have been debited . <strong>Thanks</strong>
             </div>
       @else
-      hii
+
+      <div class="d-flex flex-column flex-md-row align-items-center justify-content-between mt-4 p-4 rounded shadow-sm gap-3">
+        <h2 class="h5 text-dark mb-0">Upload a new product</h2>
+        <a href="{{ url('add-edit-product') }}">
+          <button class="btn btn-primary">Click here</button>
+        </a>
+      </div>
+
       @endif
       @else
       <div class="row mt-4">
@@ -289,7 +296,7 @@
         </button>
     </form>
 
-
+ 
 
           </div>
         </div>
@@ -310,13 +317,18 @@
         </div>
       </div>
       @endif
+      <div class="d-flex flex-column flex-md-row align-items-center justify-content-between mt-4 p-4 rounded shadow-sm gap-3">
+        <h2 class="h5 text-dark mb-0">Refer a friend and earn ₦100</h2>
+        <p class="alert alert-info text-white" id="textToCopy">http://127.0.0.1:8000/register?referer_code={{ Auth::user()->email }}</p>
+          <button class="btn btn-primary" id="copyButton">Copy link</button>
+      </div>
       <div class="row my-4">
         <div class="col-lg-8 col-md-6 mb-md-0 mb-4">
           <div class="card">
             <div class="card-header pb-0">
               <div class="row">
                 <div class="col-lg-6 col-7">
-                  <h6>Payment Hostory</h6>
+                  <h6>Payment History</h6>
                 
                 </div>
                 <div class="col-lg-6 col-5 my-auto text-end">
@@ -543,6 +555,27 @@
 <script src="{{ asset('assets/js/plugins/smooth-scrollbar.min.js') }}"></script>
 <script src="{{ asset('assets/js/plugins/chartjs.min.js') }}"></script>
     <!-- JavaScript -->
+ <script>
+    document.getElementById("copyButton").addEventListener("click", function () {
+      // Get the text inside the <p> tag
+      const text = document.getElementById("textToCopy").innerText;
+
+      // Create a temporary textarea element to copy the text
+      const textarea = document.createElement("textarea");
+      textarea.value = text;
+      document.body.appendChild(textarea);
+
+      // Select and copy the text
+      textarea.select();
+      document.execCommand("copy");
+
+      // Remove the temporary textarea
+      document.body.removeChild(textarea);
+
+      // Notify the user
+      alert("Link copied to clipboard!");
+    });
+  </script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const accountTypeSelect = document.getElementById('account_type');

@@ -119,7 +119,7 @@ ol {
 	bottom: -4px;
 	height: 2px;
 	width: 70px;
-	background: #ca1515;
+	background: darkblue;
 	content: "";
 }
 
@@ -1126,7 +1126,7 @@ ol {
 	bottom: -4px;
 	height: 2px;
 	width: 100%;
-	background: #ca1515;
+	background: darkblue;
 	content: "";
 	opacity: 0;
 }

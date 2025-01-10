@@ -11,6 +11,7 @@ use Hash;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 use App\Models\User;
+use App\Models\Product;
 use App\Models\Waitlist;
 
 class AdminAuthController extends Controller
@@ -51,7 +52,7 @@ class AdminAuthController extends Controller
         $credentials = $request->only('email', 'password');
         
         // Use the 'admins' guard for authentication
-        if (Auth::guard('admins')->attempt($credentials)) {
+        if (Auth::guard('admin')->attempt($credentials)) {
             return redirect()->intended('admin/dashboard')
                         ->withSuccess('You have successfully logged in');
         }
@@ -100,12 +101,11 @@ class AdminAuthController extends Controller
     public function dashboard()
     {
         $users = User::orderBy('created_at', 'desc')->get();
+        $productCount = Product::all()->count();
+        $userCount = User::all()->count();
+        $totalBalance = User::all()->sum('balance');
 
-        if (Auth::guard('admins')->check()) {
-            return view('admin.dashboard', compact("users"));
-        }
-
-        return redirect("admin/login")->withSuccess('Oops! You do not have access');
+        return view('admin.dashboard', compact("users", "productCount", "userCount", "totalBalance"));
     }
 
     /**

@@ -1,3 +1,51 @@
+<?php
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
+use App\Models\Product;
+use App\Models\Category;
+use App\Models\ProductsAttribute;
+use App\Models\ProductsImage;
+use App\Models\Review;
+use Illuminate\Support\Facades\Http;
+
+
+$products = Product::where('status', 'ACTIVE')
+                    ->with('category')
+                    ->with('reviews')
+                    ->inRandomOrder() 
+                    ->take(10)         
+                    ->get();
+
+$bestsellers = Product::where('status', 'ACTIVE')
+                    ->with('category')
+                    ->with('reviews')
+                    ->whereHas('reviews', function ($query) {
+                        // Ensure there are more than 5 reviews associated with the product
+                        $query->havingRaw('COUNT(*) > 5');
+                    })
+                    ->inRandomOrder() 
+                    ->take(5) 
+                    ->get();
+$features = Product::where('status', 'ACTIVE')
+                    ->where('is_featured', 'YES')
+                    ->with('category')
+                    ->with('reviews')
+                    ->inRandomOrder() 
+                    ->take(5) 
+                    ->get();
+
+$hots = Product::where('status', 'ACTIVE')
+                    ->with('category')
+                    ->with('reviews')
+                    ->inRandomOrder() 
+                    ->take(5) 
+                    ->get();
+
+
+  $categories = Category::get();
+?>
+
+
 @include('components.header')
 <body>
     <!-- Page Preloder -->
@@ -84,195 +132,79 @@
             <div class="col-lg-8 col-md-8">
                 <ul class="filter__controls">
                     <li class="active" data-filter="*">All</li>
-                    <li data-filter=".women">Women’s</li>
-                    <li data-filter=".men">Men’s</li>
-                    <li data-filter=".kid">Kid’s</li>
-                    <li data-filter=".accessories">Accessories</li>
-                    <li data-filter=".cosmetic">Cosmetics</li>
+                    @foreach($categories as $category)
+                        <li data-filter=".{{ \Str::slug($category->name) }}">{{ $category->name }}</li>
+                    @endforeach
                 </ul>
             </div>
+
         </div>
         <div class="row property__gallery">
-            <div class="col-lg-3 col-md-4 col-sm-6 mix women">
+      @foreach($products as $product)
+            <div class="col-lg-3 col-md-4 col-sm-6 mix {{ \Str::slug($product->category->name) }} view-product-btn" id="viewProductBtn" data-product-id="{{ $product->id }}">
                 <div class="product__item">
-                    <div class="product__item__pic set-bg" data-setbg="img/product/product-1.jpg">
-                        <div class="label new">New</div>
-                        <ul class="product__hover">
-                            <li><a href="img/product/product-1.jpg" class="image-popup"><span class="arrow_expand"></span></a></li>
-                            <li><a href="#"><span class="icon_heart_alt"></span></a></li>
-                            <li><a href="#"><span class="icon_bag_alt"></span></a></li>
+                    <div class="product__item__pic set-bg" data-setbg="{{ $product->image_url }}">
+                        @if(\Carbon\Carbon::parse($product->created_at)->gt(\Carbon\Carbon::now()->subDay()))
+                            <div class="label new">New</div>
+                        @endif
+                        @if($product->stock <= 0)
+                            <div class="label stockout">Out of stock</div>
+                        @endif
+
+                        <ul class="product__hover" style="display: flex; justify-content: center; margin: auto;">
+                            <li><a href="{{ $product->image_url }}" class="image-popup"><span class="arrow_expand"></span></a></li>
+                              <form class="wishlistForm" action="{{ route('addWishlist') }}" method="GET">
+                                @csrf
+                                 <input type="hidden" name="product_id" value="{{ $product->id }}">
+                              
+                                <li><a href="#"  data-product-id="{{ $product->id }}" class=" addWishlistBtn"><span class="icon_heart_alt"></span></a></li>
+                                
+                            </form>
+                             <form id="cart-form" action="{{ route('add-to-shopping-cart') }}" method="GET">
+                                  <input type="hidden" value="{{ $product->id }}" name="product_id">
+                                     <input type="hidden" value="1" name="quantity" id="number_qaun" class="number_qaun" >
+                            <li class="product-btn"  id="addCart" data-product-id="{{ $product->id }}"><a href="#"><span class="icon_bag_alt"></span></a></li>
+                        </form>
                         </ul>
                     </div>
                     <div class="product__item__text">
-                        <h6><a href="#">Buttons tweed blazer</a></h6>
+                        <h6><a href="#">{{ $product->product_name }}</a></h6>
                         <div class="rating">
-                            <i class="fa fa-star"></i>
-                            <i class="fa fa-star"></i>
-                            <i class="fa fa-star"></i>
-                            <i class="fa fa-star"></i>
-                            <i class="fa fa-star"></i>
+                            @if($product->reviews && $product->reviews->isNotEmpty())
+                                @foreach($product->reviews as $review)
+                                    <div class="review">
+                                        <div class="rating">
+                                            @for ($i = 1; $i <= 5; $i++)
+                                                @if ($i <= $review->rating)
+                                                    <i class="fa fa-star"></i> <!-- Filled star -->
+                                                @else
+                                                    <i class="fa fa-star-o"></i> <!-- Empty star -->
+                                                @endif
+                                            @endfor
+                                        </div>
+                                    </div>
+                                @endforeach
+                            @else
+                                <!-- Display empty stars if no reviews -->
+                                <i class="fa fa-star-o"></i> <!-- Empty star -->
+                                <i class="fa fa-star-o"></i> <!-- Empty star -->
+                                <i class="fa fa-star-o"></i> <!-- Empty star -->
+                                <i class="fa fa-star-o"></i> <!-- Empty star -->
+                                <i class="fa fa-star-o"></i> <!-- Empty star -->
+                            @endif
                         </div>
-                        <div class="product__price">$ 59.0</div>
+                        <div class="product__price">
+                            ₦ 
+                            @if($product->product_discount === null || $product->product_discount == 0)
+                                {{ number_format($product->product_price, 2) }}
+                            @else
+                                {{ number_format($product->product_price - $product->product_discount, 2) }}
+                            @endif
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="col-lg-3 col-md-4 col-sm-6 mix men">
-                <div class="product__item">
-                    <div class="product__item__pic set-bg" data-setbg="img/product/product-2.jpg">
-                        <ul class="product__hover">
-                            <li><a href="img/product/product-2.jpg" class="image-popup"><span class="arrow_expand"></span></a></li>
-                            <li><a href="#"><span class="icon_heart_alt"></span></a></li>
-                            <li><a href="#"><span class="icon_bag_alt"></span></a></li>
-                        </ul>
-                    </div>
-                    <div class="product__item__text">
-                        <h6><a href="#">Flowy striped skirt</a></h6>
-                        <div class="rating">
-                            <i class="fa fa-star"></i>
-                            <i class="fa fa-star"></i>
-                            <i class="fa fa-star"></i>
-                            <i class="fa fa-star"></i>
-                            <i class="fa fa-star"></i>
-                        </div>
-                        <div class="product__price">$ 49.0</div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-4 col-sm-6 mix accessories">
-                <div class="product__item">
-                    <div class="product__item__pic set-bg" data-setbg="img/product/product-3.jpg">
-                        <div class="label stockout">out of stock</div>
-                        <ul class="product__hover">
-                            <li><a href="img/product/product-3.jpg" class="image-popup"><span class="arrow_expand"></span></a></li>
-                            <li><a href="#"><span class="icon_heart_alt"></span></a></li>
-                            <li><a href="#"><span class="icon_bag_alt"></span></a></li>
-                        </ul>
-                    </div>
-                    <div class="product__item__text">
-                        <h6><a href="#">Cotton T-Shirt</a></h6>
-                        <div class="rating">
-                            <i class="fa fa-star"></i>
-                            <i class="fa fa-star"></i>
-                            <i class="fa fa-star"></i>
-                            <i class="fa fa-star"></i>
-                            <i class="fa fa-star"></i>
-                        </div>
-                        <div class="product__price">$ 59.0</div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-4 col-sm-6 mix cosmetic">
-                <div class="product__item">
-                    <div class="product__item__pic set-bg" data-setbg="img/product/product-4.jpg">
-                        <ul class="product__hover">
-                            <li><a href="img/product/product-4.jpg" class="image-popup"><span class="arrow_expand"></span></a></li>
-                            <li><a href="#"><span class="icon_heart_alt"></span></a></li>
-                            <li><a href="#"><span class="icon_bag_alt"></span></a></li>
-                        </ul>
-                    </div>
-                    <div class="product__item__text">
-                        <h6><a href="#">Slim striped pocket shirt</a></h6>
-                        <div class="rating">
-                            <i class="fa fa-star"></i>
-                            <i class="fa fa-star"></i>
-                            <i class="fa fa-star"></i>
-                            <i class="fa fa-star"></i>
-                            <i class="fa fa-star"></i>
-                        </div>
-                        <div class="product__price">$ 59.0</div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-4 col-sm-6 mix kid">
-                <div class="product__item">
-                    <div class="product__item__pic set-bg" data-setbg="img/product/product-5.jpg">
-                        <ul class="product__hover">
-                            <li><a href="img/product/product-5.jpg" class="image-popup"><span class="arrow_expand"></span></a></li>
-                            <li><a href="#"><span class="icon_heart_alt"></span></a></li>
-                            <li><a href="#"><span class="icon_bag_alt"></span></a></li>
-                        </ul>
-                    </div>
-                    <div class="product__item__text">
-                        <h6><a href="#">Fit micro corduroy shirt</a></h6>
-                        <div class="rating">
-                            <i class="fa fa-star"></i>
-                            <i class="fa fa-star"></i>
-                            <i class="fa fa-star"></i>
-                            <i class="fa fa-star"></i>
-                            <i class="fa fa-star"></i>
-                        </div>
-                        <div class="product__price">$ 59.0</div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-4 col-sm-6 mix women men kid accessories cosmetic">
-                <div class="product__item sale">
-                    <div class="product__item__pic set-bg" data-setbg="img/product/product-6.jpg">
-                        <div class="label sale">Sale</div>
-                        <ul class="product__hover">
-                            <li><a href="img/product/product-6.jpg" class="image-popup"><span class="arrow_expand"></span></a></li>
-                            <li><a href="#"><span class="icon_heart_alt"></span></a></li>
-                            <li><a href="#"><span class="icon_bag_alt"></span></a></li>
-                        </ul>
-                    </div>
-                    <div class="product__item__text">
-                        <h6><a href="#">Tropical Kimono</a></h6>
-                        <div class="rating">
-                            <i class="fa fa-star"></i>
-                            <i class="fa fa-star"></i>
-                            <i class="fa fa-star"></i>
-                            <i class="fa fa-star"></i>
-                            <i class="fa fa-star"></i>
-                        </div>
-                        <div class="product__price">$ 49.0 <span>$ 59.0</span></div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-4 col-sm-6 mix women men kid accessories cosmetic">
-                <div class="product__item">
-                    <div class="product__item__pic set-bg" data-setbg="img/product/product-7.jpg">
-                        <ul class="product__hover">
-                            <li><a href="img/product/product-7.jpg" class="image-popup"><span class="arrow_expand"></span></a></li>
-                            <li><a href="#"><span class="icon_heart_alt"></span></a></li>
-                            <li><a href="#"><span class="icon_bag_alt"></span></a></li>
-                        </ul>
-                    </div>
-                    <div class="product__item__text">
-                        <h6><a href="#">Contrasting sunglasses</a></h6>
-                        <div class="rating">
-                            <i class="fa fa-star"></i>
-                            <i class="fa fa-star"></i>
-                            <i class="fa fa-star"></i>
-                            <i class="fa fa-star"></i>
-                            <i class="fa fa-star"></i>
-                        </div>
-                        <div class="product__price">$ 59.0</div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-4 col-sm-6 mix women men kid accessories cosmetic">
-                <div class="product__item sale">
-                    <div class="product__item__pic set-bg" data-setbg="img/product/product-8.jpg">
-                        <div class="label">Sale</div>
-                        <ul class="product__hover">
-                            <li><a href="img/product/product-8.jpg" class="image-popup"><span class="arrow_expand"></span></a></li>
-                            <li><a href="#"><span class="icon_heart_alt"></span></a></li>
-                            <li><a href="#"><span class="icon_bag_alt"></span></a></li>
-                        </ul>
-                    </div>
-                    <div class="product__item__text">
-                        <h6><a href="#">Water resistant backpack</a></h6>
-                        <div class="rating">
-                            <i class="fa fa-star"></i>
-                            <i class="fa fa-star"></i>
-                            <i class="fa fa-star"></i>
-                            <i class="fa fa-star"></i>
-                            <i class="fa fa-star"></i>
-                        </div>
-                        <div class="product__price">$ 49.0 <span>$ 59.0</span></div>
-                    </div>
-                </div>
-            </div>
+        @endforeach
         </div>
     </div>
 </section>
@@ -321,54 +253,55 @@
                     <div class="section-title">
                         <h4>Hot Trend</h4>
                     </div>
-                    <div class="trend__item">
+                 @if($hots->isNotEmpty())
+                @foreach($hots as $hot)
+                    <div class="trend__item view-product-btn" id="viewProductBtn" data-product-id="{{ $hot->id }}">
                         <div class="trend__item__pic">
-                            <img src="img/trend/ht-1.jpg" alt="">
+                            <img src="{{ $hot->image_url }}" width="70" alt="">
                         </div>
                         <div class="trend__item__text">
-                            <h6>Chain bucket bag</h6>
+                            <h6>{{ $hot->product_name }}</h6>
                             <div class="rating">
-                                <i class="fa fa-star"></i>
-                                <i class="fa fa-star"></i>
-                                <i class="fa fa-star"></i>
-                                <i class="fa fa-star"></i>
-                                <i class="fa fa-star"></i>
+                             @if($hot->reviews && $hot->reviews->isNotEmpty())
+                                @foreach($hot->reviews as $review)
+                                    <div class="review">
+                                        <div class="rating">
+                                            @for ($i = 1; $i <= 5; $i++)
+                                                @if ($i <= $review->rating)
+                                                    <i class="fa fa-star"></i> <!-- Filled star -->
+                                                @else
+                                                    <i class="fa fa-star-o"></i> <!-- Empty star -->
+                                                @endif
+                                            @endfor
+                                        </div>
+                                    </div>
+                                @endforeach
+                            @else
+                                <!-- Display empty stars if no reviews -->
+                                <i class="fa fa-star-o"></i> <!-- Empty star -->
+                                <i class="fa fa-star-o"></i> <!-- Empty star -->
+                                <i class="fa fa-star-o"></i> <!-- Empty star -->
+                                <i class="fa fa-star-o"></i> <!-- Empty star -->
+                                <i class="fa fa-star-o"></i> <!-- Empty star -->
+                            @endif
                             </div>
-                            <div class="product__price">$ 59.0</div>
-                        </div>
-                    </div>
-                    <div class="trend__item">
-                        <div class="trend__item__pic">
-                            <img src="img/trend/ht-2.jpg" alt="">
-                        </div>
-                        <div class="trend__item__text">
-                            <h6>Pendant earrings</h6>
-                            <div class="rating">
-                                <i class="fa fa-star"></i>
-                                <i class="fa fa-star"></i>
-                                <i class="fa fa-star"></i>
-                                <i class="fa fa-star"></i>
-                                <i class="fa fa-star"></i>
+                            <div class="product__price">
+                                ₦ 
+                                @if($hot->product_discount === null || $hot->product_discount == 0)
+                                    {{ number_format($hot->product_price, 2) }}
+                                @else
+                                    {{ number_format($hot->product_price - $hot->product_discount, 2) }}
+                                @endif
                             </div>
-                            <div class="product__price">$ 59.0</div>
                         </div>
-                    </div>
-                    <div class="trend__item">
-                        <div class="trend__item__pic">
-                            <img src="img/trend/ht-3.jpg" alt="">
+                        @endforeach
+                        @else
+                         <div class="trend__item">
+                            <p>NO PRODUCT UNDER THIS CATEGORY</p>
                         </div>
-                        <div class="trend__item__text">
-                            <h6>Cotton T-Shirt</h6>
-                            <div class="rating">
-                                <i class="fa fa-star"></i>
-                                <i class="fa fa-star"></i>
-                                <i class="fa fa-star"></i>
-                                <i class="fa fa-star"></i>
-                                <i class="fa fa-star"></i>
-                            </div>
-                            <div class="product__price">$ 59.0</div>
-                        </div>
-                    </div>
+                        @endif                   
+                     </div>
+                </div>
                 </div>
             </div>
             <div class="col-lg-4 col-md-4 col-sm-6">
@@ -376,109 +309,109 @@
                     <div class="section-title">
                         <h4>Best seller</h4>
                     </div>
-                    <div class="trend__item">
+                @if($bestsellers->isNotEmpty())
+                @foreach($bestsellers as $bestseller)
+                    <div class="trend__item view-product-btn" id="viewProductBtn" data-product-id="{{ $bestseller->id }}">
                         <div class="trend__item__pic">
-                            <img src="img/trend/bs-1.jpg" alt="">
+                            <img src="{{ $bestseller->image_url }}" width="70" alt="">
                         </div>
                         <div class="trend__item__text">
-                            <h6>Cotton T-Shirt</h6>
+                            <h6>{{ $bestseller->product_name }}</h6>
                             <div class="rating">
-                                <i class="fa fa-star"></i>
-                                <i class="fa fa-star"></i>
-                                <i class="fa fa-star"></i>
-                                <i class="fa fa-star"></i>
-                                <i class="fa fa-star"></i>
+                            @if($bestseller->reviews && $bestseller->reviews->isNotEmpty())
+                                @foreach($bestseller->reviews as $review)
+                                    <div class="review">
+                                        <div class="rating">
+                                            @for ($i = 1; $i <= 5; $i++)
+                                                @if ($i <= $review->rating)
+                                                    <i class="fa fa-star"></i> <!-- Filled star -->
+                                                @else
+                                                    <i class="fa fa-star-o"></i> <!-- Empty star -->
+                                                @endif
+                                            @endfor
+                                        </div>
+                                    </div>
+                                @endforeach
+                            @else
+                                <!-- Display empty stars if no reviews -->
+                                <i class="fa fa-star-o"></i> <!-- Empty star -->
+                                <i class="fa fa-star-o"></i> <!-- Empty star -->
+                                <i class="fa fa-star-o"></i> <!-- Empty star -->
+                                <i class="fa fa-star-o"></i> <!-- Empty star -->
+                                <i class="fa fa-star-o"></i> <!-- Empty star -->
+                            @endif
                             </div>
-                            <div class="product__price">$ 59.0</div>
+                            <div class="product__price">
+                                ₦ 
+                                @if($bestseller->product_discount === null || $bestseller->product_discount == 0)
+                                    {{ number_format($bestseller->product_price, 2) }}
+                                @else
+                                    {{ number_format($bestseller->product_price - $bestseller->product_discount, 2) }}
+                                @endif
+                            </div>
                         </div>
                     </div>
-                    <div class="trend__item">
-                        <div class="trend__item__pic">
-                            <img src="img/trend/bs-2.jpg" alt="">
-                        </div>
-                        <div class="trend__item__text">
-                            <h6>Zip-pockets pebbled tote <br />briefcase</h6>
-                            <div class="rating">
-                                <i class="fa fa-star"></i>
-                                <i class="fa fa-star"></i>
-                                <i class="fa fa-star"></i>
-                                <i class="fa fa-star"></i>
-                                <i class="fa fa-star"></i>
-                            </div>
-                            <div class="product__price">$ 59.0</div>
-                        </div>
-                    </div>
-                    <div class="trend__item">
-                        <div class="trend__item__pic">
-                            <img src="img/trend/bs-3.jpg" alt="">
-                        </div>
-                        <div class="trend__item__text">
-                            <h6>Round leather bag</h6>
-                            <div class="rating">
-                                <i class="fa fa-star"></i>
-                                <i class="fa fa-star"></i>
-                                <i class="fa fa-star"></i>
-                                <i class="fa fa-star"></i>
-                                <i class="fa fa-star"></i>
-                            </div>
-                            <div class="product__price">$ 59.0</div>
-                        </div>
-                    </div>
+                @endforeach
+                @else
+                 <div class="trend__item">
+                    <p>NO PRODUCT UNDER THIS CATEGORY</p>
                 </div>
+                @endif
             </div>
+        </div>
             <div class="col-lg-4 col-md-4 col-sm-6">
                 <div class="trend__content">
                     <div class="section-title">
                         <h4>Feature</h4>
                     </div>
-                    <div class="trend__item">
+                 @if($features->isNotEmpty())
+                @foreach($features as $featured)
+                    <div class="trend__item view-product-btn" id="viewProductBtn" data-product-id="{{ $featured->id }}">
                         <div class="trend__item__pic">
-                            <img src="img/trend/f-1.jpg" alt="">
+                            <img src="{{ $featured->image_url }}" width="70" alt="">
                         </div>
                         <div class="trend__item__text">
-                            <h6>Bow wrap skirt</h6>
+                            <h6>{{ $featured->product_name }}</h6>
                             <div class="rating">
-                                <i class="fa fa-star"></i>
-                                <i class="fa fa-star"></i>
-                                <i class="fa fa-star"></i>
-                                <i class="fa fa-star"></i>
-                                <i class="fa fa-star"></i>
+                             @if($featured->reviews && $featured->reviews->isNotEmpty())
+                                @foreach($featured->reviews as $review)
+                                    <div class="review">
+                                        <div class="rating">
+                                            @for ($i = 1; $i <= 5; $i++)
+                                                @if ($i <= $review->rating)
+                                                    <i class="fa fa-star"></i> <!-- Filled star -->
+                                                @else
+                                                    <i class="fa fa-star-o"></i> <!-- Empty star -->
+                                                @endif
+                                            @endfor
+                                        </div>
+                                    </div>
+                                @endforeach
+                            @else
+                                <!-- Display empty stars if no reviews -->
+                                <i class="fa fa-star-o"></i> <!-- Empty star -->
+                                <i class="fa fa-star-o"></i> <!-- Empty star -->
+                                <i class="fa fa-star-o"></i> <!-- Empty star -->
+                                <i class="fa fa-star-o"></i> <!-- Empty star -->
+                                <i class="fa fa-star-o"></i> <!-- Empty star -->
+                            @endif
                             </div>
-                            <div class="product__price">$ 59.0</div>
-                        </div>
-                    </div>
-                    <div class="trend__item">
-                        <div class="trend__item__pic">
-                            <img src="img/trend/f-2.jpg" alt="">
-                        </div>
-                        <div class="trend__item__text">
-                            <h6>Metallic earrings</h6>
-                            <div class="rating">
-                                <i class="fa fa-star"></i>
-                                <i class="fa fa-star"></i>
-                                <i class="fa fa-star"></i>
-                                <i class="fa fa-star"></i>
-                                <i class="fa fa-star"></i>
+                            <div class="product__price">
+                                ₦ 
+                                @if($featured->product_discount === null || $featured->product_discount == 0)
+                                    {{ number_format($featured->product_price, 2) }}
+                                @else
+                                    {{ number_format($featured->product_price - $featured->product_discount, 2) }}
+                                @endif
                             </div>
-                            <div class="product__price">$ 59.0</div>
                         </div>
-                    </div>
-                    <div class="trend__item">
-                        <div class="trend__item__pic">
-                            <img src="img/trend/f-3.jpg" alt="">
+                        @endforeach
+                        @else
+                         <div class="trend__item">
+                            <p>NO PRODUCT UNDER THIS CATEGORY</p>
                         </div>
-                        <div class="trend__item__text">
-                            <h6>Flap cross-body bag</h6>
-                            <div class="rating">
-                                <i class="fa fa-star"></i>
-                                <i class="fa fa-star"></i>
-                                <i class="fa fa-star"></i>
-                                <i class="fa fa-star"></i>
-                                <i class="fa fa-star"></i>
-                            </div>
-                            <div class="product__price">$ 59.0</div>
-                        </div>
-                    </div>
+                        @endif                   
+                     </div>
                 </div>
             </div>
         </div>

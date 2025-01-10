@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 use App\Models\Setup;
 use App\Models\Payment;
+use App\Models\Product;
 use Illuminate\Support\Facades\Http;
 
 class SetupController extends Controller
@@ -17,11 +18,17 @@ class SetupController extends Controller
     {
         $userInfo = Auth::user();
         $setup = Setup::where('user_id', $userInfo->id)->first();
-        $payments = Payment::where('user_id', $userInfo->id)->get();
+        $payments = Payment::where('user_id', $userInfo->id)
+                    ->orderBy('created_at', 'desc')
+                    ->get();
         $pendingPayment = Payment::where('user_id', $userInfo->id)
-                         ->where('description', 'SELLER ACCOUNT SETUP FEE')->first();
+                         ->where('description', 'SELLER ACCOUNT SETUP FEE')
+                         ->where('status', 'PENDING')
+                         ->first();
+        $productCount = Product::where('user_id', $userInfo->id)->count();
 
-          return view('dashboard', compact('setup', 'payments', 'pendingPayment'));
+
+          return view('dashboard', compact('setup', 'payments', 'pendingPayment', 'productCount'));
 
     }
 
@@ -89,7 +96,7 @@ class SetupController extends Controller
             if ($payment) {
                 // Update existing pending payment
                 $payment->update([
-                    'amount' => 2875 * 100, 
+                    'amount' => 2875, 
                     'payment_method' => 'PAYSTACK',
                 ]);
             } else {
@@ -98,7 +105,7 @@ class SetupController extends Controller
                     'user_id' => $user->id,
                     'currency' => 'NGN',
                     'description' => 'SELLER ACCOUNT SETUP FEE',
-                    'amount' => 2875 * 100,
+                    'amount' => 2875,
                     'payment_method' => 'PAYSTACK',
                     'status' => 'PENDING',
                 ]);
@@ -142,10 +149,14 @@ class SetupController extends Controller
 
         $data = $response->json();
 
-        dd($data);
+        $userID = Auth::user()->id;
+
 
         if ($data['status'] ?? false && $data['data']['status'] === 'success') {
-            $payment = Payment::where('reference', $reference)->first();
+            $payment = Payment::where('user_id', $userID)
+                        ->where('description', 'SELLER ACCOUNT SETUP FEE')
+                        ->first();
+
             if ($payment) {
                 $payment->status = 'PAID';
                 $payment->currency = $data['data']['currency'];
@@ -157,4 +168,47 @@ class SetupController extends Controller
 
         return redirect()->route('dashboard')->with('error', 'Payment verification failed 2.');
     }
+
+        public function update(Request $request, $id)
+        {
+            $setup = Setup::findOrFail($id);
+
+            // Validate input
+            $request->validate([
+                'account_type' => 'required|in:BUYER,SELLER',
+                'company_name' => 'nullable|string|max:255',
+                'company_description' => 'nullable|string',
+                'company_address_1' => 'nullable|string|max:255',
+                'company_image' => 'nullable|image|mimes:jpg,png,jpeg,gif|max:2048',
+            ]);
+
+            // Update fields
+            $setup->account_type = $request->account_type;
+            $setup->company_name = $request->company_name;
+            $setup->company_description = $request->company_description;
+            $setup->company_address_1 = $request->company_address_1;
+
+            // Handle company image upload to Cloudinary
+            if ($request->hasFile('company_image')) {
+                // Delete the old image from Cloudinary if it exists
+                if ($setup->company_image_id) {
+                    Cloudinary::destroy($setup->company_image_id);
+                }
+
+                $image = $request->file('company_image');
+                
+                // Upload new image to Cloudinary
+                $uploadedImage = Cloudinary::upload($image->getRealPath(), [
+                    'folder' => 'seller_images', // Optional folder name
+                ]);
+
+                // Get the URL and image ID of the uploaded image
+                $setup->company_image = $uploadedImage->getSecurePath();
+                $setup->company_image_id = $uploadedImage->getPublicId();  // Store the image ID for future deletion
+            }
+
+            $setup->save();
+
+            return redirect()->back()->with('message', 'Setup updated successfully!');
+        }
 }

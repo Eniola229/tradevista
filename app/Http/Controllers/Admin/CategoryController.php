@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Admin;
 use App\Models\Category;
+use App\Models\Product;
 use Illuminate\Http\RedirectResponse;
 
 class CategoryController extends Controller
@@ -15,17 +16,13 @@ class CategoryController extends Controller
     {
         $categories = Category::orderBy('created_at', 'desc')->get();
 
-        if (Auth::guard('admins')->check()) {
-            return view('admin.categories', compact("categories"));
-        }
-
-        return redirect("admin/login")->withSuccess('Oops! You do not have access');
+        return view('admin.categories', compact("categories"));
     }
 
     public function add()
     {
 
-        if (Auth::guard('admins')->check() && Auth::guard('admins')->user()->role === "SUPER" || Auth::guard('admins')->user()->role === "ADMIN") {
+        if (Auth::guard('admin')->check() && Auth::guard('admin')->user()->role === "SUPER" || Auth::guard('admin')->user()->role === "ADMIN") {
           return view('admin.add-category');
         }
 
@@ -65,9 +62,15 @@ class CategoryController extends Controller
         if (!$category) {
             return back()->with('error', 'Category not found.');
         }
+        // Check if any product is associated with this category ID
+        $productExists = Product::where('category_id', $id)->exists();
+
+        if ($productExists) {
+            return redirect()->back()->withErrors(['error' => 'This category is associated with a product and cannot be deleted at the moment.']);
+        }
 
         // Check if the authenticated user is a SUPER admin
-        if (Auth::guard('admins')->check() && Auth::guard('admins')->user()->role === "SUPER") {
+        if (Auth::guard('admin')->check() && Auth::guard('admin')->user()->role === "SUPER") {
             $category->delete();
             return back()->with('message', 'Category successfully deleted.');
         }
@@ -79,7 +82,7 @@ class CategoryController extends Controller
     {
         $category = Category::where('id', $id)->first();
 
-        if (Auth::guard('admins')->check() && Auth::guard('admins')->user()->role === "SUPER" || Auth::guard('admins')->user()->role === "ADMIN") {
+        if (Auth::guard('admin')->check() && Auth::guard('admin')->user()->role === "SUPER" || Auth::guard('admin')->user()->role === "ADMIN") {
             return view('admin.edit-category', compact('category'));
         }
 

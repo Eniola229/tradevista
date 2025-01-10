@@ -13,7 +13,7 @@ class TeamController extends Controller
     {
         $admins = Admin::orderBy('created_at', 'desc')->get();
 
-        if (Auth::guard('admins')->check()) {
+        if (Auth::guard('admin')->check()) {
             return view('admin.team', compact("admins"));
         }
 
@@ -23,7 +23,7 @@ class TeamController extends Controller
     public function add()
     {
 
-        if (Auth::guard('admins')->check() && Auth::guard('admins')->user()->role === "SUPER") {
+        if (Auth::guard('admin')->check() && Auth::guard('admin')->user()->role === "SUPER") {
             return view('admin.add-admin');
         }
 
@@ -34,7 +34,7 @@ class TeamController extends Controller
     {
         $admin = Admin::where('id', $id)->first();
 
-        if (Auth::guard('admins')->check() && Auth::guard('admins')->user()->role === "SUPER") {
+        if (Auth::guard('admin')->check() && Auth::guard('admin')->user()->role === "SUPER") {
             return view('admin.edit-admin', compact('admin'));
         }
 
@@ -52,7 +52,7 @@ class TeamController extends Controller
         }
 
         // Check if the authenticated user is a SUPER admin
-        if (Auth::guard('admins')->check() && Auth::guard('admins')->user()->role === "SUPER") {
+        if (Auth::guard('admin')->check() && Auth::guard('admin')->user()->role === "SUPER") {
             $admin->delete();
             return back()->with('message', 'Admin successfully deleted.');
         }

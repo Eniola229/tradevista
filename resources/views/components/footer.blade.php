@@ -1,3 +1,15 @@
+<div id="toast-container" aria-live="polite" aria-atomic="true">
+    <div id="toast" class="toast" style="font-weight: bolder;"></div>
+</div>
+<script type="text/javascript">
+document.querySelectorAll('.view-product-btn').forEach(button => {
+    button.addEventListener('click', function() {
+        const productId = this.getAttribute('data-product-id');
+        window.location.href = '/product-details/' + productId;
+    });
+});
+</script>
+
 <!-- Footer Section Begin -->
 <footer class="footer">
     <div class="container">
