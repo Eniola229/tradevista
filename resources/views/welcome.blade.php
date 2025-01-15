@@ -62,7 +62,7 @@ $hots = Product::where('status', 'ACTIVE')
     <!-- Header Section End -->
 
     <!-- Categories Section Begin -->
-    <section class="categories">
+<!--     <section class="categories">
         <div class="container-fluid">
             <div class="row">
                 <div class="col-lg-6 p-0">
@@ -83,7 +83,7 @@ $hots = Product::where('status', 'ACTIVE')
                                 <h4>Accessories</h4>
                                 <p>792 items</p>
                                 <a href="#">Shop now</a>
-                            </div>  -->
+                            </div>  --
                         </div>
                     </div>
                     <div class="col-lg-6 col-md-6 col-sm-6 p-0">
@@ -92,7 +92,7 @@ $hots = Product::where('status', 'ACTIVE')
                                 <h4>Accessories</h4>
                                 <p>792 items</p>
                                 <a href="#">Shop now</a>
-                            </div>  -->
+                            </div>  --
                         </div>
                     </div>
                     <div class="col-lg-6 col-md-6 col-sm-6 p-0">
@@ -101,7 +101,7 @@ $hots = Product::where('status', 'ACTIVE')
                                 <h4>Accessories</h4>
                                 <p>792 items</p>
                                 <a href="#">Shop now</a>
-                            </div>  -->
+                            </div>  --
                         </div>
                     </div>
                     <div class="col-lg-6 col-md-6 col-sm-6 p-0">
@@ -110,7 +110,39 @@ $hots = Product::where('status', 'ACTIVE')
                                 <h4>Accessories</h4>
                                 <p>792 items</p>
                                 <a href="#">Shop now</a>
-                            </div>  -->
+                            </div>  --
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section> -->
+<!-- Banner Section Begin -->
+<section class="banner set-bg" data-setbg="img/banner.png">
+    <div class="container">
+        <div class="row">
+            <div class="col-xl-7 col-lg-8 m-auto">
+                <div class="banner__slider owl-carousel">
+                    <div class="banner__item">
+                        <div class="banner__text">
+                            <span>Connect. Explore. Discover.</span>
+                            <h1>Unmatched Deals Await</h1>
+                            <a href="{{ url('/products') }}">Start Shopping</a>
+                        </div>
+                    </div>
+                    <div class="banner__item">
+                        <div class="banner__text">
+                            <span>Shop Smart, Live Better</span>
+                            <h1>Everything You Need</h1>
+                            <a href="{{ url('/products') }}">Browse Now</a>
+                        </div>
+                    </div>
+                    <div class="banner__item">
+                        <div class="banner__text">
+                            <span>Your Marketplace. Your Rules.</span>
+                            <h1>Find What Moves You</h1>
+                            <a href="{{ url('/products') }}">Explore Today</a>
                         </div>
                     </div>
                 </div>
@@ -118,8 +150,7 @@ $hots = Product::where('status', 'ACTIVE')
         </div>
     </div>
 </section>
-<!-- Categories Section End -->
-
+<!-- Banner Section End -->
 <!-- Product Section Begin -->
 <section class="product spad">
     <div class="container">
@@ -210,39 +241,7 @@ $hots = Product::where('status', 'ACTIVE')
 </section>
 <!-- Product Section End -->
 
-<!-- Banner Section Begin -->
-<section class="banner set-bg" data-setbg="img/banner/banner-1.jpg">
-    <div class="container">
-        <div class="row">
-            <div class="col-xl-7 col-lg-8 m-auto">
-                <div class="banner__slider owl-carousel">
-                    <div class="banner__item">
-                        <div class="banner__text">
-                            <span>The Chloe Collection</span>
-                            <h1>The Project Jacket</h1>
-                            <a href="#">Shop now</a>
-                        </div>
-                    </div>
-                    <div class="banner__item">
-                        <div class="banner__text">
-                            <span>The Chloe Collection</span>
-                            <h1>The Project Jacket</h1>
-                            <a href="#">Shop now</a>
-                        </div>
-                    </div>
-                    <div class="banner__item">
-                        <div class="banner__text">
-                            <span>The Chloe Collection</span>
-                            <h1>The Project Jacket</h1>
-                            <a href="#">Shop now</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-<!-- Banner Section End -->
+
 
 <!-- Trend Section Begin -->
 <section class="trend spad">
@@ -425,14 +424,14 @@ $hots = Product::where('status', 'ACTIVE')
         <div class="row">
             <div class="col-lg-6 p-0">
                 <div class="discount__pic">
-                    <img src="img/discount.jpg" alt="">
+                    <img src="img/tradevista.png" style="height: 400px;" alt="">
                 </div>
             </div>
             <div class="col-lg-6 p-0">
                 <div class="discount__text">
                     <div class="discount__text__title">
                         <span>Discount</span>
-                        <h2>Summer 2019</h2>
+                        <h2>Collection 2025</h2>
                         <h5><span>Sale</span> 50%</h5>
                     </div>
                     <div class="discount__countdown" id="countdown-time">
@@ -453,7 +452,7 @@ $hots = Product::where('status', 'ACTIVE')
                             <p>Sec</p>
                         </div>
                     </div>
-                    <a href="#">Shop now</a>
+                    <a href="{{ url('/products') }}">Shop now</a>
                 </div>
             </div>
         </div>
@@ -468,15 +467,15 @@ $hots = Product::where('status', 'ACTIVE')
             <div class="col-lg-3 col-md-4 col-sm-6">
                 <div class="services__item">
                     <i class="fa fa-car"></i>
-                    <h6>Free Shipping</h6>
-                    <p>For all oder over $99</p>
+                    <h6>Low Shipping Fee</h6>
+                    <p>For all order over ₦10k</p>
                 </div>
             </div>
             <div class="col-lg-3 col-md-4 col-sm-6">
                 <div class="services__item">
                     <i class="fa fa-money"></i>
                     <h6>Money Back Guarantee</h6>
-                    <p>If good have Problems</p>
+                    <p>If goods have Problems</p>
                 </div>
             </div>
             <div class="col-lg-3 col-md-4 col-sm-6">
@@ -499,7 +498,7 @@ $hots = Product::where('status', 'ACTIVE')
 <!-- Services Section End -->
 
 <!-- Instagram Begin -->
-<div class="instagram">
+<!-- <div class="instagram">
     <div class="container-fluid">
         <div class="row">
             <div class="col-lg-2 col-md-4 col-sm-4 p-0">
@@ -552,7 +551,7 @@ $hots = Product::where('status', 'ACTIVE')
             </div>
         </div>
     </div>
-</div>
+</div> -->
 <!-- Instagram End -->
 
 

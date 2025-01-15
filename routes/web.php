@@ -17,6 +17,8 @@ use App\Http\Controllers\Front\CartController;
 use App\Http\Controllers\Front\CheckoutController;
 use App\Http\Controllers\Front\ShippingController;
 use App\Http\Controllers\Front\RefererController;
+use App\Http\Controllers\Front\ProductPageController;
+use App\Http\Controllers\Front\BlogController;
 
 
 Route::get('/', function () {
@@ -25,7 +27,10 @@ Route::get('/', function () {
 
    
 Route::get('/calculate-shipping-fee', [ShippingController::class, 'calculateFee']);
-
+Route::get('/contact', [BlogController::class, 'contact']);
+Route::post('/contact', [BlogController::class, 'storeContact']);
+Route::post('/newsletter', [BlogController::class, 'storeNewsletter']);
+Route::get('/blog', [BlogController::class, 'blogs']);
 
 //WISHLIST
 Route::prefix('wishlist')->controller(WishlistController::class)->group(function () {
@@ -38,7 +43,7 @@ Route::prefix('wishlist')->controller(WishlistController::class)->group(function
 
 
 // Products Routes
-Route::prefix('products')->controller(ProductController::class)->group(function () {
+Route::prefix('products')->controller(ProductPageController::class)->group(function () {
     Route::get('/', 'ProductsPage')->name('products');
     Route::get('seller-products', 'sellerProducts');
     Route::get('flash-sale', 'flashSale');
@@ -49,7 +54,7 @@ Route::prefix('products')->controller(ProductController::class)->group(function 
     Route::get('add-to-cart', 'addToCart')->name('add-to-shopping-cart');
     Route::get('review-a-product', 'review')->name('review-product');
 });
- Route::get('product-details/{id}', [ProductController::class, 'ProductDetails'])->name('delete-product');
+ Route::get('product-details/{id}', [ProductPageController::class, 'ProductDetails'])->name('delete-product');
 // Cart Routes
 Route::prefix('carts')->controller(CartController::class)->group(function () {
     Route::get('/', 'carts')->name('cart');

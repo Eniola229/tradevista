@@ -24,8 +24,6 @@ document.querySelectorAll('.view-product-btn').forEach(button => {
                         <a href="#"><img src="img/payment/payment-1.png" alt=""></a>
                         <a href="#"><img src="img/payment/payment-2.png" alt=""></a>
                         <a href="#"><img src="img/payment/payment-3.png" alt=""></a>
-                        <a href="#"><img src="img/payment/payment-4.png" alt=""></a>
-                        <a href="#"><img src="img/payment/payment-5.png" alt=""></a>
                     </div>
                 </div>
             </div>
@@ -33,9 +31,9 @@ document.querySelectorAll('.view-product-btn').forEach(button => {
                 <div class="footer__widget">
                     <h6>Quick links</h6>
                     <ul>
-                        <li><a href="#">About</a></li>
-                        <li><a href="#">Blogs</a></li>
-                        <li><a href="#">Contact</a></li>
+                        <li><a href="{{ url('about') }}">About</a></li>
+                        <li><a href="{{ url('blogs') }}">Blogs</a></li>
+                        <li><a href="{{ url('contact') }}">Contact</a></li>
                         <li><a href="#">FAQ</a></li>
                     </ul>
                 </div>
@@ -44,26 +42,34 @@ document.querySelectorAll('.view-product-btn').forEach(button => {
                 <div class="footer__widget">
                     <h6>Account</h6>
                     <ul>
-                        <li><a href="#">My Account</a></li>
-                        <li><a href="#">Orders Tracking</a></li>
-                        <li><a href="#">Checkout</a></li>
-                        <li><a href="#">Wishlist</a></li>
+                        <li><a href="{{ url('dashboard') }}">My Account</a></li>
+                        <li><a href="{{ url('orders') }}">Orders</a></li>
+                        <li><a href="{{ url('checkout') }}">Checkout</a></li>
+                        <li><a href="{{ url('wishlist') }}">Wishlist</a></li>
                     </ul>
                 </div>
             </div>
             <div class="col-lg-4 col-md-8 col-sm-8">
                 <div class="footer__newslatter">
+                    @if(session('submessage'))
+                                    <div class="alert alert-success text-red-800 bg-red-200 p-4 rounded mb-4">
+                                        {{ session('submessage') }}
+                                    </div>
+                    @endif
+                    @if(Session::has('suberror'))
+                                    <div class="alert alert-danger text-red-800 bg-red-200 p-4 rounded mb-4">
+                                        {{ Session::get('suberror') }}
+                                    </div>
+                    @endif
                     <h6>NEWSLETTER</h6>
-                    <form action="#">
-                        <input type="text" placeholder="Email">
+                    <form action="{{ url('newsletter') }}" method="post">
+                        @csrf
+                        <input type="text" name="email" placeholder="Email" required>
                         <button type="submit" class="site-btn">Subscribe</button>
                     </form>
                     <div class="footer__social">
                         <a href="#"><i class="fa fa-facebook"></i></a>
-                        <a href="#"><i class="fa fa-twitter"></i></a>
-                        <a href="#"><i class="fa fa-youtube-play"></i></a>
-                        <a href="#"><i class="fa fa-instagram"></i></a>
-                        <a href="#"><i class="fa fa-pinterest"></i></a>
+                        <a href="#"><i class="fa fa-whatsapp"></i></a>
                     </div>
                 </div>
             </div>
@@ -85,8 +91,8 @@ document.querySelectorAll('.view-product-btn').forEach(button => {
 <div class="search-model">
     <div class="h-100 d-flex align-items-center justify-content-center">
         <div class="search-close-switch">+</div>
-        <form class="search-model-form">
-            <input type="text" id="search-input" placeholder="Search here.....">
+        <form class="search-model-form" action="{{ url('products') }}" method="GET">
+            <input value="{{ request('query') }}"  name="query"  type="text" id="search-input" placeholder="Search here.....">
         </form>
     </div>
 </div>

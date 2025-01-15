@@ -68,7 +68,12 @@
                     </div>
                 </div>
                 <div class="col-lg-9 col-md-9">
-                    <div class="row">
+            @if(!empty($query))
+                <p class="mb-4">Showing results for: <strong>{{ $query }}</strong></p>
+            @endif
+
+         <div class="row">
+             @if($products->isNotEmpty())
           @foreach($products as $product)
             <div class="col-lg-4 col-md-4 col-sm-6 mix {{ \Str::slug($product->category->name) }} view-product-btn" id="viewProductBtn" data-product-id="{{ $product->id }}">
                 <div class="product__item">
@@ -134,6 +139,13 @@
                 </div>
             </div>
         @endforeach
+        @else 
+         <div class="container text-center">
+            <h4>No Product Found.</h4>
+            <div class="cart__btn update__btn" style="justify-content: center; align-items: center; margin: auto;">
+             <a href="{{ url('products') }}" ><span class="icon_loading"></span>Products</a>
+         </div>
+        @endif
                 
                         <div class="col-lg-12 text-center">
                             <div class="pagination__option">

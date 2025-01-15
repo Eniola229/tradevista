@@ -505,7 +505,7 @@ ol {
 
 .banner__text span {
 	font-size: 18px;
-	color: #ca1515;
+	color: darkblue;
 	text-transform: uppercase;
 }
 
@@ -532,7 +532,7 @@ ol {
 	bottom: 0;
 	height: 2px;
 	width: 100%;
-	background: #ca1515;
+	background: darkblue;
 	content: "";
 }
 
@@ -558,7 +558,7 @@ ol {
 }
 
 .banner__slider.owl-carousel .owl-dots button.active {
-	background: #ca1515;
+	background: darkblue;
 }
 
 .banner__slider.owl-carousel .owl-dots button:last-child {
@@ -661,7 +661,7 @@ ol {
 	bottom: 0;
 	height: 2px;
 	width: 100%;
-	background: #ca1515;
+	background: darkblue;
 	content: "";
 }
 
@@ -694,7 +694,7 @@ ol {
 
 .discount__text__title h2 {
 	font-size: 60px;
-	color: #ca1515;
+	color: darkblue;
 	font-family: "Cookie", cursive;
 	line-height: 46px;
 	margin-bottom: 10px;
@@ -757,7 +757,7 @@ ol {
 
 .services__item i {
 	font-size: 36px;
-	color: #ca1515;
+	color: darkblue;
 	position: absolute;
 	left: 0;
 	top: 4px;
