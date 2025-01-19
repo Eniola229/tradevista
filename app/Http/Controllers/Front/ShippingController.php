@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Front;
 
 use App\Http\Controllers\Controller;
-
 use App\Services\FedExService;
 use Illuminate\Http\Request;
 
@@ -16,36 +15,56 @@ class ShippingController extends Controller
         $this->fedExService = $fedExService;
     }
 
-    public function calculateFee(Request $request)
+    public function getRates(Request $request)
     {
-        $validated = $request->validate([
-            'origin' => 'required|array',
-            'destination' => 'required|array',
-            'weight' => 'required|numeric',
-            'dimensions' => 'required|array',
-        ]);
+        // Hardcoded test data with rateRequestType
+        $testData = [
+            'origin' => [
+                'city' => 'New York',
+                'state' => 'NY',
+                'countryCode' => 'US',
+                'postalCode' => '10001',
+            ],
+            'destination' => [
+                'city' => 'Los Angeles',
+                'state' => 'CA',
+                'countryCode' => 'US',
+                'postalCode' => '90001',
+            ],
+            'weight' => 5, // in KG
+            'dimensions' => [
+                'length' => 30, // in CM
+                'width' => 20,  // in CM
+                'height' => 15, // in CM
+            ],
+            'pickupType' => 'DROPOFF_AT_FEDEX_LOCATION', // Add pickup type
+            'rateRequestType' => ['ACCOUNT'], // Specify rate request type
+        ];
 
+        // Build the payload for the FedEx API
         $data = [
             'accountNumber' => [
                 'value' => env('FEDEX_ACCOUNT_NUMBER'),
             ],
             'requestedShipment' => [
                 'shipper' => [
-                    'address' => $validated['origin'],
+                    'address' => $testData['origin'],
                 ],
                 'recipient' => [
-                    'address' => $validated['destination'],
+                    'address' => $testData['destination'],
                 ],
+                'pickupType' => $testData['pickupType'],
+                'rateRequestType' => $testData['rateRequestType'], // Include rate request type
                 'requestedPackageLineItems' => [
                     [
                         'weight' => [
-                            'value' => $validated['weight'],
+                            'value' => $testData['weight'],
                             'units' => 'KG',
                         ],
                         'dimensions' => [
-                            'length' => $validated['dimensions']['length'],
-                            'width' => $validated['dimensions']['width'],
-                            'height' => $validated['dimensions']['height'],
+                            'length' => $testData['dimensions']['length'],
+                            'width' => $testData['dimensions']['width'],
+                            'height' => $testData['dimensions']['height'],
                             'units' => 'CM',
                         ],
                     ],
@@ -54,13 +73,13 @@ class ShippingController extends Controller
         ];
 
         try {
-            $shippingFee = $this->fedExService->calculateShippingFee($data);
+            $shippingFee = $this->fedExService->getRates($data);
 
-            return response()->json([
-                'shipping_fee' => $shippingFee,
-            ]);
+            return response()->json($shippingFee);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
+
+
 }

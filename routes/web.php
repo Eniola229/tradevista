@@ -26,7 +26,9 @@ Route::get('/', function () {
 });
 
    
-Route::get('/calculate-shipping-fee', [ShippingController::class, 'calculateFee']);
+Route::get('checkout/get-shipping-fee', [ShippingController::class, 'getRates']);
+
+
 Route::get('/contact', [BlogController::class, 'contact']);
 Route::post('/contact', [BlogController::class, 'storeContact']);
 Route::post('/newsletter', [BlogController::class, 'storeNewsletter']);

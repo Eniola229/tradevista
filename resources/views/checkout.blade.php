@@ -20,8 +20,26 @@ use App\Models\Product;
     <!-- Header Section End -->
     
         <!-- Breadcrumb Begin -->
-    
-    <!-- Shop Section Begin -->
+    <style type="text/css">
+        .list-group-item {
+    transition: box-shadow 0.3s, transform 0.3s;
+    }
+
+    .list-group-item:hover {
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transform: translateY(-2px);
+    }
+
+    .list-group-item.active {
+        background-color: #f8f9fa;
+        border-color: #007bff;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+    }
+
+    .list-group-item input[type="radio"]:checked + div {
+        color: #007bff;
+    }
+    </style>
    <!-- Breadcrumb Begin -->
     <div class="breadcrumb-option">
         <div class="container">
@@ -69,273 +87,280 @@ use App\Models\Product;
                                 
                 </div>
             </div>
-            <form id="checkoutForm" action="#" class="checkout__form">
-                <div class="row">
-                    <div class="col-lg-8">
-                        <h5>Billing detail</h5>
-                        <div class="row">
-                            <div class="col-lg-6 col-md-6 col-sm-6">
-                                <div class="checkout__form__input">
-                                    <p>First Name <span>*</span></p>
-                                    <input type="text" name="first_name" value="{{ explode(' ', Auth::user()->name)[0] }}">
-                                </div>
-                            </div>
-                            <div class="col-lg-6 col-md-6 col-sm-6">
-                                <div class="checkout__form__input">
-                                    <p>Last Name <span>*</span></p>
-                                    <input type="text" name="last_name" value="{{ explode(' ', Auth::user()->name)[1] }}">
-                                </div>
-                            </div>
-                             
-                            <div class="col-lg-12">
-                                <div class="checkout__form__input">
-                                    <p>Country <span>*</span></p>
-                                    <input type="text" name="countryCode", value="NIGERIA" readonly>
-                                </div>
-                                <div class="checkout__form__input">
-                                    <p>Address <span>*</span></p>
-                                    <input type="text" placeholder="Street Address">
-                                    <input type="text" placeholder="Apartment. suite, etc" name="address" required>
-                                </div>
-                                <div class="checkout__form__input">
-                                    <p>Town/City <span>*</span></p>
-                                    <input type="text" value="{{ $adrress->town_city }}"  name="cityName" required>
-                                </div>
-                                <div class="checkout__form__input">
-                                    <p>State <span>*</span></p>
-                                    <input type="text" value="{{ $adrress->state }}"  name="stateCode" required>
-                                </div>
-                                <div class="checkout__form__input">
-                                    <p>Postcode/Zip <span>*</span></p>
-                                    <input type="text" value="{{ $adrress->zip }}" name="zip" required>
-                                </div>
-                            </div>
-                            <div class="col-lg-6 col-md-6 col-sm-6">
-                                <div class="checkout__form__input">
-                                    <p>Phone <span>*</span></p>
-                                    <input type="text" name="phone" required>
-                                </div>
-                            </div>
-                            <div class="col-lg-6 col-md-6 col-sm-6">
-                                <div class="checkout__form__input">
-                                    <p>Email <span>*</span></p>
-                                    <input type="text" name="email" value="{{ Auth::user()->email }}">
-                                </div>
-                            </div>
-                            <div class="col-lg-12">
-                           <!--      <div class="checkout__form__checkbox">
-                                    <label for="acc">
-                                        Create an acount?
-                                        <input type="checkbox" id="acc">
-                                        <span class="checkmark"></span>
-                                    </label>
-                                    <p>Create am acount by entering the information below. If you are a returing
-                                        customer login at the <br />top of the page</p>
-                                    </div> -->
-                                 <!--    <div class="checkout__form__input">
-                                        <p>Account Password <span>*</span></p>
-                                        <input type="text">
-                                    </div> -->
-                                    <div class="checkout__form__checkbox">
-                                        <label for="note">
-                                            Note about your order, e.g, special note for delivery
-                                            <input type="checkbox" id="note">
-                                            <span class="checkmark"></span>
-                                        </label>
-                                    </div>
-                                    <div class="checkout__form__input">
-                                        <p>Oder notes <span>*</span></p>
-                                        <input type="text"
-                                        placeholder="Note about your order, e.g, special noe for delivery" name="order_note">
-                                    </div>
-                                </div>
-                            </div>
-                         <div>
-                        <!-- Checkbox for using billing as shipping details -->
-                         <div class="checkout__form__checkbox">
-                            <label>
-                                  Use Billing as Shipping Details
-                                <input type="checkbox" id="useBillingAsShipping" onclick="toggleShippingDetails()"> 
-                                 <span class="checkmark"></span>
-                              
-                            </label>
-                            </div>
+<form id="checkoutForm" action="#" class="checkout__form">
+    <div class="row">
+        <div class="col-lg-8">
+            <h5>Billing detail</h5>
+            <div class="row">
+                <div class="col-lg-6 col-md-6 col-sm-6">
+                    <div class="checkout__form__input">
+                        <p>First Name <span>*</span></p>
+                        <input type="text" name="first_name" value="{{ explode(' ', Auth::user()->name)[0] }}">
+                    </div>
+                </div>
+                <div class="col-lg-6 col-md-6 col-sm-6">
+                    <div class="checkout__form__input">
+                        <p>Last Name <span>*</span></p>
+                        <input type="text" name="last_name" value="{{ explode(' ', Auth::user()->name)[1] }}">
+                    </div>
+                </div>
 
-                        <!-- Checkbox for manual shipping details -->
-                        <div class="checkout__form__checkbox">
-                            <label>
-                                 Enter Shipping Details
-                                <input type="checkbox" id="manualShipping" onclick="toggleShippingDetails()">
-                                 <span class="checkmark"></span>
-                            </label>
+                <div class="col-lg-12">
+                    <div class="checkout__form__input">
+                        <p>Country <span>*</span></p>
+                        <input type="text" name="countryCode" value="NIGERIA" readonly>
+                    </div>
+                    <div class="checkout__form__input">
+                        <p>Address <span>*</span></p>
+                        <input type="text" placeholder="Street Address">
+                        <input type="text" placeholder="Apartment. suite, etc" name="address" required>
+                    </div>
+                    <div class="checkout__form__input">
+                        <p>Town/City <span>*</span></p>
+                        <input type="text" value="{{ $address->town_city }}" name="cityName" required>
+                    </div>
+                    <div class="checkout__form__input">
+                        <p>State <span>*</span></p>
+                        <input type="text" value="{{ $address->state }}" name="stateCode" required>
+                    </div>
+                    <div class="checkout__form__input">
+                        <p>Postcode/Zip <span>*</span></p>
+                        <input type="text" value="{{ $address->zip }}" name="zip" required>
+                    </div>
+                </div>
+                <div class="col-lg-6 col-md-6 col-sm-6">
+                    <div class="checkout__form__input">
+                        <p>Phone <span>*</span></p>
+                        <input type="text" name="phone" required>
+                    </div>
+                </div>
+                <div class="col-lg-6 col-md-6 col-sm-6">
+                    <div class="checkout__form__input">
+                        <p>Email <span>*</span></p>
+                        <input type="text" name="email" value="{{ Auth::user()->email }}">
+                    </div>
+                </div>
+
+                <div class="col-lg-12">
+                    <div class="checkout__form__checkbox">
+                        <label for="note">
+                            Note about your order, e.g., special note for delivery
+                            <input type="checkbox" id="note">
+                            <span class="checkmark"></span>
+                        </label>
+                    </div>
+                    <div class="checkout__form__input">
+                        <p>Order notes <span>*</span></p>
+                        <input type="text" placeholder="Note about your order, e.g., special note for delivery" name="order_note">
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <!-- Shipping Details Form -->
+                <div id="shippingDetails" style="display: none;">
+                    <div class="col-lg-12">
+                        <h5>Shipping Details</h5>
+                        <div class="checkout__form__input">
+                            <p>Country <span>*</span></p>
+                            <input type="text" name="countryCode" value="NIGERIA" readonly>
                         </div>
-
-                        <!-- Shipping details form -->
-                        <div id="shippingDetails" style="display: none;">
-                            <div class="col-lg-12">
-                                <h5>Shipping Details</h5>
-                                <div class="col-lg-12">
-                                    <div class="checkout__form__input">
-                                        <p>Country <span>*</span></p>
-                                        <input type="text" name="countryCode" value="NIGERIA" readonly>
-                                    </div>
-                                    <div class="checkout__form__input">
-                                        <p>Address <span>*</span></p>
-                                        <input type="text" placeholder="Street Address" name="streetAddress">
-                                        <input type="text" placeholder="Apartment. Suite, etc" name="address" required>
-                                    </div>
-                                    <div class="checkout__form__input">
-                                        <p>Town/City <span>*</span></p>
-                                        <input type="text" name="cityName" value="{{ $adrress->town_city }}" required>
-                                    </div>
-                                    <div class="checkout__form__input">
-                                        <p>State <span>*</span></p>
-                                        <input type="text" name="stateCode" value="{{ $adrress->state }}" required>
-                                    </div>
-                                    <div class="checkout__form__input">
-                                        <p>Postcode/Zip <span>*</span></p>
-                                        <input type="text" name="zipCode" value="{{ $adrress->zip }}" required>
-                                    </div>
-                                </div>
-                                <div class="col-lg-12 col-md-12 col-sm-12">
-                                    <div class="checkout__form__input">
-                                        <p>Phone <span>*</span></p>
-                                        <input type="text" name="phone" required>
-                                    </div>
-                                </div>
-                            </div>
+                        <div class="checkout__form__input">
+                            <p>Address <span>*</span></p>
+                            <input type="text" placeholder="Street Address" name="streetAddress">
+                            <input type="text" placeholder="Apartment. Suite, etc" name="address" required>
+                        </div>
+                        <div class="checkout__form__input">
+                            <p>Town/City <span>*</span></p>
+                            <input type="text" name="cityName" value="{{ $address->town_city }}" required>
+                        </div>
+                        <div class="checkout__form__input">
+                            <p>State <span>*</span></p>
+                            <input type="text" name="stateCode" value="{{ $address->state }}" required>
+                        </div>
+                        <div class="checkout__form__input">
+                            <p>Postcode/Zip <span>*</span></p>
+                            <input type="text" name="zipCode" value="{{ $address->zip }}" required>
                         </div>
                     </div>
-
-                        </div>
-                        <div class="col-lg-4">
-                            <div class="checkout__order">
-                                <h5>Your order</h5>
-                                <div class="checkout__order__product">
-                                    <ul>
-                                        <li>
-                                            <span class="top__text">Product</span>
-                                            <span class="top__text__right">Total</span>
-                                        </li>
-                                         @foreach ($cart as $item)
-                                        <li>{{ $item['product_name'] }} <span>₦ {{ number_format($item['total'], 2) }}</span></li>
-                                        @endforeach
-                                    </ul>
-                                </div>
-                                <div class="checkout__order__total">
-                                    <ul>
-                                        <li>Subtotal <span>₦ {{ number_format($subTotal, 2) }}</span></li>
-                                        <li>Shipping Fee <span id="shippingFee">₦ 0.00</span></li>
-                                      
-                                        <li>Total <span>₦ {{ number_format($subTotal, 2) }}</span></li>
-                                    </ul>
-                                </div>
-                                 @if (!auth()->check())
-                                <div class="checkout__order__widget">
-                                    <label for="o-acc">
-                                        Create an acount?
-                                        <input type="checkbox" id="o-acc">
-                                        <span class="checkmark"></span>
-                                    </label>
-                                    <p>Create am acount by entering the information below. If you are a returing customer
-                                    login at the top of the page.</p>
-                                    @endif
-                                    
-                                    <div class="checkout__form__checkbox">
-                                    <label>
-                                      Pay with Paystack
-                                        <input type="checkbox" id="manualShipping">
-                                         <span class="checkmark"></span>
-                                    </label>
-                                </div>
-                                <div class="checkout__form__checkbox">
-                                    <label>
-                                      Pay with Interswitch
-                                        <input type="checkbox" id="manualShipping">
-                                         <span class="checkmark"></span>
-                                    </label>
-                                </div>
-                                        <span class="checkmark"></span>
-                                         <button type="submit" class="site-btn">Place oder</button>
-                                   
-                                </div>
-                            </div>
+                    <div class="col-lg-12 col-md-12 col-sm-12">
+                        <div class="checkout__form__input">
+                            <p>Phone <span>*</span></p>
+                            <input type="text" name="phone" required>
                         </div>
                     </div>
-                </form>
+                </div>
+            </div>
+            <button type="button" id="calculateRates" class="site-btn">Calculate Rates</button>
+            <ul id="shippingForm" class="mt-4 list-group">
+            <!-- Shipping methods will be dynamically added here -->
+            </ul>
+            <li id="loading" class="d-none mt-3">Loading, please wait...</li>
+            <hr>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="checkout__order">
+                <h5>Your order</h5>
+                <div class="checkout__order__product">
+                    <ul>
+                        <li>
+                            <span class="top__text">Product</span>
+                            <span class="top__text__right">Total</span>
+                        </li>
+                        @foreach ($cart as $item)
+                            <li>{{ $item['product_name'] }} <span>₦ {{ number_format($item['total'], 2) }}</span></li>
+                        @endforeach
+                    </ul>
+                </div>
+                <div class="checkout__order__total">
+                    <ul>
+                        <li>Subtotal <span>₦ {{ number_format($subTotal, 2) }}</span></li>
+                        <hr>
+                        <li>Shipping Fee <span id="rate">₦ 0.00</span></li>
+                        <li>Total <span  id="totalAmount">₦ {{ number_format($subTotal, 2) }}</span></li>
+                    </ul>
+                </div>
+                <button type="submit" class="site-btn">Place Order</button>
+            </div>
+        </div>
+    </div>
+</form>
+
             </div>
         </section>
-        <!-- Checkout Section End -->
- <button onclick="calculateShippingFee()">Calculate Shipping Fee</button>
     <!-- Product Details Section End -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 <script>
-const origin = {
-    city: 'New York',
-    stateOrProvinceCode: 'NY',
-    postalCode: '10001',
-    countryCode: 'US',
-};
+    const exchangeRateToNGN = 760; // Replace with the actual exchange rate
 
-const destination = {
-    city: 'Los Angeles',
-    stateOrProvinceCode: 'CA',
-    postalCode: '90001',
-    countryCode: 'US',
-};
+    document.getElementById('calculateRates').addEventListener('click', async () => {
+        const loading = document.getElementById('loading');
+        const shippingForm = document.getElementById('shippingForm');
+        const rateElement = document.getElementById('rate'); // Shipping fee element
+        const totalElement = document.getElementById('totalAmount'); // Total element to update
 
-const packageDetails = {
-    weight: 5, // in kg
-    dimensions: {
-        length: 30, // in cm
-        width: 20, // in cm
-        height: 10, // in cm
-    },
-};
+        // Show the loading indicator
+        loading.classList.remove('d-none');
+        shippingForm.innerHTML = ''; // Clear previous results
 
-// Get the CSRF token
-const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        try {
+            // Fetch the rates from your FedEx route
+            const response = await fetch('/checkout/get-shipping-fee');
+            const data = await response.json();
 
-async function calculateShippingFee() {
-    try {
-        const queryParams = new URLSearchParams({
-            'origin[city]': origin.city,
-            'origin[stateOrProvinceCode]': origin.stateOrProvinceCode,
-            'origin[postalCode]': origin.postalCode,
-            'origin[countryCode]': origin.countryCode,
-            'destination[city]': destination.city,
-            'destination[stateOrProvinceCode]': destination.stateOrProvinceCode,
-            'destination[postalCode]': destination.postalCode,
-            'destination[countryCode]': destination.countryCode,
-            'weight': packageDetails.weight,
-            'dimensions[length]': packageDetails.dimensions.length,
-            'dimensions[width]': packageDetails.dimensions.width,
-            'dimensions[height]': packageDetails.dimensions.height,
-        });
+            // Hide the loading indicator
+            loading.classList.add('d-none');
 
-        const response = await fetch(`/calculate-shipping-fee?${queryParams.toString()}`, {
-            method: 'GET',
-            headers: {
-                'X-CSRF-TOKEN': csrfToken,
-            },
-        });
+            // Extract rate details
+            const rateDetails = data.output.rateReplyDetails;
 
-        const data = await response.json();
-        if (data.shipping_fee) {
-            console.log('Shipping Fee:', data.shipping_fee);
-            alert(`Shipping Fee: $${data.shipping_fee}`);
-        } else {
-            console.log('Error:', data.error);
+            let selectedShippingFee = 0; // Variable to store the selected shipping fee in NGN
+
+            // Loop through rates and display them
+            rateDetails.forEach((detail) => {
+                const serviceName = detail.serviceName;
+                const deliveryDays = detail.transitTime || 'N/A';
+                const formattedDeliveryDays = 
+                    typeof deliveryDays === 'number' 
+                        ? new Intl.NumberFormat().format(deliveryDays) 
+                        : deliveryDays;
+                
+                const priceUSD = detail.ratedShipmentDetails[0]?.totalNetFedExCharge || 0;
+                const priceNGN = priceUSD * exchangeRateToNGN;
+
+                // Create a list item with radio button
+                const listItem = document.createElement('li');
+                listItem.classList.add(
+                    'list-group-item',
+                    'd-flex',
+                    'align-items-center',
+                    'p-3',
+                    'rounded',
+                    'shadow-sm',
+                    'hover-shadow',
+                    'cursor-pointer'
+                );
+
+                listItem.innerHTML = ` 
+                    <div class="d-flex align-items-center w-100">
+                        <!-- Left: Radio Button -->
+                        <input type="radio" name="shippingOption" value="${serviceName}" class="form-check-input me-3" data-price="${priceNGN}">
+
+                        <!-- Middle: Service Name and Delivery Days -->
+                        <div class="flex-grow-1">
+                            <div class="fw-bold">${serviceName}</div>
+                            <small class="text-muted">${formattedDeliveryDays} delivery</small>
+                        </div>
+
+                        <!-- Right: Price -->
+                        <div class="text-success fw-bold text-end ms-auto">
+                            ₦ ${new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN', minimumFractionDigits: 2 }).format(priceNGN).replace('₦','')}
+                        </div>
+                    </div>
+                `;
+
+                // Add click event to select the item
+                listItem.addEventListener('click', () => {
+                    shippingForm.querySelectorAll('.list-group-item').forEach((item) => item.classList.remove('active'));
+                    listItem.classList.add('active');
+                    listItem.querySelector('input').checked = true;
+
+                    // Update the shipping fee when an option is selected
+                    selectedShippingFee = parseFloat(listItem.querySelector('input').dataset.price);
+
+                    // Update the shipping fee and total dynamically
+                    rateElement.textContent = `₦ ${new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN', minimumFractionDigits: 2 }).format(selectedShippingFee).replace('₦','')}`;
+                    updateTotalPrice(selectedShippingFee);
+                });
+
+                // Append to the form
+                shippingForm.appendChild(listItem);
+            });
+
+        } catch (error) {
+            // Hide the loading indicator and show an error
+            loading.classList.add('d-none');
+            shippingForm.innerHTML = ` 
+                <li class="list-group-item text-danger">Failed to fetch shipping rates. Please try again.</li>
+            `;
+            console.error(error);
         }
-    } catch (error) {
-        console.error('Error calculating shipping fee:', error);
+    });
+
+function updateTotalPrice(shippingFee) {
+    // Retrieve the subtotal from the PHP side, remove commas, and ensure it's a valid number
+    const subTotal = parseFloat(
+        "{{ number_format($subTotal, 2) }}"
+            .replace(/,/g, '') // Remove all commas globally
+            .replace('₦', '') // Remove the currency symbol
+    );
+
+    console.log(subTotal);
+
+    // Ensure subTotal is a valid number
+    if (isNaN(subTotal)) {
+        console.error("Invalid subtotal value");
+        return;
+    }
+
+    // Calculate the total by adding the shipping fee to the subtotal
+    const total = subTotal + shippingFee;
+
+    // Update the total value on the page using the id "totalAmount"
+    const totalElement = document.getElementById('totalAmount');
+    if (totalElement) {
+        // Format the total as Nigerian currency
+        totalElement.textContent = new Intl.NumberFormat('en-NG', {
+            style: 'currency',
+            currency: 'NGN',
+            minimumFractionDigits: 2
+        }).format(total);
     }
 }
 
-calculateShippingFee();
 </script>
-
-
 
 
 <script type="text/javascript">

@@ -18,7 +18,7 @@ public function index()
     $sessionId = Session::getId();
     $customerId = auth()->check() ? auth()->user()->id : null;
     $customer = auth()->user();
-    $adrress = ShippingAddress::where('user_id', $customer->id)->first();
+    $address = ShippingAddress::where('user_id', $customer->id)->first();
     $user = User::where('id', $customer->id)->first();
     $deliveryAddress = "LAGOS";
 
@@ -75,7 +75,7 @@ public function index()
     }
 
 
-    return view('checkout', compact('countries', 'cart', 'subTotal', 'totalWeight', 'store', 'deliveryAddress', 'adrress'));
+    return view('checkout', compact('countries', 'cart', 'subTotal', 'totalWeight', 'store', 'deliveryAddress', 'address'));
 }
 
 
