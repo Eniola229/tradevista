@@ -20,6 +20,11 @@ class BlogController extends Controller
     {
         return view('blogs');
     }
+
+    public function about(Request $request)
+    {
+        return view('about');
+    }
         // Store contact form submission
     public function storeContact(Request $request)
     {

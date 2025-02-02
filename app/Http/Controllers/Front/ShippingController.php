@@ -3,83 +3,81 @@
 namespace App\Http\Controllers\Front;
 
 use App\Http\Controllers\Controller;
-use App\Services\FedExService;
+use App\Services\TopshipService; 
 use Illuminate\Http\Request;
 
 class ShippingController extends Controller
 {
-    protected $fedExService;
+    protected $topshipService;
 
-    public function __construct(FedExService $fedExService)
+    public function __construct(TopshipService $topshipService)
     {
-        $this->fedExService = $fedExService;
+        $this->topshipService = $topshipService;
     }
 
-    public function getRates(Request $request)
+    /**
+     * Get pickup rates with hardcoded test data.
+     */
+    public function getPickupRates()
     {
-        // Hardcoded test data with rateRequestType
-        $testData = [
-            'origin' => [
-                'city' => 'New York',
-                'state' => 'NY',
-                'countryCode' => 'US',
-                'postalCode' => '10001',
-            ],
-            'destination' => [
-                'city' => 'Los Angeles',
-                'state' => 'CA',
-                'countryCode' => 'US',
-                'postalCode' => '90001',
-            ],
-            'weight' => 5, // in KG
-            'dimensions' => [
-                'length' => 30, // in CM
-                'width' => 20,  // in CM
-                'height' => 15, // in CM
-            ],
-            'pickupType' => 'DROPOFF_AT_FEDEX_LOCATION', // Add pickup type
-            'rateRequestType' => ['ACCOUNT'], // Specify rate request type
-        ];
-
-        // Build the payload for the FedEx API
-        $data = [
-            'accountNumber' => [
-                'value' => env('FEDEX_ACCOUNT_NUMBER'),
-            ],
-            'requestedShipment' => [
-                'shipper' => [
-                    'address' => $testData['origin'],
+        // Hardcoded test data for pickup rates
+        $shipmentDetails = [
+            'shipmentDetail' => [
+                'senderDetails' => [
+                    'cityName' => 'Ibadan',
+                    'countryCode' => 'NG', // Nigeria
                 ],
-                'recipient' => [
-                    'address' => $testData['destination'],
+                'receiverDetails' => [
+                    'cityName' => 'Lagos',
+                    'countryCode' => 'NG', // Nigeria
                 ],
-                'pickupType' => $testData['pickupType'],
-                'rateRequestType' => $testData['rateRequestType'], // Include rate request type
-                'requestedPackageLineItems' => [
-                    [
-                        'weight' => [
-                            'value' => $testData['weight'],
-                            'units' => 'KG',
-                        ],
-                        'dimensions' => [
-                            'length' => $testData['dimensions']['length'],
-                            'width' => $testData['dimensions']['width'],
-                            'height' => $testData['dimensions']['height'],
-                            'units' => 'CM',
-                        ],
-                    ],
-                ],
+                'totalWeight' => 5.0, // Weight in kilograms
             ],
         ];
 
-        try {
-            $shippingFee = $this->fedExService->getRates($data);
+        // Call the Topship service to get pickup rates
+        $rates = $this->topshipService->getPickupRates($shipmentDetails);
 
-            return response()->json($shippingFee);
-        } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
-        }
+        // Return the rates as JSON
+        return response()->json($rates);
+    }
+    /**
+     * Create a shipment with test data.
+     */
+    public function createShipment()
+    {
+        // Hardcoded test data for creating a shipment from Ibadan to Lagos
+        $payload = [
+            'origin' => 'Ibadan, Nigeria',
+            'destination' => 'Lagos, Nigeria',
+            'weight' => 5.0, // 5 kg
+            'recipient' => [
+                'name' => 'John Doe',
+                'phone' => '08012345678',
+                'address' => 'No 15, Marina Street, Lagos',
+            ],
+            'sender' => [
+                'name' => 'Jane Smith',
+                'phone' => '08123456789',
+                'address' => 'No 10, Mokola Road, Ibadan',
+            ],
+        ];
+
+        $shipment = $this->topshipService->createShipment($payload);
+
+        return response()->json($shipment);
     }
 
+    /**
+     * Track a shipment with test data.
+     */
+    public function trackShipment()
+    {
+        // Hardcoded test tracking ID
+        $trackingId = 'TS1234567890'; // Replace with a valid test tracking ID from Topship
 
+        $tracking = $this->topshipService->trackShipment($trackingId);
+
+        return response()->json($tracking);
+    }
 }

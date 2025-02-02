@@ -54,7 +54,7 @@ class ProductController extends Controller
             $title = "Add Product";
             $product = new Product;
             $productdata = null; // No existing product for adding
-            $message = "Product added successfully";
+            $message = "Product added successfully. The Sales Team will review and approve your post within an hour. If it is not approved, please feel free to contact us.";
         } else {
             // Edit Product
             $title = "Edit Product";
@@ -102,9 +102,12 @@ class ProductController extends Controller
             $product->meta_title = $request->meta_title;
             $product->meta_keywords = $request->meta_keywords;
             $product->meta_description = $request->meta_description;
-            $product->status = $request->status;
             $product->category_id = $request->category_id;
             $product->shipping_fee = $request->shipping_fee;
+
+            if ($id == "") {
+                $product->status = "INACTIVE";
+            }
 
             $product->user_id = Auth::user()->id;
 

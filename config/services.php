@@ -39,5 +39,9 @@ return [
         'url' => env('CLOUDINARY_URL'),
     ],
 
+    'topship' => [
+        'api_key' => env('TOPSHIP_API_KEY'),
+        'base_url' => env('TOPSHIP_API_URL'),
+    ],
 
 ];

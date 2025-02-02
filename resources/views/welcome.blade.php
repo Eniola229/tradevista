@@ -241,8 +241,6 @@ $hots = Product::where('status', 'ACTIVE')
 </section>
 <!-- Product Section End -->
 
-
-
 <!-- Trend Section Begin -->
 <section class="trend spad">
     <div class="container">
@@ -252,15 +250,14 @@ $hots = Product::where('status', 'ACTIVE')
                     <div class="section-title">
                         <h4>Hot Trend</h4>
                     </div>
-                 @if($hots->isNotEmpty())
-                @foreach($hots as $hot)
-                    <div class="trend__item view-product-btn" id="viewProductBtn" data-product-id="{{ $hot->id }}">
+                     @if($hots->isNotEmpty())
+                     @foreach($hots as $hot)
+                    <div class="trend__item">
                         <div class="trend__item__pic">
-                            <img src="{{ $hot->image_url }}" width="70" alt="">
+                            <img src="{{ $hot->image_url }}" alt="{{ $hot->product_name }}" width="70">
                         </div>
                         <div class="trend__item__text">
                             <h6>{{ $hot->product_name }}</h6>
-                            <div class="rating">
                              @if($hot->reviews && $hot->reviews->isNotEmpty())
                                 @foreach($hot->reviews as $review)
                                     <div class="review">
@@ -283,7 +280,6 @@ $hots = Product::where('status', 'ACTIVE')
                                 <i class="fa fa-star-o"></i> <!-- Empty star -->
                                 <i class="fa fa-star-o"></i> <!-- Empty star -->
                             @endif
-                            </div>
                             <div class="product__price">
                                 ₦ 
                                 @if($hot->product_discount === null || $hot->product_discount == 0)
@@ -293,14 +289,13 @@ $hots = Product::where('status', 'ACTIVE')
                                 @endif
                             </div>
                         </div>
-                        @endforeach
+                    </div>
+                    @endforeach
                         @else
                          <div class="trend__item">
                             <p>NO PRODUCT UNDER THIS CATEGORY</p>
                         </div>
-                        @endif                   
-                     </div>
-                </div>
+                        @endif    
                 </div>
             </div>
             <div class="col-lg-4 col-md-4 col-sm-6">
@@ -308,11 +303,11 @@ $hots = Product::where('status', 'ACTIVE')
                     <div class="section-title">
                         <h4>Best seller</h4>
                     </div>
-                @if($bestsellers->isNotEmpty())
-                @foreach($bestsellers as $bestseller)
-                    <div class="trend__item view-product-btn" id="viewProductBtn" data-product-id="{{ $bestseller->id }}">
+                    @if($bestsellers->isNotEmpty())
+                    @foreach($bestsellers as $bestseller)
+                    <div class="trend__item">
                         <div class="trend__item__pic">
-                            <img src="{{ $bestseller->image_url }}" width="70" alt="">
+                              <img src="{{ $bestseller->image_url }}" width="70" alt="">
                         </div>
                         <div class="trend__item__text">
                             <h6>{{ $bestseller->product_name }}</h6>
@@ -340,14 +335,12 @@ $hots = Product::where('status', 'ACTIVE')
                                 <i class="fa fa-star-o"></i> <!-- Empty star -->
                             @endif
                             </div>
-                            <div class="product__price">
                                 ₦ 
                                 @if($bestseller->product_discount === null || $bestseller->product_discount == 0)
                                     {{ number_format($bestseller->product_price, 2) }}
                                 @else
                                     {{ number_format($bestseller->product_price - $bestseller->product_discount, 2) }}
                                 @endif
-                            </div>
                         </div>
                     </div>
                 @endforeach
@@ -356,8 +349,8 @@ $hots = Product::where('status', 'ACTIVE')
                     <p>NO PRODUCT UNDER THIS CATEGORY</p>
                 </div>
                 @endif
+                </div>
             </div>
-        </div>
             <div class="col-lg-4 col-md-4 col-sm-6">
                 <div class="trend__content">
                     <div class="section-title">
@@ -365,7 +358,7 @@ $hots = Product::where('status', 'ACTIVE')
                     </div>
                  @if($features->isNotEmpty())
                 @foreach($features as $featured)
-                    <div class="trend__item view-product-btn" id="viewProductBtn" data-product-id="{{ $featured->id }}">
+                    <div class="trend__item">
                         <div class="trend__item__pic">
                             <img src="{{ $featured->image_url }}" width="70" alt="">
                         </div>
@@ -395,29 +388,25 @@ $hots = Product::where('status', 'ACTIVE')
                                 <i class="fa fa-star-o"></i> <!-- Empty star -->
                             @endif
                             </div>
-                            <div class="product__price">
                                 ₦ 
                                 @if($featured->product_discount === null || $featured->product_discount == 0)
                                     {{ number_format($featured->product_price, 2) }}
                                 @else
                                     {{ number_format($featured->product_price - $featured->product_discount, 2) }}
                                 @endif
-                            </div>
                         </div>
+                    </div>
                         @endforeach
                         @else
                          <div class="trend__item">
                             <p>NO PRODUCT UNDER THIS CATEGORY</p>
                         </div>
-                        @endif                   
-                     </div>
+                        @endif  
                 </div>
             </div>
         </div>
     </div>
 </section>
-<!-- Trend Section End -->
-
 <!-- Discount Section Begin -->
 <section class="discount">
     <div class="container">

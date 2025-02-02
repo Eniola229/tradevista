@@ -146,11 +146,11 @@ class ProductPageController extends Controller
 
     public function ProductsPage(Request $request)
     {
-        $products = Product::where('status', 'ACTIVE')
-                    ->with('category')
-                    ->with('reviews')
-                    ->inRandomOrder()        
-                    ->get();
+            $products = Product::where('status', 'ACTIVE')
+                        ->with(['category', 'reviews'])
+                        ->inRandomOrder()
+                        ->cursorPaginate(20); 
+
 
             $bestsellers = Product::where('status', 'ACTIVE')
                                 ->with('category')
@@ -183,11 +183,11 @@ class ProductPageController extends Controller
 
         $query = $request->input('query');
 
-        // Search in product_name, product_price, and other relevant fields
-        $products = Product::where('product_name', 'like', '%' . $query . '%')
-            ->orWhere('product_price', 'like', '%' . $query . '%')
-            ->orderBy('created_at', 'desc')
-            ->get();
+    // Search in product_name, product_price, and other relevant fields
+    $products = Product::where('product_name', 'like', '%' . $query . '%')
+        ->orWhere('product_price', 'like', '%' . $query . '%')
+        ->orderBy('created_at', 'desc')
+        ->paginate(20); 
 
     return view('products-page', compact('products', 'categories', 'query'));
     }

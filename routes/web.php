@@ -8,6 +8,10 @@ use App\Http\Controllers\Admin\AdminAuthController;
 use App\Http\Controllers\Admin\TeamController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\AdminRefererController;
+use App\Http\Controllers\Admin\AdminProductController;
+use App\Http\Controllers\Admin\UsersController;
+use App\Http\Controllers\Admin\SupportTicketController;
+use App\Http\Controllers\Admin\WIthdraweralController;
 
 //USER
 use App\Http\Controllers\Front\SetupController;
@@ -19,6 +23,9 @@ use App\Http\Controllers\Front\ShippingController;
 use App\Http\Controllers\Front\RefererController;
 use App\Http\Controllers\Front\ProductPageController;
 use App\Http\Controllers\Front\BlogController;
+use App\Http\Controllers\Front\SupportController;
+use App\Http\Controllers\Front\WithdrawController;
+use App\Http\Controllers\LocationController;
 
 
 Route::get('/', function () {
@@ -26,13 +33,14 @@ Route::get('/', function () {
 });
 
    
-Route::get('checkout/get-shipping-fee', [ShippingController::class, 'getRates']);
+Route::get('checkout/get-shipping-fee', [ShippingController::class, 'getPickupRates']);
 
 
 Route::get('/contact', [BlogController::class, 'contact']);
 Route::post('/contact', [BlogController::class, 'storeContact']);
 Route::post('/newsletter', [BlogController::class, 'storeNewsletter']);
 Route::get('/blog', [BlogController::class, 'blogs']);
+Route::get('/about', [BlogController::class, 'about']);
 
 //WISHLIST
 Route::prefix('wishlist')->controller(WishlistController::class)->group(function () {
@@ -67,6 +75,9 @@ Route::prefix('carts')->controller(CartController::class)->group(function () {
 
 });
 
+//COUNTRY AND CITIES 
+Route::get('/location-form', [LocationController::class, 'showForm'])->name('location.form');
+Route::get('/get-cities', [LocationController::class, 'getCities'])->name('location.cities');
 
 Route::middleware('auth')->group(function () {
     //PROFILE
@@ -88,11 +99,20 @@ Route::middleware('auth')->group(function () {
     Route::get('/user/products', [ProductController::class, 'products'])->name('products');
     Route::match(['get', 'post'], 'add-edit-product/{id?}', [ProductController::class, 'addEditProduct'])->name('products.add');
     Route::put('add-edit-product/{id}', [ProductController::class, 'addEditProduct'])->name('products.edit');
-    Route::get('user/view/product/{id}', [ProductController::class, 'viewProduct'])->name('products.view');
+    Route::get('user/view/product/{id}', [ProductPageController::class, 'viewProduct'])->name('products.view');
     Route::post('user/add/attribute/{id}', [ProductController::class, 'addAttributes'])->name('add-attribute');
     Route::post('user/add/images/{id}', [ProductController::class, 'addImages'])->name('add-images');
     Route::post('user/delete/product/{id}', [ProductController::class, 'deleteProduct'])->name('delete-product');
-
+    //SUPPORT 
+    Route::get('user/support', [SupportController::class, 'index'])->name('support');
+    Route::post('/support-tickets', [SupportController::class, 'store'])->name('support.ticket.submit');
+    Route::get('/support-tickets/{id}', [SupportController::class, 'show']);
+    Route::put('/support-tickets/{id}', [SupportController::class, 'update']);
+    Route::delete('/support-tickets/{id}', [SupportController::class, 'destroy']);
+    //REDRAW
+    Route::get('user/withdraw', [WithdrawController::class, 'index'])->name('withdraw.index');
+    Route::post('user/withdraw', [WithdrawController::class, 'withdraw'])->name('user-withdraw');
+    Route::post('/withdraw/upload-receipt/{id}', [WithdrawController::class, 'uploadReceipt'])->name('withdraw.upload-receipt');
     // Checkout Routes
     Route::prefix('checkout')->controller(CheckoutController::class)->group(function () {
         Route::get('/', 'index')->name('checkout.index');
@@ -120,6 +140,14 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
  Route::get('/category/delete/{id}', [CategoryController::class, 'delete'])->name('admin-delete-category');
  Route::get('/category/edit/{id}', [CategoryController::class, 'edit'])->name('admin-category-edit');
  Route::get('/referer', [AdminRefererController::class, 'index'])->name('user.referer');
+ Route::get('/products', [AdminProductController::class, 'index'])->name('admin.products');
+ Route::get('/view/product/{id}', [AdminProductController::class, 'view'])->name('admin.view-products');
+ Route::get('/change-product-status', [AdminProductController::class, 'changeStatus']);
+ Route::get('/users', [UsersController::class, 'index'])->name('admin.users');
+ Route::get('/support', [SupportTicketController::class, 'index'])->name('support');
+ Route::post('/support/answer/{id}', [SupportTicketController::class, 'answer'])->name('support.answer');
+ Route::get('/withdraw', [WIthdraweralController::class, 'index'])->name('withdraw');
+ Route::post('/upload-receipt', [WIthdraweralController::class, 'uploadReceipt'])->name('admin.uploadReceipt');
 });
 
 require __DIR__.'/auth.php';

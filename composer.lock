@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "2a7d60ebf455d05935900a78dabf6742",
+    "content-hash": "e0b66a39a78f788f7b04e650635b562b",
     "packages": [
         {
             "name": "brick/math",
@@ -2801,6 +2801,63 @@
                 }
             ],
             "time": "2024-11-21T10:39:51+00:00"
+        },
+        {
+            "name": "octw/aramex",
+            "version": "1.2.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Moustafa22/Laravel-Aramex-SDK.git",
+                "reference": "32870964bd6d9e0282cddf9bf2dc3883041d2084"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Moustafa22/Laravel-Aramex-SDK/zipball/32870964bd6d9e0282cddf9bf2dc3883041d2084",
+                "reference": "32870964bd6d9e0282cddf9bf2dc3883041d2084",
+                "shasum": ""
+            },
+            "type": "package",
+            "extra": {
+                "laravel": {
+                    "aliases": {
+                        "Aramex": "Octw\\Aramex\\Aramex"
+                    },
+                    "providers": [
+                        "Octw\\Aramex\\AramexServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Octw\\Aramex\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Moustafa Allahham",
+                    "email": "iteng.moustafa@gmail.com",
+                    "role": "Developer"
+                }
+            ],
+            "description": "A Library to integrate with Aramex APIs",
+            "keywords": [
+                "aramex",
+                "integraton",
+                "laravel",
+                "php",
+                "sdk",
+                "ship",
+                "shipping"
+            ],
+            "support": {
+                "issues": "https://github.com/Moustafa22/Laravel-Aramex-SDK/issues",
+                "source": "https://github.com/Moustafa22/Laravel-Aramex-SDK/tree/1.2.1"
+            },
+            "time": "2021-09-18T15:06:21+00:00"
         },
         {
             "name": "phpoption/phpoption",
@@ -6167,6 +6224,44 @@
                 "source": "https://github.com/webmozarts/assert/tree/1.11.0"
             },
             "time": "2022-06-03T18:03:27+00:00"
+        },
+        {
+            "name": "zalanihir/country-state-city",
+            "version": "v1.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/ZalaNihir/country-state-city-package.git",
+                "reference": "699b4609c3a6b299ea52fd6632cd585401ec446e"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/ZalaNihir/country-state-city-package/zipball/699b4609c3a6b299ea52fd6632cd585401ec446e",
+                "reference": "699b4609c3a6b299ea52fd6632cd585401ec446e",
+                "shasum": ""
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Nihir\\CountryStateCity\\": "src/",
+                    "Nihir\\CountryStateCity\\Console\\Commands\\": "src/Console/Commands/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "ZalaNihir",
+                    "email": "zalanihir8866@gmail.com"
+                }
+            ],
+            "description": "Laravel package for country, state, city providers with the flags",
+            "support": {
+                "issues": "https://github.com/ZalaNihir/country-state-city-package/issues",
+                "source": "https://github.com/ZalaNihir/country-state-city-package/tree/v1.1.0"
+            },
+            "time": "2024-11-30T13:45:16+00:00"
         }
     ],
     "packages-dev": [

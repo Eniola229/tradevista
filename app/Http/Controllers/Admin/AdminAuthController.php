@@ -13,6 +13,7 @@ use Illuminate\Http\RedirectResponse;
 use App\Models\User;
 use App\Models\Product;
 use App\Models\Waitlist;
+use App\Models\Withdraw;
 
 class AdminAuthController extends Controller
 {
@@ -102,10 +103,12 @@ class AdminAuthController extends Controller
     {
         $users = User::orderBy('created_at', 'desc')->get();
         $productCount = Product::all()->count();
+        $withdrawCount = Withdraw::where('status', 'PENDING')->get()->count();
+        $pendingProductCount = Product::where('status', 'INACTIVE')->get()->count();
         $userCount = User::all()->count();
         $totalBalance = User::all()->sum('balance');
 
-        return view('admin.dashboard', compact("users", "productCount", "userCount", "totalBalance"));
+        return view('admin.dashboard', compact("users", "productCount", "userCount", "totalBalance", 'pendingProductCount', 'withdrawCount'));
     }
 
     /**
@@ -131,7 +134,7 @@ class AdminAuthController extends Controller
     public function logout(): RedirectResponse
     {
         Session::flush();
-        Auth::guard('admins')->logout();
+        Auth::guard('admin')->logout();
 
         return redirect('admin/login');
     }

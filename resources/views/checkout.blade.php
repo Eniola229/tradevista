@@ -90,7 +90,7 @@ use App\Models\Product;
 <form id="checkoutForm" action="#" class="checkout__form">
     <div class="row">
         <div class="col-lg-8">
-            <h5>Billing detail</h5>
+            <h5>Shipping Address</h5>
             <div class="row">
                 <div class="col-lg-6 col-md-6 col-sm-6">
                     <div class="checkout__form__input">
@@ -112,20 +112,20 @@ use App\Models\Product;
                     </div>
                     <div class="checkout__form__input">
                         <p>Address <span>*</span></p>
-                        <input type="text" placeholder="Street Address">
-                        <input type="text" placeholder="Apartment. suite, etc" name="address" required>
+                        <input type="text" placeholder="Street Address" value="{{ isset($address) ? $address->address : '' }}" required>
+                        <input type="text" placeholder="Apartment. suite, etc (Optional)" name="address" >
                     </div>
                     <div class="checkout__form__input">
                         <p>Town/City <span>*</span></p>
-                        <input type="text" value="{{ $address->town_city }}" name="cityName" required>
+                        <input type="text" value="{{ isset($address) ? $address->town_city : '' }}" name="cityName" required>
                     </div>
                     <div class="checkout__form__input">
                         <p>State <span>*</span></p>
-                        <input type="text" value="{{ $address->state }}" name="stateCode" required>
+                        <input type="text" value="{{ isset($address) ? $address->state : '' }}" name="stateCode" required>
                     </div>
                     <div class="checkout__form__input">
                         <p>Postcode/Zip <span>*</span></p>
-                        <input type="text" value="{{ $address->zip }}" name="zip" required>
+                        <input type="text" value="{{ isset($address) ? $address->zip : '' }}" name="zip" required>
                     </div>
                 </div>
                 <div class="col-lg-6 col-md-6 col-sm-6">
@@ -155,32 +155,38 @@ use App\Models\Product;
                     </div>
                 </div>
             </div>
-
+                    <div class="checkout__form__checkbox">
+                        <label for="checked">
+                           Use shipping address as billing address.
+                            <input type="checkbox" id="checked">
+                            <span class="checkmark"></span>
+                        </label>
+                    </div>
             <div>
                 <!-- Shipping Details Form -->
                 <div id="shippingDetails" style="display: none;">
                     <div class="col-lg-12">
-                        <h5>Shipping Details</h5>
+                        <h5>Billing Details</h5>
                         <div class="checkout__form__input">
                             <p>Country <span>*</span></p>
                             <input type="text" name="countryCode" value="NIGERIA" readonly>
                         </div>
                         <div class="checkout__form__input">
                             <p>Address <span>*</span></p>
-                            <input type="text" placeholder="Street Address" name="streetAddress">
-                            <input type="text" placeholder="Apartment. Suite, etc" name="address" required>
+                            <input type="text" placeholder="Street Address" name="streetAddress" value="{{ isset($address) ? $address->address : '' }}" required>
+                            <input type="text" placeholder="Apartment. Suite, etc" name="address">
                         </div>
                         <div class="checkout__form__input">
                             <p>Town/City <span>*</span></p>
-                            <input type="text" name="cityName" value="{{ $address->town_city }}" required>
+                            <input type="text" name="cityName" value="{{ isset($address) ? $address->town_city : '' }}" required>
                         </div>
                         <div class="checkout__form__input">
                             <p>State <span>*</span></p>
-                            <input type="text" name="stateCode" value="{{ $address->state }}" required>
+                            <input type="text" name="stateCode" value="{{ isset($address) ? $address->state : '' }}" required>
                         </div>
                         <div class="checkout__form__input">
                             <p>Postcode/Zip <span>*</span></p>
-                            <input type="text" name="zipCode" value="{{ $address->zip }}" required>
+                            <input type="text" name="zipCode" value="{{ isset($address) ? $address->zip : '' }}" required>
                         </div>
                     </div>
                     <div class="col-lg-12 col-md-12 col-sm-12">
@@ -363,25 +369,29 @@ function updateTotalPrice(shippingFee) {
 </script>
 
 
-<script type="text/javascript">
-    function toggleShippingDetails() {
-    const useBillingAsShipping = document.getElementById('useBillingAsShipping');
-    const manualShipping = document.getElementById('manualShipping');
-    const shippingDetails = document.getElementById('shippingDetails');
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const checkbox = document.getElementById("checked");
+    const billingDetails = document.getElementById("shippingDetails");
 
-    // If "Use Billing as Shipping Details" is checked, hide the manual shipping form
-    if (useBillingAsShipping.checked) {
-        shippingDetails.style.display = 'none';
-    }
+    // Auto-check the checkbox when the page loads
+    checkbox.checked = true;
 
-    // If "Enter Shipping Details" is checked, show the manual shipping form
-    else if (manualShipping.checked) {
-        shippingDetails.style.display = 'block';
-    } else {
-        shippingDetails.style.display = 'none';
-    }
-}
+    // Initially hide the billing form because the checkbox is checked
+    billingDetails.style.display = "none";
 
+    // Add an event listener to toggle the billing form visibility
+    checkbox.addEventListener("change", function () {
+      if (checkbox.checked) {
+        // Hide the billing form when the checkbox is checked
+        billingDetails.style.display = "none";
+      } else {
+        // Show the billing form when the checkbox is unchecked
+        billingDetails.style.display = "block";
+      }
+    });
+  });
 </script>
+
 @include('components.footer')
 </html>

@@ -89,7 +89,7 @@ class FedExService
                 'headers' => [
                     'Content-Type' => 'application/json',
                     'Authorization' => 'Bearer ' . $accessToken,
-                    'X-locale' => 'en_US', // Optional
+                     'X-locale' => 'en_NG', // Set locale to Nigeria here
                 ],
                 'json' => $data
             ]);

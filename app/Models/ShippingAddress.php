@@ -35,6 +35,7 @@ class ShippingAddress extends Model
         'country',
         'state',
         'town_city',
+        'address',
         'zip',
         'address_type'
     ];

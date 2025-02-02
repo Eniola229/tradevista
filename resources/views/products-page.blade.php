@@ -147,14 +147,26 @@
          </div>
         @endif
                 
-                        <div class="col-lg-12 text-center">
-                            <div class="pagination__option">
-                                <a href="#">1</a>
-                                <a href="#">2</a>
-                                <a href="#">3</a>
-                                <a href="#"><i class="fa fa-angle-right"></i></a>
-                            </div>
-                        </div>
+        <div class="col-lg-12 text-center">
+            <div class="pagination__option">
+                @if ($products->lastPage() > 1)
+                    @if (!$products->onFirstPage())
+                        <a href="{{ $products->previousPageUrl() }}"><i class="fa fa-angle-left"></i></a>
+                    @endif
+
+                    @for ($i = 1; $i <= $products->lastPage(); $i++)
+                        <a href="{{ $products->url($i) }}" class="{{ $i == $products->currentPage() ? 'active' : '' }}">
+                            {{ $i }}
+                        </a>
+                    @endfor
+
+                    @if ($products->hasMorePages())
+                        <a href="{{ $products->nextPageUrl() }}"><i class="fa fa-angle-right"></i></a>
+                    @endif
+                @endif
+            </div>
+        </div>
+
                     </div>
                 </div>
             </div>

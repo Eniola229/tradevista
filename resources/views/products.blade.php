@@ -36,11 +36,11 @@
     @include('components.nav')
       
     @if(session('message'))
-        <div class="alert alert-success">
+        <div class="alert alert-success" style="color: white;">
             {{ session('message') }}
         </div>
     @elseif(session('error'))
-        <div class="alert alert-danger">
+        <div class="alert alert-danger" style="color: white;">
             {{ session('error') }}
         </div>
     @endif
@@ -81,6 +81,7 @@
                       <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Payment Image</th>
                       <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Payment Name</th>
                       <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Price</th>
+                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Status</th>
                       <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Date Added</th>
                       <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Action</th>
                     </tr>
@@ -96,7 +97,10 @@
                                 <h6 class="mb-0 text-sm">{{ $product->product_name }}</h6>
                             </td>
                             <td>
-                                <h6 class="mb-0 text-sm">₦ {{ $product->product_price }}</h6>
+                                <h6 class="mb-0 text-sm">₦ {{ number_format($product->product_price, 2) }}</h6>
+                            </td>
+                            <td>
+                                <h6 class="mb-0 text-sm {{ $product->status === 'ACTIVE' ? 'text-success' : 'text-danger' }}">{{ $product->status }}</h6>
                             </td>
                             <td>
                                 <div class="d-flex px-2 py-1">

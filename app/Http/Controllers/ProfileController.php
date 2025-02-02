@@ -11,7 +11,9 @@ use Illuminate\View\View;
 use App\Models\Setup;
 use App\Models\ShippingAddress;
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
-
+use App\Models\Country;
+use App\Models\State;
+use App\Models\City;
 
 class ProfileController extends Controller
 {
@@ -23,8 +25,10 @@ class ProfileController extends Controller
         $user = Auth::user()->id;
         $setup = Setup::where('user_id', $user)->first();
         $shippingAddress = ShippingAddress::where('user_id', $user)->first();
+        $nigeria = Country::where('name', 'Nigeria')->first();
+        $states = State::where('country_id', $nigeria->id)->get();
 
-        return view('profile', compact('setup', 'shippingAddress'));
+        return view('profile', compact('setup', 'shippingAddress', 'states'));
     }
 
     /**
@@ -89,6 +93,7 @@ class ProfileController extends Controller
             'country' => 'required|string|max:255',
             'state' => 'required|string|max:255',
             'town_city' => 'required|string|max:255',
+            'address' => 'required|string|max:255',
             'zip' => 'required|string|max:10',
             'address_type' => 'required|string|in:home,work,other',
         ]);
@@ -100,6 +105,7 @@ class ProfileController extends Controller
             'state' => $request->state,
             'town_city' => $request->town_city,
             'zip' => $request->zip,
+            'address' => $request->address,
             'address_type' => $request->address_type,
         ]);
 

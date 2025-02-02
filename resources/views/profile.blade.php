@@ -149,7 +149,7 @@
                         <button class="nav-link active" id="orders-tab" data-bs-toggle="tab" data-bs-target="#orders" type="button" role="tab" aria-controls="orders" aria-selected="true">Account Type</button>
                     </li>
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="wishlist-tab" data-bs-toggle="tab" data-bs-target="#wishlist" type="button" role="tab" aria-controls="wishlist" aria-selected="false">Shiiping Address</button>
+                        <button class="nav-link" id="wishlist-tab" data-bs-toggle="tab" data-bs-target="#wishlist" type="button" role="tab" aria-controls="wishlist" aria-selected="false">Address</button>
                     </li>
                     <li class="nav-item" role="presentation">
                         <button class="nav-link" id="settings-tab" data-bs-toggle="tab" data-bs-target="#settings" type="button" role="tab" aria-controls="settings" aria-selected="false">Update Proflle</button>
@@ -254,13 +254,14 @@
                     <div class="card p-4">
                    @if($shippingAddress)
                        <div class="container mt-5">
-                          <h2 class="mb-4">Shiiping Address</h2>
+                          <h2 class="mb-4">Address</h2>
                           <table class="table table-bordered table-striped">
                               <thead>
                                   <tr>
                                       <th>Country</th>
                                       <th>State</th>
                                       <th>Town/City</th>
+                                      <th>Address</th>
                                       <th>ZIP Code</th>
                                       <th>Address Type</th>
                                       <th>Actions</th>
@@ -271,6 +272,7 @@
                                           <td>{{ $shippingAddress->country }}</td>
                                           <td>{{ $shippingAddress->state }}</td>
                                           <td>{{ $shippingAddress->town_city }}</td>
+                                          <td>{{ $shippingAddress->address }}</td>
                                           <td>{{ $shippingAddress->zip }}</td>
                                           <td>{{ ucfirst($shippingAddress->address_type) }}</td>
                                           <td>
@@ -304,55 +306,30 @@
                                                 </select>
                                             </div>
 
-                                            <!-- State -->
-                                            <div class="mb-3">
+                                              <!-- State -->
+                                                <div class="mb-3">
                                                 <label for="state" class="form-label">State</label>
                                                 <select class="form-select" id="state" name="state" required>
                                                     <option value="" disabled selected>Select State</option>
-                                                    <option value="Abia">Abia</option>
-                                                    <option value="Adamawa">Adamawa</option>
-                                                    <option value="Akwa Ibom">Akwa Ibom</option>
-                                                    <option value="Anambra">Anambra</option>
-                                                    <option value="Bauchi">Bauchi</option>
-                                                    <option value="Bayelsa">Bayelsa</option>
-                                                    <option value="Benue">Benue</option>
-                                                    <option value="Borno">Borno</option>
-                                                    <option value="Cross River">Cross River</option>
-                                                    <option value="Delta">Delta</option>
-                                                    <option value="Ebonyi">Ebonyi</option>
-                                                    <option value="Edo">Edo</option>
-                                                    <option value="Ekiti">Ekiti</option>
-                                                    <option value="Enugu">Enugu</option>
-                                                    <option value="Gombe">Gombe</option>
-                                                    <option value="Imo">Imo</option>
-                                                    <option value="Jigawa">Jigawa</option>
-                                                    <option value="Kaduna">Kaduna</option>
-                                                    <option value="Kano">Kano</option>
-                                                    <option value="Katsina">Katsina</option>
-                                                    <option value="Kebbi">Kebbi</option>
-                                                    <option value="Kogi">Kogi</option>
-                                                    <option value="Kwara">Kwara</option>
-                                                    <option value="Lagos">Lagos</option>
-                                                    <option value="Nasarawa">Nasarawa</option>
-                                                    <option value="Niger">Niger</option>
-                                                    <option value="Ogun">Ogun</option>
-                                                    <option value="Ondo">Ondo</option>
-                                                    <option value="Osun">Osun</option>
-                                                    <option value="Oyo">Oyo</option>
-                                                    <option value="Plateau">Plateau</option>
-                                                    <option value="Rivers">Rivers</option>
-                                                    <option value="Sokoto">Sokoto</option>
-                                                    <option value="Taraba">Taraba</option>
-                                                    <option value="Yobe">Yobe</option>
-                                                    <option value="Zamfara">Zamfara</option>
-                                                    <option value="FCT">Federal Capital Territory</option>
+                                                    @foreach ($states as $state)
+                                                        <option value="{{ $state->name }}" {{ old('state') == $state->name ? 'selected' : '' }}>
+                                                            {{ $state->name }}
+                                                        </option>
+                                                    @endforeach
                                                 </select>
-                                            </div>
+                                                </div>
 
                                             <!-- Town/City -->
                                             <div class="mb-3">
-                                                <label for="town_city" class="form-label">Town/City</label>
-                                                <input type="text" value="{{ $shippingAddress->town_city }}" class="form-control" id="town_city" name="town_city" placeholder="Enter Town/City" required>
+                                                <label for="townCity" class="form-label">Town/City</label>
+                                                <select id="city" name="town_city" class="form-select">
+                                                    <option value="">Select a city</option>
+                                                </select>
+                                            </div>
+                                            <!-- Address -->
+                                            <div class="mb-3">
+                                                <label for="address" class="form-label">Address</label>
+                                                <input type="text" value="{{ $shippingAddress->address }}" class="form-control" id="address" name="address" placeholder="Enter Address" required>
                                             </div>
 
                                             <!-- ZIP -->
@@ -396,54 +373,30 @@
 
                   <!-- State -->
                   <div class="mb-3">
-                      <label for="state" class="form-label">State</label>
-                      <select class="form-select" id="state" name="state" required>
-                          <option value="" disabled selected>Select State</option>
-                          <option value="Abia">Abia</option>
-                          <option value="Adamawa">Adamawa</option>
-                          <option value="Akwa Ibom">Akwa Ibom</option>
-                          <option value="Anambra">Anambra</option>
-                          <option value="Bauchi">Bauchi</option>
-                          <option value="Bayelsa">Bayelsa</option>
-                          <option value="Benue">Benue</option>
-                          <option value="Borno">Borno</option>
-                          <option value="Cross River">Cross River</option>
-                          <option value="Delta">Delta</option>
-                          <option value="Ebonyi">Ebonyi</option>
-                          <option value="Edo">Edo</option>
-                          <option value="Ekiti">Ekiti</option>
-                          <option value="Enugu">Enugu</option>
-                          <option value="Gombe">Gombe</option>
-                          <option value="Imo">Imo</option>
-                          <option value="Jigawa">Jigawa</option>
-                          <option value="Kaduna">Kaduna</option>
-                          <option value="Kano">Kano</option>
-                          <option value="Katsina">Katsina</option>
-                          <option value="Kebbi">Kebbi</option>
-                          <option value="Kogi">Kogi</option>
-                          <option value="Kwara">Kwara</option>
-                          <option value="Lagos">Lagos</option>
-                          <option value="Nasarawa">Nasarawa</option>
-                          <option value="Niger">Niger</option>
-                          <option value="Ogun">Ogun</option>
-                          <option value="Ondo">Ondo</option>
-                          <option value="Osun">Osun</option>
-                          <option value="Oyo">Oyo</option>
-                          <option value="Plateau">Plateau</option>
-                          <option value="Rivers">Rivers</option>
-                          <option value="Sokoto">Sokoto</option>
-                          <option value="Taraba">Taraba</option>
-                          <option value="Yobe">Yobe</option>
-                          <option value="Zamfara">Zamfara</option>
-                          <option value="FCT">Federal Capital Territory</option>
-                      </select>
-                  </div>
+                                                <label for="state" class="form-label">State</label>
+                                                <select class="form-select" id="state" name="state" required>
+                                                    <option value="" disabled selected>Select State</option>
+                                                    @foreach ($states as $state)
+                                                        <option value="{{ $state->name }}" {{ old('state') == $state->name ? 'selected' : '' }}>
+                                                            {{ $state->name }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                                </div>
 
                     <!-- Town/City -->
                     <div class="mb-3">
                         <label for="townCity" class="form-label">Town/City</label>
-                        <input type="text" class="form-control" id="townCity" name="town_city" placeholder="Enter Town/City" required>
+                        <select id="city" name="town_city" class="form-select">
+                            <option value="">Select a city</option>
+                        </select>
                     </div>
+
+                                            <!-- Address -->
+                                            <div class="mb-3">
+                                                <label for="address" class="form-label">Address</label>
+                                                <input type="text" class="form-control" id="address" name="address" placeholder="Enter Address" required>
+                                            </div>
 
                     <!-- ZIP -->
                     <div class="mb-3">
@@ -546,6 +499,28 @@
 <script src="{{ asset('assets/js/plugins/smooth-scrollbar.min.js') }}"></script>
 <script src="{{ asset('assets/js/plugins/chartjs.min.js') }}"></script>
     <!-- JavaScript -->
+<script>
+    // Handle state change to fetch cities
+    document.getElementById('state').addEventListener('change', function () {
+        const stateName = this.value; // Get the selected state name
+        const cityDropdown = document.getElementById('city');
+        cityDropdown.innerHTML = '<option value="">Loading...</option>';
+
+        if (stateName) {
+            fetch(`/get-cities?state_name=${stateName}`)
+                .then(response => response.json())
+                .then(data => {
+                    cityDropdown.innerHTML = '<option value="">Select a city</option>';
+                    data.forEach(city => {
+                        cityDropdown.innerHTML += `<option value="${city.name}">${city.name}</option>`;
+                    });
+                });
+        } else {
+            cityDropdown.innerHTML = '<option value="">Select a city</option>';
+        }
+    });
+</script>
+
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const accountTypeSelect = document.getElementById('account_type');

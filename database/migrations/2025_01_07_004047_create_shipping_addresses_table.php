@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('country')->default('NIGERIA');
             $table->string('state');
             $table->string('town_city');
+            $table->string('address');
             $table->string('zip');
             $table->string('address_type');
             $table->timestamps();
