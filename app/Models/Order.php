@@ -52,10 +52,13 @@ class Order extends Model
         return $this->hasMany(OrderProduct::class, 'order_id')->with('product');
     }
 
-
+   public function shippingAddress()
+    {
+        return $this->belongsTo(ShippingAddress::class, 'shipping_address_id');
+    }
 
     public function orders_products()
     {
-        return $this->hasMany(OrderProduct::class);
+        return $this->hasMany(OrderProduct::class,);
     }
 }

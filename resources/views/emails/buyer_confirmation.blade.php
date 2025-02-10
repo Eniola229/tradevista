@@ -39,7 +39,7 @@
                             $totalAmount += $subtotal;
                         @endphp
                         <tr>
-                            <td>{{ $op->product->name ?? 'Unknown Product' }}</td> <!-- Fix: Access product name via relation -->
+                            <td>{{ $op->product->product_name ?? 'Unknown Product' }}</td> <!-- Fix: Access product name via relation -->
                             <td>₦{{ number_format($op->product_price, 2) }}</td>
                             <td>{{ $op->product_qty }}</td>
                             <td>₦{{ number_format($subtotal, 2) }}</td> <!-- Fix: Calculate total -->

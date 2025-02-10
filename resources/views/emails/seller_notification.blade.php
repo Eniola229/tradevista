@@ -33,7 +33,7 @@
                 @foreach($products as $product)
                 <tr>
                     <td>{{ $product->product_name }}</td>
-                    <td>₦{{ number_format($product->price, 2) }}</td>
+                    <td>₦{{ number_format($product->product_price, 2) }}</td>
                 </tr>
                 @endforeach
             </tbody>

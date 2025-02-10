@@ -157,7 +157,7 @@ $hots = Product::where('status', 'ACTIVE')
         <div class="row">
             <div class="col-lg-4 col-md-4">
                 <div class="section-title">
-                    <h4>New product</h4>
+                    <h4>New products</h4>
                 </div>
             </div>
             <div class="col-lg-8 col-md-8">

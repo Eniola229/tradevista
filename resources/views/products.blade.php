@@ -52,7 +52,7 @@
               <div class="row">
                 <div class="col-lg-12 col-7">
                    <div class="d-flex flex-column flex-md-row align-items-center justify-content-between rounded gap-3">
-                    <h2 class="h5 text-dark mb-0">Your Products</h2>
+                    <h2 class="h5 text-dark mb-0">Products</h2>
                     <a href="{{ url('add-edit-product') }}">
                       <button class="btn btn-primary">Add New Product</button>
                     </a>
@@ -78,8 +78,8 @@
                 <table class="table align-items-center mb-0">
                   <thead>
                     <tr>
-                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Payment Image</th>
-                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Payment Name</th>
+                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Product Image</th>
+                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Product Name</th>
                       <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Price</th>
                       <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Status</th>
                       <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Date Added</th>

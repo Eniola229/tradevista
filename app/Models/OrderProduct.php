@@ -39,17 +39,15 @@ class OrderProduct extends Model
         'product_qty',
         'product_total',
     ];
-
-    public function order()
-    {
-        return $this->belongsTo(Order::class);
-    }
-
     
-
     public function product()
     {
         return $this->belongsTo(Product::class);
     }
  
+    // ✅ Relationship to Order
+    public function order()
+    {
+        return $this->belongsTo(Order::class);
+    }
 }

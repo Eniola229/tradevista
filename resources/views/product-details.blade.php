@@ -61,7 +61,8 @@
                 </div>
                 <div class="col-lg-6">
                     <div class="product__details__text">
-                        <h3>{{ $product->product_name }} <h6>Brand: {{ $setup->company_name }}</h6></h3><br>
+                        <h3>{{ $product->product_name }} <h6>Brand: {{ $setup->company_name }}</h6></h3>
+                        <h6>Address: {{ $setup->address }}</h6><br>
                        <span>You can contact the seller to place an order, <span style="color: red;">(though we recommend placing all orders online for security purposes)</span></span>
                         <h6>{{ $setup->company_mobile_1 }} | {{ $setup->company_mobile_1 }}</h6>
                         <div class="rating">
@@ -152,7 +153,7 @@
                                 </li>
                                 <li>
                                     <span>Shipping fee:</span>
-                                    <p>₦ {{ $product->shipping_fee }}</p>
+                                    <p>₦ {{ $product->shipping_fee }} (This is only for customers whose address are close to the seller)</p>
                                 </li>
                             </ul>
                         </div>

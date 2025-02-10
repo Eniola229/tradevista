@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\UsersController;
 use App\Http\Controllers\Admin\SupportTicketController;
 use App\Http\Controllers\Admin\WIthdraweralController;
 use App\Http\Controllers\Admin\StatePriceController;
+use App\Http\Controllers\Admin\AdminOrderController;
 
 //USER
 use App\Http\Controllers\Front\SetupController;
@@ -27,6 +28,7 @@ use App\Http\Controllers\Front\BlogController;
 use App\Http\Controllers\Front\SupportController;
 use App\Http\Controllers\Front\WithdrawController;
 use App\Http\Controllers\Front\OrderController;
+use App\Http\Controllers\Front\BusOrdersController;
 use App\Http\Controllers\LocationController;
 
 
@@ -124,6 +126,9 @@ Route::middleware('auth')->group(function () {
     //Orders 
     Route::get('/user/orders', [OrderController::class, 'getUserOrders'])->name('user.orders');
     Route::get('/user/order/view/{id}', [OrderController::class, 'viewOrder'])->name('user.order.view');
+    //Orders for Sellers 
+    Route::get('/user/bus-orders', [BusOrdersController::class, 'soldProducts'])->name('user.sold-products');
+
     
 });
 
@@ -155,8 +160,10 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
  Route::get('/withdraw', [WIthdraweralController::class, 'index'])->name('withdraw');
  Route::post('/upload-receipt', [WIthdraweralController::class, 'uploadReceipt'])->name('admin.uploadReceipt');
  Route::resource('state_prices', StatePriceController::class);
-
-
+ Route::get('/orders', [AdminOrderController::class, 'index'])->name('orders.index');
+ Route::get('/orders/{id}', [AdminOrderController::class, 'show'])->name('orders.show');
+ Route::post('/orders/{id}/update-status', [AdminOrderController::class, 'updateStatus'])->name('orders.updateStatus');
 });
 
+//TO ANY DEVELOPER --- IF YOU NEED EXPLANTION AND CLERITY ON SOME CODES - CALL OR WHATSAPP - 08035906313
 require __DIR__.'/auth.php';

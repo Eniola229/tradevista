@@ -116,14 +116,18 @@ public function verifyPayment(Request $request)
     $sellerAmounts = [];  // To track each seller’s earnings and products
     $adminTotal = 0;
 
-    DB::transaction(function () use ($cartItems, $order, &$sellerAmounts, &$adminTotal) {
+DB::transaction(function () use ($cartItems, $order, &$sellerAmounts, &$adminTotal) {
     foreach ($cartItems as $item) {
         $product = Product::find($item->product_id);
         if (!$product) continue;
 
         $sellerId = $product->user_id;
-        $itemTotal = $item->product_price * $item->quantity;
-        $productPrice = $product->product_price;
+        $productPrice = floatval($product->product_price);
+        $itemTotal = $productPrice * $item->quantity;
+        $sellerShare = round(0.85 * $itemTotal, 2);
+        $adminShare = round(0.15 * $itemTotal, 2);
+        
+        \Log::info("Processing Order: Product {$product->id} - Price: {$productPrice}, Qty: {$item->quantity}, Total: {$itemTotal}, Seller Share: {$sellerShare}");
 
         // Create OrderProduct record
         OrderProduct::create([
@@ -134,11 +138,17 @@ public function verifyPayment(Request $request)
             'product_total' => $itemTotal,
         ]);
 
-        // Calculate shares (85% to seller, 15% to admin)
-        $sellerShare = 0.85 * $itemTotal;
-        $adminShare = 0.15 * $itemTotal;
+        // Record Payment
+        Payment::create([
+            'user_id'       => Auth::id(),
+            'currency'      => 'NGN',
+            'amount'        => number_format($sellerShare, 2, '.', ''),
+            'description'   => 'Payment for new order placed',
+            'payment_method'=> 'Paystack',
+            'status'        => 'PAID'
+        ]);
 
-        // Update seller balance safely
+        // Update seller balance
         User::where('id', $sellerId)->increment('balance', $sellerShare);
 
         // Track seller earnings
@@ -151,6 +161,7 @@ public function verifyPayment(Request $request)
         $adminTotal += $adminShare;
     }
 });
+
 
     // Clear the cart for this user after order is placed
     Cart::where('user_id', $user->id)->delete();

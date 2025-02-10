@@ -73,6 +73,11 @@ class Product extends Model
         return $this->hasMany(Review::class);  
     }
 
+    public function seller()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
     public static function getDiscountedPrice($product_id)
     {
         // Fetch product details

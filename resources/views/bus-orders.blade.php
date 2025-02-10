@@ -36,11 +36,11 @@
     @include('components.nav')
       
     @if(session('message'))
-        <div class="alert alert-success">
+        <div class="alert alert-success" style="color: white;">
             {{ session('message') }}
         </div>
     @elseif(session('error'))
-        <div class="alert alert-danger">
+        <div class="alert alert-danger" style="color: white;">
             {{ session('error') }}
         </div>
     @endif
@@ -52,12 +52,9 @@
               <div class="row">
                 <div class="col-lg-12 col-7">
                    <div class="d-flex flex-column flex-md-row align-items-center justify-content-between rounded gap-3">
-                    <h2 class="h5 text-dark mb-0">Your Referers</h2>
-                    <button class="btn btn-primary" id="copyButton">Copy referer link</button>
+                    <h2 class="h5 text-dark mb-0">Sold Products ({{$productCount}})</h2>
                   </div>
-                 
-                    <p style="display: none;" class="alert alert-info text-white" id="textToCopy">https://tradevista.biz/register?referer_code={{ Auth::user()->email }}</p>
-                   
+                
                 </div>
                 <div class="col-lg-6 col-5 my-auto text-end">
                   <div class="dropdown float-lg-end pe-4">
@@ -65,9 +62,7 @@
                       <i class="fa fa-ellipsis-v text-secondary"></i>
                     </a>
                     <ul class="dropdown-menu px-2 py-3 ms-sm-n4 ms-n5" aria-labelledby="dropdownTable">
-                      <li><a class="dropdown-item border-radius-md" href="javascript:;">Action</a></li>
-                      <li><a class="dropdown-item border-radius-md" href="javascript:;">Another action</a></li>
-                      <li><a class="dropdown-item border-radius-md" href="javascript:;">Something else here</a></li>
+                      <li><a class="dropdown-item border-radius-md" href="javascript:;">Null</a></li>
                     </ul>
                   </div>
                 </div>
@@ -75,48 +70,61 @@
             </div>
             <div class="card-body px-0 pb-2">
               <div class="table-responsive">
-                <table class="table align-items-center mb-0">
-                  <thead>
+               <table class="table table-bordered">
+                <thead>
                     <tr>
-                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Referer Name</th>
-                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Referer Email</th>
-                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Referer Mobile No</th>
-                      <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Date Added</th>
-                      </tr>
-                  </thead>
-                  <tbody>
-                    @if($referers->isNotEmpty())
-                    @foreach($referers as $referered)
-                        <tr>
-                            <td>
-                                <h6 class="mb-0 text-sm">{{ $referered->referer->name }}</h6>
-                            </td>
-                            <td>
-                                <h6 class="mb-0 text-sm">{{ $referered->referer->email }}</h6>
-                            </td>
-                            <td>
-                                <h6 class="mb-0 text-sm">{{ $referered->referer->phone_number }}</h6>
-                            </td>
-                            <td>
-                                <div class="d-flex px-2 py-1">
-                                    <div class="d-flex flex-column justify-content-center">
-                                        <h6 class="mb-0 text-sm">{{ $referered->created_at->format('F j, Y g:i A') }}</h6>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>
-                        </tr>
-                    @endforeach
-                @else
-                    <tr>
-                        <td colspan="5" class="text-center">
-                            <p>You dont have any referer yet.</p>
-                        </td>
+                        <th>Image</th>
+                        <th>Product Name</th>
+                        <th>Price</th>
+                        <th>Status</th>
+                        <th>Date Sold</th>
+                        <th>Actions</th>
                     </tr>
-                @endif
+                </thead>
+                <tbody>
+                    @if($products->isNotEmpty())
+                        @foreach($products as $orderProduct)
+                            @php $product = $orderProduct->product; @endphp
+                            <tr>
+                                <td>
+                                    <img src="{{ $product->image_url }}" width="70" alt="{{ $product->product_name }}">
+                                </td>
+                                <td>
+                                    <h6 class="mb-0 text-sm">{{ $product->product_name }}</h6>
+                                </td>
+                                <td>
+                                    <h6 class="mb-0 text-sm">₦ {{ number_format($product->product_price, 2) }}</h6>
+                                </td>
+                                <td>
+                                    <h6 class="mb-0 text-sm {{ $product->status === 'ACTIVE' ? 'text-success' : 'text-danger' }}">{{ $product->status }}</h6>
+                                </td>
+                                <td>
+                                    <h6 class="mb-0 text-sm">{{ $orderProduct->created_at->format('F j, Y g:i A') }}</h6>
+                                </td>
+                                <td>
+                                    <a href="{{ url('user/view/product', ['id' => $product->id]) }}">
+                                        <button class="btn btn-success">View</button>
+                                    </a>
+                                    <a href="{{ url('add-edit-product', ['id' => $product->id]) }}">
+                                        <button class="btn btn-primary">Edit</button>
+                                    </a>
+                                </td>
+                            </tr>
+                        @endforeach
+                    @else
+                        <tr>
+                            <td colspan="6" class="text-center">
+                                <p>No products have been sold yet.</p>
+                            </td>
+                        </tr>
+                    @endif
+                </tbody>
+            </table>
 
-                  </tbody>
-                </table>
+            <!-- Pagination -->
+            <div class="d-flex justify-content-center mt-3">
+                {{ $products->links('pagination::bootstrap-4') }}
+            </div>
               </div>
             </div>
           </div>
@@ -130,27 +138,7 @@
 <script src="{{ asset('assets/js/plugins/perfect-scrollbar.min.js') }}"></script>
 <script src="{{ asset('assets/js/plugins/smooth-scrollbar.min.js') }}"></script>
 <script src="{{ asset('assets/js/plugins/chartjs.min.js') }}"></script>
- <script>
-    document.getElementById("copyButton").addEventListener("click", function () {
-      // Get the text inside the <p> tag
-      const text = document.getElementById("textToCopy").innerText;
 
-      // Create a temporary textarea element to copy the text
-      const textarea = document.createElement("textarea");
-      textarea.value = text;
-      document.body.appendChild(textarea);
-
-      // Select and copy the text
-      textarea.select();
-      document.execCommand("copy");
-
-      // Remove the temporary textarea
-      document.body.removeChild(textarea);
-
-      // Notify the user
-      alert("Link copied to clipboard!");
-    });
-  </script>
   <script>
     var win = navigator.platform.indexOf('Win') > -1;
     if (win && document.querySelector('#sidenav-scrollbar')) {

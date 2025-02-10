@@ -20,8 +20,9 @@ class SetupController extends Controller
         $userInfo = Auth::user();
         $setup = Setup::where('user_id', $userInfo->id)->first();
         $payments = Payment::where('user_id', $userInfo->id)
-                    ->orderBy('created_at', 'desc')
-                    ->get();
+                        ->orderBy('created_at', 'desc')
+                        ->paginate(10);
+
         $pendingPayment = Payment::where('user_id', $userInfo->id)
                          ->where('description', 'SELLER ACCOUNT SETUP FEE')
                          ->where('status', 'PENDING')

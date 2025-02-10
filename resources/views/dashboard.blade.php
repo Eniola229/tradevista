@@ -369,11 +369,11 @@
       @endif
       <div class="d-flex flex-column flex-md-row align-items-center justify-content-between mt-4 p-4 rounded shadow-sm gap-3">
         <h2 class="h5 text-dark mb-0">Refer a friend and earn ₦100</h2>
-        <p class="alert alert-info text-white" id="textToCopy">http://127.0.0.1:8000/register?referer_code={{ Auth::user()->email }}</p>
+        <p class="alert alert-info text-white" id="textToCopy">https://tradevista.biz/register?referer_code={{ Auth::user()->email }}</p>
           <button class="btn btn-primary" id="copyButton">Copy link</button>
       </div>
       <div class="row my-4">
-        <div class="col-lg-8 col-md-6 mb-md-0 mb-4">
+        <div class="col-lg-12 col-md-6 mb-md-0 mb-4">
           <div class="card">
             <div class="card-header pb-0">
               <div class="row">
@@ -387,9 +387,7 @@
                       <i class="fa fa-ellipsis-v text-secondary"></i>
                     </a>
                     <ul class="dropdown-menu px-2 py-3 ms-sm-n4 ms-n5" aria-labelledby="dropdownTable">
-                      <li><a class="dropdown-item border-radius-md" href="javascript:;">Action</a></li>
-                      <li><a class="dropdown-item border-radius-md" href="javascript:;">Another action</a></li>
-                      <li><a class="dropdown-item border-radius-md" href="javascript:;">Something else here</a></li>
+                      <li><a class="dropdown-item border-radius-md" href="javascript:;">Null</a></li>
                     </ul>
                   </div>
                 </div>
@@ -457,14 +455,34 @@
                         </td>
                     </tr>
                     @endforeach
-
                   </tbody>
                 </table>
+                    <div class="d-flex justify-content-center mt-3">
+                        <ul class="pagination">
+                            @if ($payments->onFirstPage())
+                                <li class="page-item disabled"><span class="page-link">«</span></li>
+                            @else
+                                <li class="page-item"><a class="page-link" href="{{ $payments->previousPageUrl() }}">«</a></li>
+                            @endif
+
+                            @foreach ($payments->getUrlRange(1, $payments->lastPage()) as $page => $url)
+                                <li class="page-item {{ $payments->currentPage() == $page ? 'active' : '' }}">
+                                    <a class="page-link" href="{{ $url }}">{{ $page }}</a>
+                                </li>
+                            @endforeach
+
+                            @if ($payments->hasMorePages())
+                                <li class="page-item"><a class="page-link" href="{{ $payments->nextPageUrl() }}"> »</a></li>
+                            @else
+                                <li class="page-item disabled"><span class="page-link"> »</span></li>
+                            @endif
+                        </ul>
+                    </div>
               </div>
             </div>
           </div>
         </div>
-        <div class="col-lg-4 col-md-6">
+      <!--   <div class="col-lg-4 col-md-6">
           <div class="card h-100">
             <div class="card-header pb-0">
               <h6>Notification</h6>
@@ -528,7 +546,7 @@
               </div>
             </div>
           </div>
-        </div>
+        </div> -->
       </div>
     </div>
   </main>
