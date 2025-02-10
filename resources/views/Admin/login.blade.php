@@ -60,7 +60,7 @@
                                     <div class="alert alert-danger text-red-800 bg-red-200 p-4 rounded mb-4">
                                         <ul class="list-disc list-inside">
                                             @foreach($errors->all() as $error)
-                                                <li>{{ $error }}</li>
+                                                <li style="color: white;">{{ $error }}</li>
                                             @endforeach
                                         </ul>
                                     </div>

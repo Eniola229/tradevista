@@ -17,8 +17,9 @@ return new class extends Migration
             $table->enum('account_type', ['SELLER', 'BUYER']);
             $table->string('company_name')->nullable();
             $table->string('company_description')->nullable();
-            $table->string('company_address_1')->nullable();
-            $table->string('company_address_2')->nullable();
+            $table->string('state')->nullable();
+            $table->string('address')->nullable();
+            $table->string('zipcode')->nullable();
             $table->string('company_mobile_1')->nullable();
             $table->string('company_mobile_2')->nullable();
             $table->string('company_image')->nullable();

@@ -64,7 +64,7 @@ document.querySelectorAll('.view-product-btn').forEach(button => {
                     <h6>NEWSLETTER</h6>
                     <form action="{{ url('newsletter') }}" method="post">
                         @csrf
-                        <input type="text" name="email" placeholder="Email" required>
+                        <input type="text" name="email" placeholder="Email">
                         <button type="submit" class="site-btn">Subscribe</button>
                     </form>
                     <div class="footer__social">

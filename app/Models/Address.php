@@ -4,15 +4,16 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Ramsey\Uuid\Uuid;
 use Illuminate\Notifications\Notifiable;
+use Ramsey\Uuid\Uuid;
+use Session;
 
-class Order extends Model
+class Address extends Model
 {
     use HasFactory;
     use Notifiable;
 
-    protected $table = 'orders';
+    protected $table = 'carts';
     protected $keyType = 'uuid';
     public $incrementing = false;
     protected $primaryKey = 'id';
@@ -28,34 +29,16 @@ class Order extends Model
                 $model->id = Uuid::uuid4()->toString();
             }
         });
-        
+
     }
 
-     protected $fillable = [
+    protected $fillable = [
+        'session_id',
+        'order_code',
         'user_id',
-        'transaction_id',
-        'payment_status',
-        'delivery_status',
-        'shipping_address',
-        'total_weight',
-        'subtotal',
-        'total',
+        'product_id',
+        'size',
+        'quantity'
     ];
 
-    public function user()
-    {
-        return $this->belongsTo(User::class);
-    }
-
-    public function orderProducts()
-    {
-        return $this->hasMany(OrderProduct::class, 'order_id')->with('product');
-    }
-
-
-
-    public function orders_products()
-    {
-        return $this->hasMany(OrderProduct::class);
-    }
 }

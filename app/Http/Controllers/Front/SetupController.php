@@ -10,6 +10,7 @@ use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 use App\Models\Setup;
 use App\Models\Payment;
 use App\Models\Product;
+use App\Models\Order;
 use Illuminate\Support\Facades\Http;
 
 class SetupController extends Controller
@@ -25,10 +26,18 @@ class SetupController extends Controller
                          ->where('description', 'SELLER ACCOUNT SETUP FEE')
                          ->where('status', 'PENDING')
                          ->first();
+        $pendingOrder = Order::where('user_id', $userInfo->id)
+                         ->where('delivery_status', 'Processing')
+                         ->count();
+
+        $DeliveredOrder = Order::where('user_id', $userInfo->id)
+                         ->where('delivery_status', 'Delivered')
+                         ->count();
+
         $productCount = Product::where('user_id', $userInfo->id)->count();
 
 
-          return view('dashboard', compact('setup', 'payments', 'pendingPayment', 'productCount'));
+          return view('dashboard', compact('setup', 'DeliveredOrder', 'pendingOrder', 'payments', 'pendingPayment', 'productCount'));
 
     }
 
@@ -39,8 +48,9 @@ class SetupController extends Controller
             'account_type' => 'required|in:SELLER,BUYER',
             'company_name' => 'required_if:account_type,SELLER|max:255',
             'company_description' => 'required_if:account_type,SELLER',
-            'company_address_1' => 'required_if:account_type,SELLER|max:255',
-            'company_address_2' => 'nullable|max:255',
+            'state' => 'required_if:account_type,SELLER|max:255',
+            'address' => 'nullable|max:255',
+            'zipcode' => 'nullable|max:255',
             'company_mobile_1' => 'required_if:account_type,SELLER|max:15',
             'company_mobile_2' => 'nullable|max:15',
             'company_image' => 'required_if:account_type,SELLER|image|mimes:jpeg,png,jpg,gif|max:5048',
@@ -58,8 +68,9 @@ class SetupController extends Controller
                     'account_type' => $request->account_type,
                     'company_name' => $request->company_name,
                     'company_description' => $request->company_description,
-                    'company_address_1' => $request->company_address_1,
-                    'company_address_2' => $request->company_address_2,
+                    'state' => $request->state,
+                    'address' => $request->address,
+                    'zipcode' => $request->zipcode,
                     'company_mobile_1' => $request->company_mobile_1,
                     'company_mobile_2' => $request->company_mobile_2,
                 ]);
@@ -78,8 +89,9 @@ class SetupController extends Controller
                     'account_type' => $request->account_type,
                     'company_name' => $request->company_name,
                     'company_description' => $request->company_description,
-                    'company_address_1' => $request->company_address_1,
-                    'company_address_2' => $request->company_address_2,
+                    'state' => $request->state,
+                    'address' => $request->address,
+                    'zipcode' => $request->zipcode,
                     'company_mobile_1' => $request->company_mobile_1,
                     'company_mobile_2' => $request->company_mobile_2,
                     'company_image' => $companyImageUrl,
@@ -178,7 +190,9 @@ class SetupController extends Controller
                 'account_type' => 'required|in:BUYER,SELLER',
                 'company_name' => 'nullable|string|max:255',
                 'company_description' => 'nullable|string',
-                'company_address_1' => 'nullable|string|max:255',
+                'state' => 'nullable|string|max:255',
+                'address' => 'nullable|string|max:255',
+                'zipcode' => 'nullable|string|max:255',
                 'company_image' => 'nullable|image|mimes:jpg,png,jpeg,gif|max:2048',
             ]);
 
@@ -186,7 +200,9 @@ class SetupController extends Controller
             $setup->account_type = $request->account_type;
             $setup->company_name = $request->company_name;
             $setup->company_description = $request->company_description;
-            $setup->company_address_1 = $request->company_address_1;
+            $setup->state = $request->state;
+            $setup->address = $request->address;
+            $setup->zipcode = $request->zipcode;
 
             // Handle company image upload to Cloudinary
             if ($request->hasFile('company_image')) {

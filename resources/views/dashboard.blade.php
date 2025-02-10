@@ -100,7 +100,7 @@
                   <div class="numbers">
                     <p class="text-sm mb-0 text-capitalize font-weight-bold">Pending orders</p>
                     <h5 class="font-weight-bolder mb-0">
-                      0
+                      {{ $pendingOrder }}
                       <!-- <span class="text-danger text-sm font-weight-bolder">-2%</span> -->
                     </h5>
                   </div>
@@ -122,7 +122,7 @@
                   <div class="numbers">
                     <p class="text-sm mb-0 text-capitalize font-weight-bold">Orders</p>
                     <h5 class="font-weight-bolder mb-0">
-                     0
+                     {{ $DeliveredOrder }}
                       <!-- <span class="text-success text-sm font-weight-bolder">+5%</span> -->
                     </h5>
                   </div>
@@ -226,27 +226,77 @@
                 >{{ old('company_description') }}</textarea>
             </div>
 
+      <div class="mb-4">
+          <label for="state" class="block text-sm font-medium text-gray-700">State</label><br>
+          <select
+              id="state"
+              name="state"
+              class="block w-full p-3 border border-gray-900 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+              style="width: 100%;"
+          >
+              <option value="">Select State</option>
+              <option value="Abia" {{ old('state') == 'Abia' ? 'selected' : '' }}>Abia</option>
+              <option value="Adamawa" {{ old('state') == 'Adamawa' ? 'selected' : '' }}>Adamawa</option>
+              <option value="Akwa Ibom" {{ old('state') == 'Akwa Ibom' ? 'selected' : '' }}>Akwa Ibom</option>
+              <option value="Anambra" {{ old('state') == 'Anambra' ? 'selected' : '' }}>Anambra</option>
+              <option value="Bauchi" {{ old('state') == 'Bauchi' ? 'selected' : '' }}>Bauchi</option>
+              <option value="Bayelsa" {{ old('state') == 'Bayelsa' ? 'selected' : '' }}>Bayelsa</option>
+              <option value="Benue" {{ old('state') == 'Benue' ? 'selected' : '' }}>Benue</option>
+              <option value="Borno" {{ old('state') == 'Borno' ? 'selected' : '' }}>Borno</option>
+              <option value="Cross River" {{ old('state') == 'Cross River' ? 'selected' : '' }}>Cross River</option>
+              <option value="Delta" {{ old('state') == 'Delta' ? 'selected' : '' }}>Delta</option>
+              <option value="Ebonyi" {{ old('state') == 'Ebonyi' ? 'selected' : '' }}>Ebonyi</option>
+              <option value="Edo" {{ old('state') == 'Edo' ? 'selected' : '' }}>Edo</option>
+              <option value="Ekiti" {{ old('state') == 'Ekiti' ? 'selected' : '' }}>Ekiti</option>
+              <option value="Enugu" {{ old('state') == 'Enugu' ? 'selected' : '' }}>Enugu</option>
+              <option value="Gombe" {{ old('state') == 'Gombe' ? 'selected' : '' }}>Gombe</option>
+              <option value="Imo" {{ old('state') == 'Imo' ? 'selected' : '' }}>Imo</option>
+              <option value="Jigawa" {{ old('state') == 'Jigawa' ? 'selected' : '' }}>Jigawa</option>
+              <option value="Kaduna" {{ old('state') == 'Kaduna' ? 'selected' : '' }}>Kaduna</option>
+              <option value="Kano" {{ old('state') == 'Kano' ? 'selected' : '' }}>Kano</option>
+              <option value="Katsina" {{ old('state') == 'Katsina' ? 'selected' : '' }}>Katsina</option>
+              <option value="Kebbi" {{ old('state') == 'Kebbi' ? 'selected' : '' }}>Kebbi</option>
+              <option value="Kogi" {{ old('state') == 'Kogi' ? 'selected' : '' }}>Kogi</option>
+              <option value="Kwara" {{ old('state') == 'Kwara' ? 'selected' : '' }}>Kwara</option>
+              <option value="Lagos" {{ old('state') == 'Lagos' ? 'selected' : '' }}>Lagos</option>
+              <option value="Nasarawa" {{ old('state') == 'Nasarawa' ? 'selected' : '' }}>Nasarawa</option>
+              <option value="Niger" {{ old('state') == 'Niger' ? 'selected' : '' }}>Niger</option>
+              <option value="Ogun" {{ old('state') == 'Ogun' ? 'selected' : '' }}>Ogun</option>
+              <option value="Ondo" {{ old('state') == 'Ondo' ? 'selected' : '' }}>Ondo</option>
+              <option value="Osun" {{ old('state') == 'Osun' ? 'selected' : '' }}>Osun</option>
+              <option value="Oyo" {{ old('state') == 'Oyo' ? 'selected' : '' }}>Oyo</option>
+              <option value="Plateau" {{ old('state') == 'Plateau' ? 'selected' : '' }}>Plateau</option>
+              <option value="Rivers" {{ old('state') == 'Rivers' ? 'selected' : '' }}>Rivers</option>
+              <option value="Sokoto" {{ old('state') == 'Sokoto' ? 'selected' : '' }}>Sokoto</option>
+              <option value="Taraba" {{ old('state') == 'Taraba' ? 'selected' : '' }}>Taraba</option>
+              <option value="Yobe" {{ old('state') == 'Yobe' ? 'selected' : '' }}>Yobe</option>
+              <option value="Zamfara" {{ old('state') == 'Zamfara' ? 'selected' : '' }}>Zamfara</option>
+              <option value="FCT" {{ old('state') == 'FCT' ? 'selected' : '' }}>FCT</option>
+          </select>
+      </div>
+
+
             <div class="mb-4">
-                <label for="company_address_1" class="block text-sm font-medium text-gray-700">Address Line 1</label><br>
+                <label for="address" class="block text-sm font-medium text-gray-700">Address</label><br>
                 <input
                     type="text"
-                    id="company_address_1"
-                    name="company_address_1"
+                    id="address"
+                    name="address"
                     class="block w-full p-3 border border-gray-900 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                     style="width: 100%;"
-                     value="{{ old('company_address_1') }}"
+                     value="{{ old('address') }}"
                 >
             </div>
 
             <div class="mb-4">
-                <label for="company_address_2" class="block text-sm font-medium text-gray-700">Address Line 2</label><br>
+                <label for="zipcode" class="block text-sm font-medium text-gray-700">Zip Code </label><br>
                 <input
                     type="text"
-                    id="company_address_2"
-                    name="company_address_2"
+                    id="zipcode"
+                    name="zipcode"
                     class="block w-full p-3 border border-gray-900 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                     style="width: 100%;"
-                     value="{{ old('company_address_2') }}"
+                     value="{{ old('zipcode') }}"
                 >
             </div>
 

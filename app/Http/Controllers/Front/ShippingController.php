@@ -3,81 +3,71 @@
 namespace App\Http\Controllers\Front;
 
 use App\Http\Controllers\Controller;
-use App\Services\TopshipService; 
 use Illuminate\Http\Request;
+use App\Models\Cart;
+use App\Models\Product;
+use App\Models\Setup;
+use App\Models\StatePrice;
+use Illuminate\Support\Facades\Auth;
 
 class ShippingController extends Controller
 {
-    protected $topshipService;
-
-    public function __construct(TopshipService $topshipService)
+      public function calculateShipping(Request $request)
     {
-        $this->topshipService = $topshipService;
-    }
+        $request->validate([
+            'stateCode' => 'required|string|max:255'
+        ]);
 
-    /**
-     * Get pickup rates with hardcoded test data.
-     */
-    public function getPickupRates()
-    {
-        // Hardcoded test data for pickup rates
-        $shipmentDetails = [
-            'shipmentDetail' => [
-                'senderDetails' => [
-                    'cityName' => 'Ibadan',
-                    'countryCode' => 'NG', // Nigeria
-                ],
-                'receiverDetails' => [
-                    'cityName' => 'Lagos',
-                    'countryCode' => 'NG', // Nigeria
-                ],
-                'totalWeight' => 5.0, // Weight in kilograms
-            ],
-        ];
+        $shippingState = $request->stateCode;
+        $userId = Auth::id();
 
-        // Call the Topship service to get pickup rates
-        $rates = $this->topshipService->getPickupRates($shipmentDetails);
+        // Get products in the user's cart
+        $cartItems = Cart::where('user_id', $userId)->get();
 
-        // Return the rates as JSON
-        return response()->json($rates);
-    }
-    /**
-     * Create a shipment with test data.
-     */
-    public function createShipment()
-    {
-        // Hardcoded test data for creating a shipment from Ibadan to Lagos
-        $payload = [
-            'origin' => 'Ibadan, Nigeria',
-            'destination' => 'Lagos, Nigeria',
-            'weight' => 5.0, // 5 kg
-            'recipient' => [
-                'name' => 'John Doe',
-                'phone' => '08012345678',
-                'address' => 'No 15, Marina Street, Lagos',
-            ],
-            'sender' => [
-                'name' => 'Jane Smith',
-                'phone' => '08123456789',
-                'address' => 'No 10, Mokola Road, Ibadan',
-            ],
-        ];
+        if ($cartItems->isEmpty()) {
+            return response()->json(['success' => false, 'message' => 'Your cart is empty!'], 400);
+        }
 
-        $shipment = $this->topshipService->createShipment($payload);
+        $shippingPrices = [];
 
-        return response()->json($shipment);
-    }
+        foreach ($cartItems as $cartItem) {
+            $product = Product::find($cartItem->product_id);
 
-    /**
-     * Track a shipment with test data.
-     */
-    public function trackShipment()
-    {
-        // Hardcoded test tracking ID
-        $trackingId = 'TS1234567890'; // Replace with a valid test tracking ID from Topship
+            if (!$product) {
+                continue;
+            }
 
-        $tracking = $this->topshipService->trackShipment($trackingId);
+            $seller = $product->user;
 
-        return response()->json($tracking);
+            if (!$seller) {
+                continue;
+            }
+
+            $startup = Setup::where('user_id', $seller->id)->first();
+
+            if (!$startup) {
+                continue;
+            }
+
+            $sellerState = $startup->state;
+
+            // Check if there's a shipping price for this route
+            $statePrice = StatePrice::where('origin', $sellerState)
+                ->where('destination', $shippingState)
+                ->first();
+
+            if ($statePrice) {
+                $shippingPrices[] = $statePrice->price;
+            }
+        }
+
+        if (empty($shippingPrices)) {
+            return response()->json(['success' => false, 'message' => 'No shipping price found for the selected state.'], 404);
+        }
+
+        // Get the highest shipping price (assuming multiple products might have different shipping costs)
+        $maxPrice = max($shippingPrices);
+
+        return response()->json(['success' => true, 'price' => $maxPrice]);
     }
 }

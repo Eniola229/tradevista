@@ -112,7 +112,7 @@ use App\Models\Product;
                     </div>
                     <div class="checkout__form__input">
                         <p>Address <span>*</span></p>
-                        <input type="text" placeholder="Street Address" value="{{ isset($address) ? $address->address : '' }}" required>
+                        <input type="text" placeholder="Street Address" value="{{ isset($address) ? $address->address : '' }}" name="shipping_address" required>
                         <input type="text" placeholder="Apartment. suite, etc (Optional)" name="address" >
                     </div>
                     <div class="checkout__form__input">
@@ -121,7 +121,7 @@ use App\Models\Product;
                     </div>
                     <div class="checkout__form__input">
                         <p>State <span>*</span></p>
-                        <input type="text" value="{{ isset($address) ? $address->state : '' }}" name="stateCode" required>
+                        <input type="text" value="{{ isset($address) ? $address->state : '' }}" id="shippingState" name="stateCode" required>
                     </div>
                     <div class="checkout__form__input">
                         <p>Postcode/Zip <span>*</span></p>
@@ -137,7 +137,7 @@ use App\Models\Product;
                 <div class="col-lg-6 col-md-6 col-sm-6">
                     <div class="checkout__form__input">
                         <p>Email <span>*</span></p>
-                        <input type="text" name="email" value="{{ Auth::user()->email }}">
+                        <input type="text" name="email" value="{{ Auth::user()->email }}" required>
                     </div>
                 </div>
 
@@ -173,26 +173,26 @@ use App\Models\Product;
                         </div>
                         <div class="checkout__form__input">
                             <p>Address <span>*</span></p>
-                            <input type="text" placeholder="Street Address" name="streetAddress" value="{{ isset($address) ? $address->address : '' }}" required>
+                            <input type="text" placeholder="Street Address" name="streetAddress" value="{{ isset($address) ? $address->address : '' }}" >
                             <input type="text" placeholder="Apartment. Suite, etc" name="address">
                         </div>
                         <div class="checkout__form__input">
                             <p>Town/City <span>*</span></p>
-                            <input type="text" name="cityName" value="{{ isset($address) ? $address->town_city : '' }}" required>
+                            <input type="text" name="cityName" value="{{ isset($address) ? $address->town_city : '' }}" >
                         </div>
                         <div class="checkout__form__input">
                             <p>State <span>*</span></p>
-                            <input type="text" name="stateCode" value="{{ isset($address) ? $address->state : '' }}" required>
+                            <input type="text" name="stateCode" id="billingState" value="{{ isset($address) ? $address->state : '' }}" >
                         </div>
                         <div class="checkout__form__input">
                             <p>Postcode/Zip <span>*</span></p>
-                            <input type="text" name="zipCode" value="{{ isset($address) ? $address->zip : '' }}" required>
+                            <input type="text" name="zipCode" value="{{ isset($address) ? $address->zip : '' }}" >
                         </div>
                     </div>
                     <div class="col-lg-12 col-md-12 col-sm-12">
                         <div class="checkout__form__input">
                             <p>Phone <span>*</span></p>
-                            <input type="text" name="phone" required>
+                            <input type="text" name="phone" >
                         </div>
                     </div>
                 </div>
@@ -227,7 +227,8 @@ use App\Models\Product;
                         <li>Total <span  id="totalAmount">₦ {{ number_format($subTotal, 2) }}</span></li>
                     </ul>
                 </div>
-                <button type="submit" class="site-btn">Place Order</button>
+                <button type="submit" id="placeOrderBtn" class="site-btn">Place Order</button>
+
             </div>
         </div>
     </div>
@@ -235,137 +236,179 @@ use App\Models\Product;
 
             </div>
         </section>
-    <!-- Product Details Section End -->
+    <!-- Product Details Section End -->\
+
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://js.paystack.co/v1/inline.js"></script>
 <script>
-    const exchangeRateToNGN = 760; // Replace with the actual exchange rate
+$(document).ready(function () {
+    $('#placeOrderBtn').click(function (event) {
+        event.preventDefault(); // Prevent form submission from reloading the page
 
-    document.getElementById('calculateRates').addEventListener('click', async () => {
-        const loading = document.getElementById('loading');
-        const shippingForm = document.getElementById('shippingForm');
-        const rateElement = document.getElementById('rate'); // Shipping fee element
-        const totalElement = document.getElementById('totalAmount'); // Total element to update
+        let button = $(this);
+        let originalText = button.html();
 
-        // Show the loading indicator
-        loading.classList.remove('d-none');
-        shippingForm.innerHTML = ''; // Clear previous results
+        // Validate required fields
+        let missingFields = [];
+        $('input[required]').each(function () {
+            if (!$(this).val().trim()) {
+                let fieldLabel = $(this).attr('placeholder') || $(this).attr('name'); // Get field label or name
+                missingFields.push(fieldLabel);
+                $(this).addClass('border-danger'); // Highlight missing fields
+            } else {
+                $(this).removeClass('border-danger'); // Remove highlight if filled
+            }
+        });
 
-        try {
-            // Fetch the rates from your FedEx route
-            const response = await fetch('/checkout/get-shipping-fee');
-            const data = await response.json();
-
-            // Hide the loading indicator
-            loading.classList.add('d-none');
-
-            // Extract rate details
-            const rateDetails = data.output.rateReplyDetails;
-
-            let selectedShippingFee = 0; // Variable to store the selected shipping fee in NGN
-
-            // Loop through rates and display them
-            rateDetails.forEach((detail) => {
-                const serviceName = detail.serviceName;
-                const deliveryDays = detail.transitTime || 'N/A';
-                const formattedDeliveryDays = 
-                    typeof deliveryDays === 'number' 
-                        ? new Intl.NumberFormat().format(deliveryDays) 
-                        : deliveryDays;
-                
-                const priceUSD = detail.ratedShipmentDetails[0]?.totalNetFedExCharge || 0;
-                const priceNGN = priceUSD * exchangeRateToNGN;
-
-                // Create a list item with radio button
-                const listItem = document.createElement('li');
-                listItem.classList.add(
-                    'list-group-item',
-                    'd-flex',
-                    'align-items-center',
-                    'p-3',
-                    'rounded',
-                    'shadow-sm',
-                    'hover-shadow',
-                    'cursor-pointer'
-                );
-
-                listItem.innerHTML = ` 
-                    <div class="d-flex align-items-center w-100">
-                        <!-- Left: Radio Button -->
-                        <input type="radio" name="shippingOption" value="${serviceName}" class="form-check-input me-3" data-price="${priceNGN}">
-
-                        <!-- Middle: Service Name and Delivery Days -->
-                        <div class="flex-grow-1">
-                            <div class="fw-bold">${serviceName}</div>
-                            <small class="text-muted">${formattedDeliveryDays} delivery</small>
-                        </div>
-
-                        <!-- Right: Price -->
-                        <div class="text-success fw-bold text-end ms-auto">
-                            ₦ ${new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN', minimumFractionDigits: 2 }).format(priceNGN).replace('₦','')}
-                        </div>
-                    </div>
-                `;
-
-                // Add click event to select the item
-                listItem.addEventListener('click', () => {
-                    shippingForm.querySelectorAll('.list-group-item').forEach((item) => item.classList.remove('active'));
-                    listItem.classList.add('active');
-                    listItem.querySelector('input').checked = true;
-
-                    // Update the shipping fee when an option is selected
-                    selectedShippingFee = parseFloat(listItem.querySelector('input').dataset.price);
-
-                    // Update the shipping fee and total dynamically
-                    rateElement.textContent = `₦ ${new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN', minimumFractionDigits: 2 }).format(selectedShippingFee).replace('₦','')}`;
-                    updateTotalPrice(selectedShippingFee);
-                });
-
-                // Append to the form
-                shippingForm.appendChild(listItem);
-            });
-
-        } catch (error) {
-            // Hide the loading indicator and show an error
-            loading.classList.add('d-none');
-            shippingForm.innerHTML = ` 
-                <li class="list-group-item text-danger">Failed to fetch shipping rates. Please try again.</li>
-            `;
-            console.error(error);
+        if (missingFields.length > 0) {
+            let errorMessage = "Please fill in the following fields:\n" + missingFields.join(', ');
+            Swal.fire('Error', errorMessage, 'error');
+            return;
         }
+
+        // Validate Shipping Fee
+        let shippingFeeText = $('#rate').text().trim();
+        if (shippingFeeText === '₦ 0.00' || shippingFeeText === '' || shippingFeeText === '₦') {
+            Swal.fire('Error', 'Please click on "Calculate Rates" before proceeding.', 'error');
+            return;
+        }
+
+        // Show loading state
+        button.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Processing...');
+
+        // Read total amount and convert to kobo
+        let totalText = $('#totalAmount').text().replace('₦', '').replace(/,/g, '');
+        let totalAmount = parseFloat(totalText);
+
+        if (totalAmount <= 0) {
+            Swal.fire('Error', 'Total amount is invalid!', 'error');
+            button.prop('disabled', false).html(originalText);
+            return;
+        }
+
+        let amountInKobo = totalAmount * 100;
+
+        var handler = PaystackPop.setup({
+            key: "{{ config('services.paystack.public_key') }}",
+            email: "{{ Auth::user()->email }}",
+            amount: amountInKobo,
+            currency: "NGN",
+            ref: '' + Math.floor((Math.random() * 1000000000) + 1),
+            callback: function (response) {
+                verifyPayment(response.reference, button, originalText);
+            },
+            onClose: function () {
+                Swal.fire('Cancelled', 'You closed the payment window.', 'error');
+                button.prop('disabled', false).html(originalText);
+            }
+        });
+
+        handler.openIframe();
     });
 
-function updateTotalPrice(shippingFee) {
-    // Retrieve the subtotal from the PHP side, remove commas, and ensure it's a valid number
-    const subTotal = parseFloat(
-        "{{ number_format($subTotal, 2) }}"
-            .replace(/,/g, '') // Remove all commas globally
-            .replace('₦', '') // Remove the currency symbol
-    );
+    function verifyPayment(reference, button, originalText) {
+        let formData = {
+            first_name: $('input[name="first_name"]').val(),
+            last_name: $('input[name="last_name"]').val(),
+            phone: $('input[name="phone"]').val(),
+            email: $('input[name="email"]').val(),
+            stateCode: $('input[name="stateCode"]').val(),
+            cityName: $('input[name="cityName"]').val(),
+            zip: $('input[name="zip"]').val(),
+            shipping_address: $('input[name="shipping_address"]').val(),
+            subtotal: "{{ $subTotal }}",
+            shipping_fee: parseFloat($('#rate').text().replace('₦', '').replace(/,/g, '')),
+            reference: reference,
+            _token: "{{ csrf_token() }}"
+        };
 
-    console.log(subTotal);
+        $('#loading').removeClass('d-none'); // Show loading
 
-    // Ensure subTotal is a valid number
-    if (isNaN(subTotal)) {
-        console.error("Invalid subtotal value");
-        return;
+        $.ajax({
+            url: "{{ route('verify.payment') }}",
+            type: "POST",
+            data: formData,
+            success: function (response) {
+                $('#loading').addClass('d-none');
+                button.prop('disabled', false).html(originalText);
+
+                if (response.success) {
+                    Swal.fire('Success', 'Order placed successfully!', 'success')
+                        .then(() => window.location.href = "/user/orders");
+                } else {
+                    Swal.fire('Error', response.message, 'error');
+                }
+            },
+            error: function (xhr) {
+                $('#loading').addClass('d-none');
+                button.prop('disabled', false).html(originalText);
+                Swal.fire('Error', xhr.responseJSON?.message || "Something went wrong!", 'error');
+            }
+        });
     }
+});
+</script>
 
-    // Calculate the total by adding the shipping fee to the subtotal
-    const total = subTotal + shippingFee;
 
-    // Update the total value on the page using the id "totalAmount"
-    const totalElement = document.getElementById('totalAmount');
-    if (totalElement) {
-        // Format the total as Nigerian currency
-        totalElement.textContent = new Intl.NumberFormat('en-NG', {
-            style: 'currency',
-            currency: 'NGN',
-            minimumFractionDigits: 2
-        }).format(total);
-    }
-}
+<script>
+    $(document).ready(function () {
+        $('#calculateRates').click(function () {
+            let shippingState = $('#shippingState').val().trim();
+            
+            if (shippingState === '') {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Please enter a state before calculating rates!',
+                });
+                return;
+            }
 
+            $('#loading').removeClass('d-none'); // Show loading message
+
+            $.ajax({
+                url: "{{ route('calculate.shipping') }}",
+                type: "POST",
+                data: {
+                    stateCode: shippingState,
+                    _token: "{{ csrf_token() }}"
+                },
+                success: function (response) {
+                    $('#loading').addClass('d-none'); // Hide loading message
+
+                    if (response.success) {
+                        let shippingPrice = response.price;
+                        let subTotal = parseFloat("{{ $subTotal }}".replace(/,/g, '')); // Convert subtotal from Blade
+
+                        let totalAmount = subTotal + shippingPrice; // Calculate new total
+
+                        // Update shipping price in UI
+                        $('#rate').text(`₦ ${shippingPrice.toLocaleString()}`);
+                        $('#totalAmount').text(`₦ ${totalAmount.toLocaleString()}`);
+
+                        // Add shipping price inside #shippingForm
+                        let priceList = `<li class="list-group-item">Shipping Price: ₦${shippingPrice.toLocaleString()}</li>`;
+                        $('#shippingForm').html(priceList); // Replace existing content
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: response.message,
+                        });
+                    }
+                },
+                error: function (xhr) {
+                    $('#loading').addClass('d-none');
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: xhr.responseJSON?.message || "Something went wrong!",
+                    });
+                }
+            });
+        });
+    });
 </script>
 
 

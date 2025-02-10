@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\AdminProductController;
 use App\Http\Controllers\Admin\UsersController;
 use App\Http\Controllers\Admin\SupportTicketController;
 use App\Http\Controllers\Admin\WIthdraweralController;
+use App\Http\Controllers\Admin\StatePriceController;
 
 //USER
 use App\Http\Controllers\Front\SetupController;
@@ -25,6 +26,7 @@ use App\Http\Controllers\Front\ProductPageController;
 use App\Http\Controllers\Front\BlogController;
 use App\Http\Controllers\Front\SupportController;
 use App\Http\Controllers\Front\WithdrawController;
+use App\Http\Controllers\Front\OrderController;
 use App\Http\Controllers\LocationController;
 
 
@@ -32,8 +34,10 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-   
-Route::get('checkout/get-shipping-fee', [ShippingController::class, 'getPickupRates']);
+//ALL THIS ROUTE ARE FOR PLACING ORDERS, PLS KINDLY WATCH WHEN HANDLING THEM. I INTENTIONAL MADE IT OPEN (JOSHUA ADEYEMI --- AFRICTECH --- 08035906313)    
+Route::post('/calculate-shipping', [ShippingController::class, 'calculateShipping'])->name('calculate.shipping');
+Route::post('/verify-payment', [OrderController::class, 'verifyPayment'])->name('verify.payment');
+Route::post('/place-order', [OrderController::class, 'placeOrder'])->name('place.order');
 
 
 Route::get('/contact', [BlogController::class, 'contact']);
@@ -117,7 +121,9 @@ Route::middleware('auth')->group(function () {
     Route::prefix('checkout')->controller(CheckoutController::class)->group(function () {
         Route::get('/', 'index')->name('checkout.index');
     });
-    
+    //Orders 
+    Route::get('/user/orders', [OrderController::class, 'getUserOrders'])->name('user.orders');
+    Route::get('/user/order/view/{id}', [OrderController::class, 'viewOrder'])->name('user.order.view');
     
 });
 
@@ -148,6 +154,9 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
  Route::post('/support/answer/{id}', [SupportTicketController::class, 'answer'])->name('support.answer');
  Route::get('/withdraw', [WIthdraweralController::class, 'index'])->name('withdraw');
  Route::post('/upload-receipt', [WIthdraweralController::class, 'uploadReceipt'])->name('admin.uploadReceipt');
+ Route::resource('state_prices', StatePriceController::class);
+
+
 });
 
 require __DIR__.'/auth.php';

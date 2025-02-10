@@ -71,7 +71,7 @@
                                         <div class="error-message">{{ $message }}</div>
                                     @enderror
                                     <!-- Password Field -->
-                                    <input type="password" name="password_confirmation" placeholder="password_confirmation" required>
+                                    <input type="password" name="password_confirmation" placeholder="Confirm Password" required>
                                     @error('password_confirmation')
                                         <div class="error-message">{{ $message }}</div>
                                     @enderror
