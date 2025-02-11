@@ -5,9 +5,6 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-  <!-- Favicon -->
-  <link rel="apple-touch-icon" sizes="76x76" href="{{ asset('assets/img/apple-icon.png') }}">
-  <link rel="icon" type="image/png" href="{{ asset('assets/img/favicon.png') }}">
 
   <title>TradeVista - {{ Auth::user()->name }}</title>
 
@@ -85,7 +82,7 @@
 
                 <!-- Product Weight -->
                 <div class="col-md-6 mb-3">
-                    <label for="product_discount" class="form-label">Product Discount</label>
+                    <label for="product_discount" class="form-label">Product Discount <span style="color: red;">(Kindly Note that this will be use as the new price for the product)</span></label>
                     <input type="text" id="product_discount" name="product_discount" class="form-control" value="{{ old('product_discount', $productdata->product_discount ?? '') }}" required>
                 </div>
 
@@ -116,19 +113,19 @@
 
                 <!-- Meta Title -->
                 <div class="col-md-6 mb-3">
-                    <label for="meta_title" class="form-label">Meta Title</label>
+                    <label for="meta_title" class="form-label">Meta Title (Optional)</label>
                     <input type="text" id="meta_title" name="meta_title" class="form-control"  maxlength="255" value="{{ old('meta_title', $productdata->meta_title ?? '') }}">
                 </div>
 
                 <!-- Meta Keywords -->
                 <div class="col-md-6 mb-3">
-                    <label for="meta_keywords" class="form-label">Meta Keywords</label>
+                    <label for="meta_keywords" class="form-label">Meta Keywords (Optional)</label>
                     <input type="text" id="meta_keywords" name="meta_keywords" maxlength="255" class="form-control" value="{{ old('meta_keywords', $productdata->meta_keywords ?? '') }}">
                 </div>
 
                 <!-- Meta Description -->
                 <div class="col-12 mb-3">
-                    <label for="meta_description" class="form-label">Meta Description</label>
+                    <label for="meta_description" class="form-label">Meta Description (Optional)</label>
                     <input type="text" id="meta_description" name="meta_description" maxlength="255" class="form-control" value="{{ old('meta_description', $productdata->meta_description ?? '') }}">
                 </div>
 
@@ -144,7 +141,9 @@
                 <!-- Product Video -->
                 <div class="col-6 mb-3">
                     <label for="product_video" class="form-label">Product Video (Max 1 minute) (Optional)</label>
-                    <input type="file" id="product_video" name="product_video" class="form-control-file" style="border: 1px solid black;">
+                   <input type="file" id="product_video" name="product_video" class="form-control-file" 
+                        accept="video/*" style="border: 1px solid black;">
+
                     @if(isset($productdata) && $productdata->video_url)
                         <video width="300" controls>
                             <source src="{{ $productdata->video_url }}" type="video/mp4">

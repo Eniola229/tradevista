@@ -1,14 +1,19 @@
 <?php
 use App\Models\Setup;
+use App\Models\Payment;
     $userInfo = Auth::user();
         $setup = Setup::where('user_id', $userInfo->id)
                     ->first();
+        $pendingPayment = Payment::where('user_id', $userInfo->id)
+                         ->where('description', 'SELLER ACCOUNT SETUP FEE')
+                         ->where('status', 'PENDING')
+                         ->first();
 ?>
 
   <aside class="sidenav navbar navbar-vertical navbar-expand-xs border-0 border-radius-xl my-3 fixed-start ms-3 " id="sidenav-main">
     <div class="sidenav-header">
       <i class="fas fa-times p-3 cursor-pointer text-secondary opacity-5 position-absolute end-0 top-0 d-none d-xl-none" aria-hidden="true" id="iconSidenav"></i>
-      <a class="navbar-brand m-0" href="" target="_blank">
+      <a class="navbar-brand m-0" href="{{ url('/') }}" target="_blank">
         <img src="{{ asset('../img/logo.png') }}" class="navbar-brand-img h-100" alt="main_logo">
         <span class="ms-1 font-weight-bold">TradeVista</span>
       </a>
@@ -57,6 +62,10 @@ use App\Models\Setup;
           </a>
         </li>
          @if($setup)
+         @if($pendingPayment)
+           <span class="nav-link-text ms-1"></span>
+          @else
+          @if($setup->account_type == 'SELLER')
         <li class="nav-item mt-3">
           <h6 class="ps-4 ms-2 text-uppercase text-xs font-weight-bolder opacity-6">Your Business pages</h6>
         </li>
@@ -101,6 +110,8 @@ use App\Models\Setup;
           </a>
         </li>
         <hr class="border border-dark border-1 my-2">
+        @endif
+        @endif
         @endif
         <li class="nav-item">
           <a class="nav-link {{ request()->is('user/withdraw') ? 'active' : '' }}" href="{{ url('user/withdraw') }}">

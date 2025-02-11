@@ -161,10 +161,10 @@ $hots = Product::where('status', 'ACTIVE')
                 </div>
             </div>
             <div class="col-lg-8 col-md-8">
-                <ul class="filter__controls">
+                <ul class="filter__controls ">
                     <li class="active" data-filter="*">All</li>
                     @foreach($categories as $category)
-                        <li data-filter=".{{ \Str::slug($category->name) }}">{{ $category->name }}</li>
+                        <li data-filter=".{{ \Str::slug($category->name) }}" class="p-2">{{ $category->name }}</li>
                     @endforeach
                 </ul>
             </div>

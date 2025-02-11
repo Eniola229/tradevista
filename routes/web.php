@@ -155,6 +155,7 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
  Route::get('/view/product/{id}', [AdminProductController::class, 'view'])->name('admin.view-products');
  Route::get('/change-product-status', [AdminProductController::class, 'changeStatus']);
  Route::get('/users', [UsersController::class, 'index'])->name('admin.users');
+ Route::get('/view/user/{id}', [UsersController::class, 'view'])->name('admin.view-user');
  Route::get('/support', [SupportTicketController::class, 'index'])->name('support');
  Route::post('/support/answer/{id}', [SupportTicketController::class, 'answer'])->name('support.answer');
  Route::get('/withdraw', [WIthdraweralController::class, 'index'])->name('withdraw');
@@ -163,6 +164,7 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
  Route::get('/orders', [AdminOrderController::class, 'index'])->name('orders.index');
  Route::get('/orders/{id}', [AdminOrderController::class, 'show'])->name('orders.show');
  Route::post('/orders/{id}/update-status', [AdminOrderController::class, 'updateStatus'])->name('orders.updateStatus');
+
 });
 
 //TO ANY DEVELOPER --- IF YOU NEED EXPLANTION AND CLERITY ON SOME CODES - CALL OR WHATSAPP - 08035906313

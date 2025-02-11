@@ -131,29 +131,26 @@ class ProductController extends Controller
             }
 
             if ($request->hasFile('product_video')) {
-                // Check video duration (make sure it doesn't exceed 1 minute)
-                $video = $request->file('product_video');
-                $path = $video->getRealPath();
-
-                // Using FFmpeg to get the video duration
-                $ffmpeg = \FFMpeg\FFMpeg::create();
-                $videoStream = $ffmpeg->open($path);
-                $duration = $videoStream->getFormat()->get('duration'); // in seconds
-
-                if ($duration > 60) {
-                    return redirect()->back()->with('error', 'The video must not exceed 1 minute.');
-                }
-
-                // Upload to Cloudinary if duration is valid
+                // Upload to Cloudinary
                 $uploadVideoCloudinary = cloudinary()->upload(
-                    $video->getRealPath(),
+                    $request->file('product_video')->getRealPath(),
                     [
                         'folder' => 'tradevista/user/products/videos',
                         'resource_type' => 'video'
                     ]
                 );
+
+                // Get video details
                 $videoUrl = $uploadVideoCloudinary->getSecurePath();
-                $videoID = $uploadCloudinary->getPublicId();
+                $videoID = $uploadVideoCloudinary->getPublicId();
+                $videoDuration = $uploadVideoCloudinary->getDuration(); // Duration in seconds
+
+                // Check if the video exceeds 60 seconds
+                if ($videoDuration > 60) {
+                    return redirect()->back()->with('error', 'The video must not exceed 1 minute.');
+                }
+
+                // Save video details
                 $product->video_url = $videoUrl;
                 $product->video_id = $videoID;
             }

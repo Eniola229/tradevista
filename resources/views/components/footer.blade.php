@@ -23,7 +23,6 @@ document.querySelectorAll('.view-product-btn').forEach(button => {
                     <div class="footer__payment">
                         <a href="#"><img src="img/payment/payment-1.png" alt=""></a>
                         <a href="#"><img src="img/payment/payment-2.png" alt=""></a>
-                        <a href="#"><img src="img/payment/payment-3.png" alt=""></a>
                     </div>
                 </div>
             </div>
@@ -43,7 +42,7 @@ document.querySelectorAll('.view-product-btn').forEach(button => {
                     <h6>Account</h6>
                     <ul>
                         <li><a href="{{ url('dashboard') }}">My Account</a></li>
-                        <li><a href="{{ url('orders') }}">Orders</a></li>
+                        <li><a href="{{ url('user/orders') }}">Orders</a></li>
                         <li><a href="{{ url('checkout') }}">Checkout</a></li>
                         <li><a href="{{ url('wishlist') }}">Wishlist</a></li>
                     </ul>

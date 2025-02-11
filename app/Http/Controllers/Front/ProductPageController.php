@@ -184,10 +184,14 @@ class ProductPageController extends Controller
         $query = $request->input('query');
 
     // Search in product_name, product_price, and other relevant fields
-    $products = Product::where('product_name', 'like', '%' . $query . '%')
-        ->orWhere('product_price', 'like', '%' . $query . '%')
-        ->orderBy('created_at', 'desc')
-        ->paginate(20); 
+    $products = Product::where(function ($queryBuilder) use ($query) {
+            $queryBuilder->where('product_name', 'like', '%' . $query . '%')
+                         ->orWhere('product_price', 'like', '%' . $query . '%');
+        })
+        ->where('status', 'ACTIVE') // Ensures only active products are included
+        ->orderByRaw('RAND() * 0.1 + UNIX_TIMESTAMP(created_at) * 0.7 DESC') // Weighted randomness
+        ->paginate(20);
+
 
     return view('products-page', compact('products', 'categories', 'query'));
     }

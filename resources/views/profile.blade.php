@@ -5,10 +5,6 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-  <!-- Favicon -->
-  <link rel="apple-touch-icon" sizes="76x76" href="{{ asset('assets/img/apple-icon.png') }}">
-  <link rel="icon" type="image/png" href="{{ asset('assets/img/favicon.png') }}">
-
   <title>TradeVista - {{ Auth::user()->name }}</title>
 
   <!-- Fonts and icons -->
@@ -133,7 +129,7 @@
 
                   <h5 class="card-title mb-0">{{ Auth::user()->name }}</h5>
                   <div>
-                    <a class="btn btn-primary btn-sm" href="#">{{ $setup->account_type }}</a>
+                    <a class="btn btn-primary btn-sm" href="#">{{ $setup?->account_type ?? 'N/A' }}</a>
                     <a class="btn btn-primary btn-sm" href="#"><span data-feather="message-square"></span>N {{ number_format(Auth::user()->balance, 2) }}</a>
                   </div>
                 </div>
@@ -157,6 +153,7 @@
                 </ul>
                 <div class="tab-content mt-4 p-4" id="profileTabsContent">
                     <!-- Orders Tab -->
+                    @if($setup)
                     <div class="tab-pane fade show active" id="orders" role="tabpanel" aria-labelledby="orders-tab">
                         <div class="">
                            <form
@@ -197,7 +194,7 @@
                                             class="block w-full p-3 border border-gray-900 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                                             style="width: 100%;"
                                             value="{{ old('company_name', $setup->company_name) }}"
-                                        >
+                                        required>
                                     </div>
 
                                     <div class="mb-4">
@@ -208,11 +205,11 @@
                                             rows="3"
                                             class="block w-full p-3 border border-gray-900 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                                             style="width: 100%;"
-                                        >{{ old('company_description', $setup->company_description) }}</textarea>
+                                        required>{{ old('company_description', $setup->company_description) }}</textarea>
                                     </div>
 
                                         <div class="mb-4">
-                                            <label for="state" class="block text-sm font-medium text-gray-700">Address Line 1</label><br>
+                                            <label for="state" class="block text-sm font-medium text-gray-700">State</label><br>
                                             <select
                                                 id="state"
                                                 name="state"
@@ -262,7 +259,7 @@
 
                         
                                     <div class="mb-4">
-                                        <label for="address" class="block text-sm font-medium text-gray-700">Address Line 1</label><br>
+                                        <label for="address" class="block text-sm font-medium text-gray-700">Address</label><br>
                                         <input
                                             type="text"
                                             id="address"
@@ -270,12 +267,12 @@
                                             class="block w-full p-3 border border-gray-900 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                                             style="width: 100%;"
                                             value="{{ old('address', $setup->address) }}"
-                                        >
+                                        required>
                                     </div>
 
                                     <!-- Repeat for all seller-specific fields, preloading $setup data -->
                                     <div class="mb-4">
-                                        <label for="zipcode" class="block text-sm font-medium text-gray-700">Address Line 1</label><br>
+                                        <label for="zipcode" class="block text-sm font-medium text-gray-700">Zip Code</label><br>
                                         <input
                                             type="text"
                                             id="zipcode"
@@ -283,7 +280,33 @@
                                             class="block w-full p-3 border border-gray-900 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                                             style="width: 100%;"
                                             value="{{ old('zipcode', $setup->zipcode) }}"
-                                        >
+                                        required>
+                                    </div>
+
+                                    
+                                    <div class="mb-4">
+                                        <label for="zipcode" class="block text-sm font-medium text-gray-700">Mobile 1</label><br>
+                                        <input
+                                            type="number"
+                                            id="company_mobile_1"
+                                            name="company_mobile_1"
+                                            class="block w-full p-3 border border-gray-900 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                                            style="width: 100%;"
+                                            value="{{ old('company_mobile_1', $setup->company_mobile_1) }}"
+                                        required>
+                                    </div>
+
+                                    
+                                    <div class="mb-4">
+                                        <label for="zipcode" class="block text-sm font-medium text-gray-700">Mobile 2</label><br>
+                                        <input
+                                            type="number"
+                                            id="company_mobile_2"
+                                            name="company_mobile_2"
+                                            class="block w-full p-3 border border-gray-900 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                                            style="width: 100%;"
+                                            value="{{ old('company_mobile_2', $setup->company_mobile_2) }}"
+                                       required >
                                     </div>
 
                                     <div class="mb-4">
@@ -310,7 +333,9 @@
 
                         </div>
                     </div>
-
+                    @else
+                    <span class="nav-link-text ms-1">KINDLY SET YOUR ACCOUNT SET UP. CLICK ON DASHBOARD TO CONTINUE</span>
+                    @endif
                     <!-- Wishlist Tab -->
                     <div class="tab-pane fade" id="wishlist" role="tabpanel" aria-labelledby="wishlist-tab">
                     <div class="card p-4">
@@ -384,9 +409,10 @@
                                             <!-- Town/City -->
                                             <div class="mb-3">
                                                 <label for="townCity" class="form-label">Town/City</label>
-                                                <select id="city" name="town_city" class="form-select">
+                                              <!--   <select id="city" name="town_city" class="form-select">
                                                     <option value="">Select a city</option>
-                                                </select>
+                                                </select> -->
+                                                <input type="text" value="{{ $shippingAddress->town_city }}" class="form-control" id="town_city" name="town_city" placeholder="Enter City" required>
                                             </div>
                                             <!-- Address -->
                                             <div class="mb-3">
@@ -446,13 +472,14 @@
                                                 </select>
                                                 </div>
 
-                    <!-- Town/City -->
-                    <div class="mb-3">
-                        <label for="townCity" class="form-label">Town/City</label>
-                        <select id="city" name="town_city" class="form-select">
-                            <option value="">Select a city</option>
-                        </select>
-                    </div>
+                                                  <div class="mb-3">
+                                                <label for="townCity" class="form-label">Town/City</label>
+                                              <!--   <select id="city" name="town_city" class="form-select">
+                                                    <option value="">Select a city</option>
+                                                </select> -->
+                                                <input type="text"  class="form-control" id="town_city" name="town_city" placeholder="Enter City" required>
+                                            </div>
+
 
                                             <!-- Address -->
                                             <div class="mb-3">
@@ -487,7 +514,7 @@
                     </div>
                      <div class="tab-pane fade" id="settings" role="tabpanel" aria-labelledby="settings-tab">
                       <div class="container mt-5">
-                      <h2>Update Profile</h2>
+                      <h5>Update Profile</h5>
                       <form action="{{ route('profile.update') }}" method="POST">
                           @csrf
 

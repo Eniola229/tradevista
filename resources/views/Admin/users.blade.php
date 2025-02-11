@@ -54,7 +54,7 @@
               <div class="row">
                 <div class="col-lg-12 col-7">
                    <div class="d-flex flex-column flex-md-row align-items-center justify-content-between rounded gap-3">
-                    <h2 class="h5 text-dark mb-0">Products</h2>
+                    <h2 class="h5 text-dark mb-0">Customers</h2>
                   </div>
                 
                 </div>
@@ -112,7 +112,7 @@
                   <td>
                     <div class="d-flex px-2 py-1">
                       <div class="d-flex flex-column justify-content-center">
-                        <a href="{{ url('admin/view/product', ['id' => $user->id]) }}">
+                        <a href="{{ url('admin/view/user', ['id' => $user->id]) }}">
                           <button class="btn btn-success">View</button>
                         </a>
                       </div>

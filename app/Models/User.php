@@ -79,4 +79,10 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function setup()
+    {
+        return $this->hasOne(Setup::class, 'user_id');
+    }
+
 }

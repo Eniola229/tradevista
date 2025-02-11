@@ -20,7 +20,7 @@
     <p>Thank you for your order! Below are your order details:</p>
     <div class="order-details">
         <p><strong>Transaction ID:</strong> {{ $order->transaction_id }}</p>
-        <p><strong>Total Amount:</strong> ₦{{ number_format($order->total, 2) }}</p>
+        <p><strong>Total Amount:</strong> ₦{{ number_format($order->total, 2) }} (This include shipping fee)</p>
         <h3>Products Ordered:</h3>
         <table>
             <thead>

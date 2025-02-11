@@ -41,7 +41,8 @@ use App\Models\Product;
             <div class="row">
                 <div class="col-lg-12">
                     <div class="shop__cart__table">
-                        <table>
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
                             <thead>
                                 <tr>
                                     <th>Product</th>
@@ -69,7 +70,7 @@ use App\Models\Product;
                                     {{ number_format($item['product_price'], 2) }}
                                     @endif
                                     </td>
-                                    <td class="cart__quantity">
+                                    <td class=" p-4">
                                         <div class="pro-qty" data-product-id="{{ $item['id'] }}" data-index="{{ $index }}">
                                             <input type="text" value="{{ $item['quantity'] }}">
                                         </div>
@@ -83,6 +84,7 @@ use App\Models\Product;
                             </tbody>
                         </table>
                     </div>
+                </div>
                 </div>
             </div>
             <div class="row">

@@ -33,7 +33,7 @@ public function index()
         ->unique('product_id'); // Ensure no duplicates by product_id
 
     if ($cartItems->isEmpty()) {
-        return redirect()->route('products')->with('info', 'Your cart is empty.');
+        return redirect()->back()->with('info', 'Your cart is empty.');
     }
 
     $countries = "NIGERIA";

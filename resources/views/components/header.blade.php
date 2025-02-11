@@ -3,8 +3,8 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="description" content="Ashion Template">
-    <meta name="keywords" content="Ashion, unica, creative, html">
+    <meta name="description" content="Where Buyers and Sellers Connect">
+    <meta name="keywords" content="tradevista, ecommerce,">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>TradeVista | Connecting Buyers and Sellers</title>

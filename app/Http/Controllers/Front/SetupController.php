@@ -194,6 +194,8 @@ class SetupController extends Controller
                 'state' => 'nullable|string|max:255',
                 'address' => 'nullable|string|max:255',
                 'zipcode' => 'nullable|string|max:255',
+                'company_mobile_1' => 'nullable|string|max:15',
+                'company_mobile_2' => 'nullable|string|max:15',
                 'company_image' => 'nullable|image|mimes:jpg,png,jpeg,gif|max:2048',
             ]);
 
@@ -204,6 +206,8 @@ class SetupController extends Controller
             $setup->state = $request->state;
             $setup->address = $request->address;
             $setup->zipcode = $request->zipcode;
+            $setup->company_mobile_1 = $request->company_mobile_1;
+            $setup->company_mobile_2 = $request->company_mobile_2;
 
             // Handle company image upload to Cloudinary
             if ($request->hasFile('company_image')) {
