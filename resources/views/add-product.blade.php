@@ -11,10 +11,6 @@
   <!-- Fonts and icons -->
   <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet">
 
-  <!-- Nucleo Icons -->
-  <link href="{{ asset('assets/css/nucleo-icons.css') }}" rel="stylesheet">
-  <link href="{{ asset('assets/css/nucleo-svg.css') }}" rel="stylesheet">
-
   <!-- Font Awesome Icons -->
   <script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
   <link href="{{ asset('assets/css/nucleo-svg.css') }}" rel="stylesheet">
@@ -45,7 +41,7 @@
         </div>
     @endif
 
-    <form action="{{ isset($productdata) ? route('products.edit', $productdata->id) : route('products.add') }}" method="POST" enctype="multipart/form-data">
+    <form action="{{ isset($productdata) ? route('products.edit', $productdata->id) : route('products.add') }}" method="POST" enctype="multipart/form-data" id="productForm">
         @csrf
         <div class="card shadow-sm p-4">
             <div class="row">
@@ -80,7 +76,7 @@
                     <input type="text" id="product_weight" name="product_weight" class="form-control" value="{{ old('product_weight', $productdata->product_weight ?? '') }}" required>
                 </div>
 
-                <!-- Product Weight -->
+                <!-- Product Discount -->
                 <div class="col-md-6 mb-3">
                     <label for="product_discount" class="form-label">Product Discount <span style="color: red;">(Kindly Note that this will be use as the new price for the product)</span></label>
                     <input type="text" id="product_discount" name="product_discount" class="form-control" value="{{ old('product_discount', $productdata->product_discount ?? '') }}" required>
@@ -93,15 +89,18 @@
                 </div>
 
                 <!-- Category -->
-              <div class="col-md-6 mb-3">
-                  <label for="meta_title" class="form-label">Product Category</label>
-                  <select name="category_id" class="form-select" required>
-                      <option disabled selected>Select</option>
-                      @foreach($categories as $category)
-                          <option value="{{ $category->id }}">{{ $category->name }}</option>
-                      @endforeach
-                  </select>
-              </div>
+               
+                    <div class="col-md-6 mb-3">
+                        <label for="meta_title" class="form-label">Product Category</label>
+                        <select name="category_id" id="categorySelect" class="form-select" required>
+                            <option disabled selected value="">Select</option>
+                            @foreach($categories as $category)
+                                <option value="{{ $category->id }}">{{ $category->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+            <!----Status---->
               <div class="col-md-6 mb-3">
                   <label for="meta_title" class="form-label">Status</label>
                   <select name="status" class="form-select" required>
@@ -171,7 +170,16 @@
 <script src="{{ asset('assets/js/plugins/perfect-scrollbar.min.js') }}"></script>
 <script src="{{ asset('assets/js/plugins/smooth-scrollbar.min.js') }}"></script>
 <script src="{{ asset('assets/js/plugins/chartjs.min.js') }}"></script>
+<script>
+    document.getElementById('productForm').addEventListener('submit', function(event) {
+        var categorySelect = document.getElementById('categorySelect');
 
+        if (categorySelect.value === "") {
+            alert("Please select a product category before proceeding.");
+            event.preventDefault(); // Prevent form submission
+        }
+    });
+</script>
   <script>
     var win = navigator.platform.indexOf('Win') > -1;
     if (win && document.querySelector('#sidenav-scrollbar')) {

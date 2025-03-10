@@ -55,7 +55,7 @@
         <h4>Order ID: <strong>#{{ $order->id }}</strong></h4>
         <p><strong>Customer Name:</strong> {{ $order->user->name }}</p>
         <p><strong>Email:</strong> {{ $order->user->email }}</p>
-        <p><strong>Total:</strong> ${{ number_format($order->total, 2) }}</p>
+        <p><strong>Total:</strong> ₦{{ number_format($order->total, 2) }}</p>
         <p><strong>Status:</strong> {{ ucfirst($order->delivery_status) }}</p>
 
         <!-- Delivery Status Dropdown -->
@@ -96,7 +96,7 @@
                     <td>{{ $orderProduct->product->seller_info->address ?? 'N/A' }}</td>
                     <td>{{ $orderProduct->product->seller_info->company_mobile_1 ?? 'N/A' }}</td>
                     <td>{{ $orderProduct->product_qty }}</td>
-                    <td>${{ number_format($orderProduct->product_price, 2) }}</td>
+                    <td>₦{{ number_format($orderProduct->product_price, 2) }}</td>
                 </tr>
                 @endforeach
             </tbody>

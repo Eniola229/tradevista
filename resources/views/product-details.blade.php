@@ -66,29 +66,36 @@
                        <span>You can contact the seller to place an order, <span style="color: red;">(though we recommend placing all orders online for security purposes)</span></span>
                         <h6>{{ $setup->company_mobile_1 }} | {{ $setup->company_mobile_1 }}</h6>
                         <div class="rating">
-                          @if($reviews->isNotEmpty())
-                            @foreach($reviews as $review)
+                            @if($reviews->isNotEmpty())
+                                @php
+                                    $averageRating = round($reviews->avg('rating')); // Calculate the average rating
+                                @endphp
                                 <div class="review">
-                                    <!-- <p>{{ $review->user->name ?? 'Anonymous' }}</p> -->
                                     <div class="rating">
                                         @for ($i = 1; $i <= 5; $i++)
-                                            @if ($i <= $review->rating)
+                                            @if ($i <= $averageRating)
                                                 <i class="fa fa-star"></i> <!-- Filled star -->
                                             @else
                                                 <i class="fa fa-star-o"></i> <!-- Empty star -->
                                             @endif
                                         @endfor
                                     </div>
+                                    <p>({{ $reviews->count() }} Reviews)</p> <!-- Show number of reviews -->
                                 </div>
-                            @endforeach
-                        @else
-                            <p>No reviews yet.</p>
-                        @endif
-                            <span>( {{ $reviewCount }} reviews )</span>
+                            @else
+                                <p>No reviews yet.</p>
+                            @endif
                         </div>
                      <div class="product__details__price">
-                                ₦ {{ number_format($product->product_discount, 2) }} 
-                                <span>₦ {{ number_format($product->product_price, 2) }}</span>
+                                ₦
+                                @if($product->product_discount === null || $product->product_discount == 0)
+                                    {{ number_format($product->product_price, 2) }}
+                                @else
+                                    {{ number_format($product->product_discount, 2) }}
+                                @endif
+                                @if($product->product_discount > 0)
+                                    <span>₦ {{ number_format($product->product_price, 2) }}</span>
+                                @endif
                             </div>
 
                         <form id="cart-form" action="{{ route('add-to-shopping-cart') }}" method="GET">
@@ -185,8 +192,9 @@
                             <div class="tab-pane" id="tabs-3" role="tabpanel">
                                 <h6>Reviews ( {{ $reviewCount }} )</h6>
                                 @foreach($reviews as $review)
-                                <p>
-                                  {{ $review->review }}
+                                 <h5>Name: {{ $review->user->name }}</h5>
+                                 <p>
+                                  Review: {{ $review->review }}
                                  </p>
                                   
                                   
@@ -233,19 +241,18 @@
                         <h6><a href="#">{{ $product->product_name }}</a></h6>
                         <div class="rating">
                             @if($product->reviews && $product->reviews->isNotEmpty())
-                                @foreach($product->reviews as $review)
-                                    <div class="review">
-                                        <div class="rating">
-                                            @for ($i = 1; $i <= 5; $i++)
-                                                @if ($i <= $review->rating)
-                                                    <i class="fa fa-star"></i> <!-- Filled star -->
-                                                @else
-                                                    <i class="fa fa-star-o"></i> <!-- Empty star -->
-                                                @endif
-                                            @endfor
-                                        </div>
-                                    </div>
-                                @endforeach
+                                @php
+                                    $averageRating = round($product->reviews->avg('rating')); // Calculate the average rating
+                                @endphp
+                                <div class="rating">
+                                    @for ($i = 1; $i <= 5; $i++)
+                                        @if ($i <= $averageRating)
+                                            <i class="fa fa-star"></i> <!-- Filled star -->
+                                        @else
+                                            <i class="fa fa-star-o"></i> <!-- Empty star -->
+                                        @endif
+                                    @endfor
+                                </div>
                             @else
                                 <!-- Display empty stars if no reviews -->
                                 <i class="fa fa-star-o"></i> <!-- Empty star -->
@@ -260,7 +267,7 @@
                             @if($product->product_discount === null || $product->product_discount == 0)
                                 {{ number_format($product->product_price, 2) }}
                             @else
-                                {{ number_format($product->product_price - $product->product_discount, 2) }}
+                                {{ number_format($product->product_discount, 2) }}
                             @endif
                         </div>
                     </div>

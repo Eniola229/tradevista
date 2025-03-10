@@ -56,19 +56,22 @@ use App\Models\Product;
                                 @foreach ($cart as $index => $item)
                                 <tr>
                                     <td class="cart__product__item">
+                                    <a href="/product-details/{{ $item['id'] }}">
                                         <img src="{{ $item['image_url'] }}" width="70" alt="">
                                         <div class="cart__product__item__title">
                                             <h6>{{ $item['product_name'] }}</h6>
                                         </div>
+                                     </a>
                                     </td>
                                     <td class="cart__price">₦ <?php 
-                                        $discounted_price = Product::getDiscountedPrice($item['id']); 
-                                    ?>
-                                    @if($discounted_price > 0)
-                                       {{ number_format($discounted_price, 2) }}
-                                    @else
-                                    {{ number_format($item['product_price'], 2) }}
-                                    @endif
+                                            $discounted_price = Product::getDiscountedPrice($item['id']); 
+                                        ?>
+
+                                        @if($discounted_price > 0 && $discounted_price < $item['product_price'])
+                                           {{ number_format($discounted_price, 2) }}
+                                        @else
+                                           {{ number_format($item['product_price'], 2) }}
+                                        @endif
                                     </td>
                                     <td class=" p-4">
                                         <div class="pro-qty" data-product-id="{{ $item['id'] }}" data-index="{{ $index }}">

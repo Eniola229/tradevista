@@ -81,30 +81,35 @@ class Product extends Model
     public static function getDiscountedPrice($product_id)
     {
         // Fetch product details
-        $proDetails = Product::select('product_price', 'product_discount', 'category_id')->where('id', $product_id)->first();
+        $proDetails = Product::select('product_price', 'product_discount', 'category_id')
+            ->where('id', $product_id)
+            ->first();
 
         // Check if product exists
         if (!$proDetails) {
-            return null; // or throw an exception if preferred
+            return 0; // Return 0 if product not found
         }
 
         // Convert product details to array
         $proDetails = $proDetails->toArray();
 
-        // Initialize discounted price
-        $discounted_price = $proDetails['product_price'];  // Default to original price
+        // Debugging logs
+        \Log::info("Product Details: ", $proDetails);
 
-        // Calculate discount if applicable
-        if ($proDetails['product_discount'] > 0) {
-            $discounted_price = $proDetails['product_price'] - ($proDetails['product_price'] * $proDetails['product_discount'] / 100);
-        }else{
-            $discounted_price = 0;
+        // Check if discount is available and valid
+        if (!empty($proDetails['product_discount']) && $proDetails['product_discount'] > 0) {
+            $discounted_price = $proDetails['product_discount']; // Return discount price directly
+        } else {
+            $discounted_price = $proDetails['product_price']; // No discount, return original price
         }
 
-        // Return formatted discounted price
-        return number_format($discounted_price, 2);
+        // Debugging log
+        \Log::info("Final Corrected Discounted Price for Product ID {$product_id}: {$discounted_price}");
+
+        return $discounted_price; // Return numeric value
     }
-    
+
+
     public static function checkStockLimit()
     {
         $cartItems = Cart::where('user_id', auth()->id())->get();

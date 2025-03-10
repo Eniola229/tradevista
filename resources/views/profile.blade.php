@@ -167,6 +167,8 @@
                                 @method('PUT')
                                 <h3 class="font-bold text-2xl mb-4 text-gray-800">Update Your Account Setup</h3>
 
+                                <p style="color: red; font-size: 13px;"><strong>Important Notice</strong> If you've recently set up your account for the first time and made a successful payment, but your account hasn't been updated, please try updating again. You won't need to make another payment. <br>Thank you for your patience and cooperation.</p>
+
                                 <!-- Account Type Dropdown -->
                                 <div class="mb-4">
                                     <label for="account_type" class="block text-sm font-medium text-gray-700">Select Account Type</label> <br>

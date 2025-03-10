@@ -113,6 +113,10 @@ class ProductPageController extends Controller
             return response()->json(['status' => 'error', 'message' => 'Sorry, this product is no longer available.'], 400);
         }
 
+        if ($product->stock < $quantity) {
+            return response()->json(['status' => 'error', 'message' => 'Sorry, the remaining stock of this product is less than the quantity you want to add to the cart.'], 400);
+        }
+
         $sessionId = $request->session()->getId();
        
         $user = Auth::user(); // Get the logged-in user

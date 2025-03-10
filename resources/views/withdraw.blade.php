@@ -84,38 +84,51 @@
             </div>
         </div>
 
-        <div class="mt-5">
-            <h4>Your Withdrawal History</h4>
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Amount</th>
-                        <th>Status</th>
-                        <th>Receipt</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($withdrawals as $withdrawal)
-                    <tr>
-                        <td>₦{{ $withdrawal->amount }}</td>
-                        <td>
-                            <span class="badge bg-{{ $withdrawal->status === 'ACCEPTED' ? 'success' : ($withdrawal->status === 'REJECTED' ? 'danger' : 'warning') }}">
-                                {{ $withdrawal->status }}
-                            </span>
-                        </td>
-                        <td>
-                            @if($withdrawal->receipt)
-                                <a href="{{ $withdrawal->receipt }}" target="_blank" class="btn btn-success btn-sm">View</a>
-                                <a href="{{ $withdrawal->receipt }}" download class="btn btn-secondary btn-sm">Download</a>
-                            @else
-                                N/A
-                            @endif
-                        </td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
+<div class="mt-5">
+    <h4 class="fw-bold text-primary">Your Withdrawal History</h4>
+
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped">
+            <thead class="bg-primary text-white">
+                <tr>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th>Receipt</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($withdrawals as $withdrawal)
+                <tr>
+                    <td class="fw-bold text-dark">₦{{ number_format($withdrawal->amount, 2) }}</td>
+                    <td>
+                        <span class="badge bg-{{ 
+                            $withdrawal->status === 'ACCEPTED' ? 'success' : 
+                            ($withdrawal->status === 'REJECTED' ? 'danger' : 'warning') 
+                        }}">
+                            {{ ucfirst(strtolower($withdrawal->status)) }}
+                        </span>
+                    </td>
+                    <td>
+                        @if($withdrawal->receipt)
+                            <div class="d-flex gap-2">
+                                <a href="{{ $withdrawal->receipt }}" target="_blank" class="btn btn-sm btn-outline-success">
+                                    🔍 View
+                                </a>
+                                <a href="{{ $withdrawal->receipt }}" download class="btn btn-sm btn-outline-secondary">
+                                    ⬇️ Download
+                                </a>
+                            </div>
+                        @else
+                            <span class="text-muted">N/A</span>
+                        @endif
+                    </td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
+</div>
+
     </div>
          </div>
     </div>

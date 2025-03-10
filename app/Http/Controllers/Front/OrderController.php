@@ -138,6 +138,9 @@ DB::transaction(function () use ($cartItems, $order, &$sellerAmounts, &$adminTot
             'product_total' => $itemTotal,
         ]);
 
+        // Reduce stock from products table
+        $product->decrement('stock', $item->quantity);
+
         // Record Payment
         Payment::create([
             'user_id'       => Auth::id(),

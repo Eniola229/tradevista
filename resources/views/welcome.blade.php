@@ -201,35 +201,35 @@ $hots = Product::where('status', 'ACTIVE')
                     <div class="product__item__text">
                         <h6><a href="#">{{ $product->product_name }}</a></h6>
                         <div class="rating">
-                            @if($product->reviews && $product->reviews->isNotEmpty())
-                                @foreach($product->reviews as $review)
-                                    <div class="review">
-                                        <div class="rating">
-                                            @for ($i = 1; $i <= 5; $i++)
-                                                @if ($i <= $review->rating)
-                                                    <i class="fa fa-star"></i> <!-- Filled star -->
-                                                @else
-                                                    <i class="fa fa-star-o"></i> <!-- Empty star -->
-                                                @endif
-                                            @endfor
-                                        </div>
-                                    </div>
-                                @endforeach
-                            @else
-                                <!-- Display empty stars if no reviews -->
-                                <i class="fa fa-star-o"></i> <!-- Empty star -->
-                                <i class="fa fa-star-o"></i> <!-- Empty star -->
-                                <i class="fa fa-star-o"></i> <!-- Empty star -->
-                                <i class="fa fa-star-o"></i> <!-- Empty star -->
-                                <i class="fa fa-star-o"></i> <!-- Empty star -->
-                            @endif
+                    @if($product->reviews && $product->reviews->isNotEmpty())
+                        @php
+                            $averageRating = round($product->reviews->avg('rating')); // Calculate the average rating
+                        @endphp
+                        <div class="rating">
+                            @for ($i = 1; $i <= 5; $i++)
+                                @if ($i <= $averageRating)
+                                    <i class="fa fa-star"></i> <!-- Filled star -->
+                                @else
+                                    <i class="fa fa-star-o"></i> <!-- Empty star -->
+                                @endif
+                            @endfor
+                        </div>
+                    @else
+                        <!-- Display empty stars if no reviews -->
+                        <i class="fa fa-star-o"></i> <!-- Empty star -->
+                        <i class="fa fa-star-o"></i> <!-- Empty star -->
+                        <i class="fa fa-star-o"></i> <!-- Empty star -->
+                        <i class="fa fa-star-o"></i> <!-- Empty star -->
+                        <i class="fa fa-star-o"></i> <!-- Empty star -->
+                    @endif
+
                         </div>
                         <div class="product__price">
                             ₦ 
                             @if($product->product_discount === null || $product->product_discount == 0)
                                 {{ number_format($product->product_price, 2) }}
                             @else
-                                {{ number_format($product->product_price - $product->product_discount, 2) }}
+                                {{ number_format($product->product_discount, 2) }}
                             @endif
                         </div>
                     </div>
@@ -258,20 +258,19 @@ $hots = Product::where('status', 'ACTIVE')
                         </div>
                         <div class="trend__item__text">
                             <h6>{{ $hot->product_name }}</h6>
-                             @if($hot->reviews && $hot->reviews->isNotEmpty())
-                                @foreach($hot->reviews as $review)
-                                    <div class="review">
-                                        <div class="rating">
-                                            @for ($i = 1; $i <= 5; $i++)
-                                                @if ($i <= $review->rating)
-                                                    <i class="fa fa-star"></i> <!-- Filled star -->
-                                                @else
-                                                    <i class="fa fa-star-o"></i> <!-- Empty star -->
-                                                @endif
-                                            @endfor
-                                        </div>
-                                    </div>
-                                @endforeach
+                            @if($hot->reviews && $hot->reviews->isNotEmpty())
+                                @php
+                                    $averageRating = round($hot->reviews->avg('rating')); // Calculate the average rating
+                                @endphp
+                                <div class="rating">
+                                    @for ($i = 1; $i <= 5; $i++)
+                                        @if ($i <= $averageRating)
+                                            <i class="fa fa-star"></i> <!-- Filled star -->
+                                        @else
+                                            <i class="fa fa-star-o"></i> <!-- Empty star -->
+                                        @endif
+                                    @endfor
+                                </div>
                             @else
                                 <!-- Display empty stars if no reviews -->
                                 <i class="fa fa-star-o"></i> <!-- Empty star -->
@@ -280,12 +279,13 @@ $hots = Product::where('status', 'ACTIVE')
                                 <i class="fa fa-star-o"></i> <!-- Empty star -->
                                 <i class="fa fa-star-o"></i> <!-- Empty star -->
                             @endif
+
                             <div class="product__price">
                                 ₦ 
                                 @if($hot->product_discount === null || $hot->product_discount == 0)
                                     {{ number_format($hot->product_price, 2) }}
                                 @else
-                                    {{ number_format($hot->product_price - $hot->product_discount, 2) }}
+                                    {{ number_format($hot->product_discount, 2) }}
                                 @endif
                             </div>
                         </div>
@@ -313,19 +313,18 @@ $hots = Product::where('status', 'ACTIVE')
                             <h6>{{ $bestseller->product_name }}</h6>
                             <div class="rating">
                             @if($bestseller->reviews && $bestseller->reviews->isNotEmpty())
-                                @foreach($bestseller->reviews as $review)
-                                    <div class="review">
-                                        <div class="rating">
-                                            @for ($i = 1; $i <= 5; $i++)
-                                                @if ($i <= $review->rating)
-                                                    <i class="fa fa-star"></i> <!-- Filled star -->
-                                                @else
-                                                    <i class="fa fa-star-o"></i> <!-- Empty star -->
-                                                @endif
-                                            @endfor
-                                        </div>
-                                    </div>
-                                @endforeach
+                                @php
+                                    $averageRating = round($bestseller->reviews->avg('rating')); // Calculate the average rating
+                                @endphp
+                                <div class="rating">
+                                    @for ($i = 1; $i <= 5; $i++)
+                                        @if ($i <= $averageRating)
+                                            <i class="fa fa-star"></i> <!-- Filled star -->
+                                        @else
+                                            <i class="fa fa-star-o"></i> <!-- Empty star -->
+                                        @endif
+                                    @endfor
+                                </div>
                             @else
                                 <!-- Display empty stars if no reviews -->
                                 <i class="fa fa-star-o"></i> <!-- Empty star -->
@@ -339,7 +338,7 @@ $hots = Product::where('status', 'ACTIVE')
                                 @if($bestseller->product_discount === null || $bestseller->product_discount == 0)
                                     {{ number_format($bestseller->product_price, 2) }}
                                 @else
-                                    {{ number_format($bestseller->product_price - $bestseller->product_discount, 2) }}
+                                    {{ number_format($bestseller->product_discount, 2) }}
                                 @endif
                         </div>
                     </div>
@@ -365,20 +364,19 @@ $hots = Product::where('status', 'ACTIVE')
                         <div class="trend__item__text">
                             <h6>{{ $featured->product_name }}</h6>
                             <div class="rating">
-                             @if($featured->reviews && $featured->reviews->isNotEmpty())
-                                @foreach($featured->reviews as $review)
-                                    <div class="review">
-                                        <div class="rating">
-                                            @for ($i = 1; $i <= 5; $i++)
-                                                @if ($i <= $review->rating)
-                                                    <i class="fa fa-star"></i> <!-- Filled star -->
-                                                @else
-                                                    <i class="fa fa-star-o"></i> <!-- Empty star -->
-                                                @endif
-                                            @endfor
-                                        </div>
-                                    </div>
-                                @endforeach
+                            @if($featured->reviews && $featured->reviews->isNotEmpty())
+                                @php
+                                    $averageRating = round($featured->reviews->avg('rating')); // Calculate the average rating
+                                @endphp
+                                <div class="rating">
+                                    @for ($i = 1; $i <= 5; $i++)
+                                        @if ($i <= $averageRating)
+                                            <i class="fa fa-star"></i> <!-- Filled star -->
+                                        @else
+                                            <i class="fa fa-star-o"></i> <!-- Empty star -->
+                                        @endif
+                                    @endfor
+                                </div>
                             @else
                                 <!-- Display empty stars if no reviews -->
                                 <i class="fa fa-star-o"></i> <!-- Empty star -->
@@ -392,7 +390,7 @@ $hots = Product::where('status', 'ACTIVE')
                                 @if($featured->product_discount === null || $featured->product_discount == 0)
                                     {{ number_format($featured->product_price, 2) }}
                                 @else
-                                    {{ number_format($featured->product_price - $featured->product_discount, 2) }}
+                                    {{ number_format($featured->product_discount, 2) }}
                                 @endif
                         </div>
                     </div>

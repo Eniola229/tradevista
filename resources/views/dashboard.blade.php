@@ -136,6 +136,68 @@
           </div>
         </div>
       </div>
+
+      <!-----Notification slide show----->
+<!-----Notification slide show----->
+@if ($notifications->where('expiry_date', '>', now())->isNotEmpty())
+    <div id="notificationWrapper" class="position-fixed top-0 start-50 translate-middle-x w-100 mt-3 z-index-1050">
+        <div id="notificationCarousel" class="carousel slide" data-bs-ride="carousel">
+            <div class="carousel-inner">
+                @foreach ($notifications->where('expiry_date', '>', now()) as $key => $notification)
+                    <div class="carousel-item {{ $key == 0 ? 'active' : '' }}">
+                        <div class="container">
+                            <div class="row justify-content-center">
+                                <div class="col-md-6 col-11">
+                                    <div class="alert alert-primary shadow-lg p-3 rounded d-flex flex-column text-white">
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <i class="fa fa-bell fa-lg me-2"></i>
+                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+                                        </div>
+                                        <h4 class="fw-bold mt-2 text-center text-white">Special Notification</h4>
+                                        <p class="fw-bold mt-2 text-center">{{ $notification->description }}</p>
+                                        <div class="text-center mt-2">
+                                            @if($notification->links)
+                                                <a href="{{ $notification->links }}" class="btn btn-light btn-sm" target="_blank">
+                                                    Learn More
+                                                </a>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+
+            <!-- Carousel Controls -->
+            <button class="carousel-control-prev d-none d-md-block" type="button" data-bs-target="#notificationCarousel" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon bg-dark rounded-circle p-2"></span>
+            </button>
+            <button class="carousel-control-next d-none d-md-block" type="button" data-bs-target="#notificationCarousel" data-bs-slide="next">
+                <span class="carousel-control-next-icon bg-dark rounded-circle p-2"></span>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            var notificationCarousel = new bootstrap.Carousel(document.querySelector("#notificationCarousel"), {
+                interval: 5000, // Change notification every 5 seconds
+                pause: "hover", // Pause on hover
+                wrap: true // Loop notifications
+            });
+
+            // Auto-hide after 10 seconds
+            setTimeout(() => {
+                document.getElementById("notificationWrapper").style.display = "none";
+            }, 10000);
+        });
+    </script>
+@endif
+
+    <!-----End of Notification slide show----->
+    <!-----Errror messages----->
          @if($errors->any())
             <div class="alert alert-danger text-red-800 bg-red-200 p-4 rounded mb-4 mt-4">
                 <ul class="list-disc list-inside">
@@ -155,6 +217,7 @@
                    {{ session('message') }}
             </div>
          @endif
+    <!-----End of error messages----->
       @if($setup)
       @if($pendingPayment) 
              <div class="alert alert-warning text-red-800 bg-red-200 p-4 rounded mb-4 mt-4" style="Color: white">

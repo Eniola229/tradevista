@@ -75,7 +75,7 @@
                             <table class="table table-striped">
                                 <thead class="table-dark">
                                     <tr>
-                                        <th>User</th>
+                                        <th>Customer</th>
                                         <th>Amount</th>
                                         <th>Status</th>
                                         <th>Receipt</th>

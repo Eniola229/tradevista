@@ -41,54 +41,62 @@
         </div>
     @endif
 
-     <div class="container mt-4">
-    <h4>Order Details</h4>
-    <div class="card">
+<div class="container mt-4">
+    <div class="card p-3 shadow-lg">
+        <h4 class="text-primary fw-bold">Order Details</h4>
         <div class="card-body">
-            <h5>Order ID: {{ $order->id }}</h5>
-            <p><strong>Total Price:</strong> ₦{{ number_format($order->total_price, 2) }}</p>
-            <p><strong>Payment Status:</strong> <span class="{{ $order->payment_status === 'PAID' ? 'text-success' : 'text-danger' }}">{{ $order->payment_status }}</span></p>
-            <p><strong>Delivery Status:</strong> {{ $order->delivery_status }}</p>
-            <p><strong>Date Added:</strong> {{ $order->created_at->format('F j, Y g:i A') }}</p>
+            <h5 class="fw-bold">Order ID: <span class="text-muted">#{{ $order->id }}</span></h5>
+            <p><strong>Total Price:</strong> <span class="text-dark">₦{{ number_format($order->total_price, 2) }}</span></p>
+            <p>
+                <strong>Payment Status:</strong> 
+                <span class="fw-bold {{ $order->payment_status === 'PAID' ? 'text-success' : 'text-danger' }}">
+                    {{ $order->payment_status }}
+                </span>
+            </p>
+            <p><strong>Delivery Status:</strong> <span class="text-info">{{ $order->delivery_status }}</span></p>
+            <p><strong>Date Added:</strong> <span class="text-secondary">{{ $order->created_at->format('F j, Y g:i A') }}</span></p>
+        </div>
+
+        <h5 class="mt-4 text-primary fw-bold">Ordered Products</h5>
+
+        <div class="table-responsive">
+            <table class="table table-striped table-bordered">
+                <thead class="bg-primary text-white">
+                    <tr>
+                        <th>Product Name</th>
+                        <th>Price</th>
+                        <th>Quantity</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @php $totalAmount = 0; @endphp
+                    @foreach($order->orderProducts as $orderProduct)
+                        @php
+                            $subtotal = $orderProduct->product_price * $orderProduct->product_qty;
+                            $totalAmount += $subtotal;
+                        @endphp
+                        <tr>
+                            <td>{{ $orderProduct->product->product_name ?? 'Unknown Product' }}</td>
+                            <td>₦{{ number_format($orderProduct->product_price, 2) }}</td>
+                            <td>{{ $orderProduct->product_qty }}</td>
+                            <td>₦{{ number_format($subtotal, 2) }}</td>
+                        </tr>
+                    @endforeach
+                </tbody>
+                <tfoot>
+                    <tr class="bg-light">
+                        <th colspan="3" class="text-end">Grand Total:</th>
+                        <th class="text-dark fw-bold">₦{{ number_format($totalAmount, 2) }}</th>
+                    </tr>
+                </tfoot>
+            </table>
         </div>
     </div>
 
-    <h5 class="mt-4">Ordered Products</h5>
-<table class="table table-bordered">
-    <thead>
-        <tr>
-            <th>Product Name</th>
-            <th>Price</th>
-            <th>Quantity</th>
-            <th>Total</th>
-        </tr>
-    </thead>
-    <tbody>
-        @php $totalAmount = 0; @endphp
-        @foreach($order->orderProducts as $orderProduct)
-            @php
-                $subtotal = $orderProduct->product_price * $orderProduct->product_qty;
-                $totalAmount += $subtotal;
-            @endphp
-            <tr>
-                <td>{{ $orderProduct->product->product_name ?? 'Unknown Product' }}</td>
-                <td>₦{{ number_format($orderProduct->product_price, 2) }}</td>
-                <td>{{ $orderProduct->product_qty }}</td>
-                <td>₦{{ number_format($subtotal, 2) }}</td>
-            </tr>
-        @endforeach
-    </tbody>
-    <tfoot>
-        <tr>
-            <th colspan="3" class="text-right">Grand Total:</th>
-            <th>₦{{ number_format($totalAmount, 2) }}</th>
-        </tr>
-    </tfoot>
-</table>
-
-
-    <a href="{{ url('/user/orders') }}" class="btn btn-primary mt-3">Back to Orders</a>
+    <a href="{{ url('/user/orders') }}" class="btn btn-primary mt-3 shadow">Back to Orders</a>
 </div>
+
     </main>
 
   <!--   Core JS Files   -->

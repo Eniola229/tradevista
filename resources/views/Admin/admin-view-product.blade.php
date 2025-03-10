@@ -97,29 +97,37 @@
                     <div class="product__details__text">
                         <h3>{{ $product->product_name }} <span>Brand: {{ $setup->company_name }}</span></h3>
                         <div class="rating">
-                          @if($reviews->isNotEmpty())
-                            @foreach($reviews as $review)
-                                <div class="review">
-                                    <!-- <p>{{ $review->user->name ?? 'Anonymous' }}</p> -->
-                                    <div class="rating">
-                                        @for ($i = 1; $i <= 5; $i++)
-                                            @if ($i <= $review->rating)
-                                                <i class="fa fa-star"></i> <!-- Filled star -->
-                                            @else
-                                                <i class="fa fa-star-o"></i> <!-- Empty star -->
-                                            @endif
-                                        @endfor
-                                    </div>
-                                </div>
-                            @endforeach
-                        @else
-                            <p>No reviews yet.</p>
-                        @endif
+                            @if($reviews->isNotEmpty())
+                                @php
+                                    $averageRating = round($reviews->avg('rating')); // Calculate the average rating
+                                @endphp
+                                @for ($i = 1; $i <= 5; $i++)
+                                    @if ($i <= $averageRating)
+                                        <i class="fa fa-star"></i> <!-- Filled star -->
+                                    @else
+                                        <i class="fa fa-star-o"></i> <!-- Empty star -->
+                                    @endif
+                                @endfor
+                            @else
+                                <!-- Display empty stars if no reviews -->
+                                <i class="fa fa-star-o"></i>
+                                <i class="fa fa-star-o"></i>
+                                <i class="fa fa-star-o"></i>
+                                <i class="fa fa-star-o"></i>
+                                <i class="fa fa-star-o"></i>
+                            @endif
+                        </div>
                             <span>( {{ $reviewCount }} reviews )</span>
                         </div>
                         <div class="product__details__price">
-                            ₦ {{ number_format($product->product_discount, 2) }} 
-                            <span>₦ {{ number_format($product->product_price, 2) }}</span>
+                            ₦@if($product->product_discount === null || $product->product_discount == 0)
+                                    {{ number_format($product->product_price, 2) }}
+                                @else
+                                    {{ number_format($product->product_discount, 2) }}
+                                @endif
+                                @if($product->product_discount > 0)
+                                    <span>₦ {{ number_format($product->product_price, 2) }}</span>
+                                @endif
                         </div>
 
                         <!-- <p>{{ $product->product_description }}</p> -->

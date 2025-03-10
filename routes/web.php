@@ -14,6 +14,7 @@ use App\Http\Controllers\Admin\SupportTicketController;
 use App\Http\Controllers\Admin\WIthdraweralController;
 use App\Http\Controllers\Admin\StatePriceController;
 use App\Http\Controllers\Admin\AdminOrderController;
+use App\Http\Controllers\Admin\NotificationController;
 
 //USER
 use App\Http\Controllers\Front\SetupController;
@@ -29,6 +30,7 @@ use App\Http\Controllers\Front\SupportController;
 use App\Http\Controllers\Front\WithdrawController;
 use App\Http\Controllers\Front\OrderController;
 use App\Http\Controllers\Front\BusOrdersController;
+use App\Http\Controllers\Front\ReviewController;
 use App\Http\Controllers\LocationController;
 
 
@@ -128,7 +130,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/user/order/view/{id}', [OrderController::class, 'viewOrder'])->name('user.order.view');
     //Orders for Sellers 
     Route::get('/user/bus-orders', [BusOrdersController::class, 'soldProducts'])->name('user.sold-products');
-
+    //Review 
+    Route::get('/user/reviews', [ReviewController::class, 'pendingReviews'])->name('reviews.pending');
+    Route::post('/reviews', [ReviewController::class, 'store'])->name('reviews.store');
     
 });
 
@@ -164,7 +168,10 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
  Route::get('/orders', [AdminOrderController::class, 'index'])->name('orders.index');
  Route::get('/orders/{id}', [AdminOrderController::class, 'show'])->name('orders.show');
  Route::post('/orders/{id}/update-status', [AdminOrderController::class, 'updateStatus'])->name('orders.updateStatus');
-
+ Route::get('/notifications', [NotificationController::class, 'index'])->name('notification.index');
+ Route::get('/add/notification', [NotificationController::class, 'add'])->name('notification.add');
+ Route::post('/add/notification', [NotificationController::class, 'addNotification'])->name('admin-add-notification'); 
+ Route::get('/notification/delete/{id}', [NotificationController::class, 'delete'])->name('admin-delete-notification');
 });
 
 //TO ANY DEVELOPER --- IF YOU NEED EXPLANTION AND CLERITY ON SOME CODES - CALL OR WHATSAPP - 08035906313

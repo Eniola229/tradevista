@@ -47,7 +47,7 @@
                             </div>
                         </div>
 
-                        <div class="sidebar__filter">
+                       <!--  <div class="sidebar__filter">
                             <div class="section-title">
                                 <h4>Shop by price</h4>
                             </div>
@@ -63,7 +63,7 @@
                                 </div>
                             </div>
                             <a href="#">Filter</a>
-                        </div>
+                        </div> -->
                       
                     </div>
                 </div>
@@ -105,19 +105,18 @@
                         <h6><a href="#">{{ $product->product_name }}</a></h6>
                         <div class="rating">
                             @if($product->reviews && $product->reviews->isNotEmpty())
-                                @foreach($product->reviews as $review)
-                                    <div class="review">
-                                        <div class="rating">
-                                            @for ($i = 1; $i <= 5; $i++)
-                                                @if ($i <= $review->rating)
-                                                    <i class="fa fa-star"></i> <!-- Filled star -->
-                                                @else
-                                                    <i class="fa fa-star-o"></i> <!-- Empty star -->
-                                                @endif
-                                            @endfor
-                                        </div>
-                                    </div>
-                                @endforeach
+                                @php
+                                    $averageRating = round($product->reviews->avg('rating')); // Calculate the average rating
+                                @endphp
+                                <div class="rating">
+                                    @for ($i = 1; $i <= 5; $i++)
+                                        @if ($i <= $averageRating)
+                                            <i class="fa fa-star"></i> <!-- Filled star -->
+                                        @else
+                                            <i class="fa fa-star-o"></i> <!-- Empty star -->
+                                        @endif
+                                    @endfor
+                                </div>
                             @else
                                 <!-- Display empty stars if no reviews -->
                                 <i class="fa fa-star-o"></i> <!-- Empty star -->
@@ -132,7 +131,7 @@
                             @if($product->product_discount === null || $product->product_discount == 0)
                                 {{ number_format($product->product_price, 2) }}
                             @else
-                                {{ number_format($product->product_price - $product->product_discount, 2) }}
+                                {{ number_format($product->product_discount, 2) }}
                             @endif
                         </div>
                     </div>

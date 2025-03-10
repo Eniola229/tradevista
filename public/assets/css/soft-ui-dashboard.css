@@ -22399,7 +22399,7 @@ html {
 .navbar.navbar-dark .navbar-collapse.show .dropdown-header.text-dark,
 .navbar.navbar-dark .navbar-collapse.collapsing .dropdown-header.text-dark {
   color: #fff !important;
-}
+} 
 
 .navbar .sidenav-toggler-inner {
   width: 18px;

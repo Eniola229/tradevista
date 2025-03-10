@@ -66,15 +66,27 @@ class CartController extends Controller
     {
         $id = $request->input('product_id');
 
+        // Get the product stock
+        $product = Product::find($id);
+
+        if (!$product) {
+            return response()->json(['message' => 'Product not found!'], 404);
+        }
+
         if (Auth::check()) {
             // Update cart for logged-in users
             $user = Auth::user();
             $cart = Cart::where('user_id', $user->id)->where('product_id', $id)->first();
 
             if ($cart) {
+                if ($cart->quantity + 1 > $product->stock) {
+                    return response()->json(['message' => 'Sorry, the remaining stock is less than the quantity you want to add.'], 400);
+                }
+
                 $cart->quantity += 1;
                 $cart->save();
                 $total = $cart->quantity * $cart->product_price; // Calculate total price
+                
                 return response()->json([
                     'message' => 'Quantity increased successfully!',
                     'quantity' => $cart->quantity,
@@ -87,9 +99,14 @@ class CartController extends Controller
             $cart = Cart::where('session_id', $sessionId)->where('product_id', $id)->first();
 
             if ($cart) {
+                if ($cart->quantity + 1 > $product->stock) {
+                    return response()->json(['message' => 'Sorry, the remaining stock is less than the quantity you want to add.'], 400);
+                }
+
                 $cart->quantity += 1;
                 $cart->save();
                 $total = $cart->quantity * $cart->product_price; // Calculate total price
+                
                 return response()->json([
                     'message' => 'Quantity increased successfully!',
                     'quantity' => $cart->quantity,
@@ -100,6 +117,7 @@ class CartController extends Controller
 
         return response()->json(['message' => 'Error updating quantity!'], 400);
     }
+
 
     public function update_decrease_cart(Request $request)
     {
