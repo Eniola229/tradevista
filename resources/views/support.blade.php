@@ -88,6 +88,7 @@
                         <tr>
                             <th>Ticket ID</th>
                             <th>Issue Type</th>
+                            <th>Image</th>
                             <th>Status</th>
                             <th>Date Created</th>
                             <th>Actions</th>
@@ -98,6 +99,7 @@
                         <tr>
                             <td>{{ $support->ticket_id }}</td>
                             <td>{{ $support->problem_type }}</td>
+                            <td><a href="{{ $support->image_url }}" target="_blank">View</a></td>
                             <td>
                                 @if($support->status === 'ISSUE FIXED')
                                     <span class="badge bg-success">{{ $support->status }}</span> <!-- Green for ISSUE FIXED -->

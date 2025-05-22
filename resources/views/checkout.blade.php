@@ -101,7 +101,7 @@ use App\Models\Product;
                 <div class="col-lg-6 col-md-6 col-sm-6">
                     <div class="checkout__form__input">
                         <p>Last Name <span>*</span></p>
-                        <input type="text" name="last_name" value="{{ explode(' ', Auth::user()->name)[1] }}">
+                        <input type="text" name="last_name" value="{{ count(explode(' ', Auth::user()->name)) > 1 ? explode(' ', Auth::user()->name)[1] : null }}" required>
                     </div>
                 </div>
 
@@ -119,9 +119,38 @@ use App\Models\Product;
                         <p>Town/City <span>*</span></p>
                         <input type="text" value="{{ isset($address) ? $address->town_city : '' }}" name="cityName" required>
                     </div>
-                    <div class="checkout__form__input">
+                    <div class="checkout__form__input" style="position: relative;">
                         <p>State <span>*</span></p>
-                        <input type="text" value="{{ isset($address) ? $address->state : '' }}" id="shippingState" name="stateCode" required>
+                        <input 
+                            type="text" 
+                            id="shippingState" 
+                            name="stateCode" 
+                            value="{{ old('stateCode', isset($address) ? $address->state : '') }}" 
+                            required 
+                            placeholder="Select State"
+                            autocomplete="off"
+                            onclick="toggleDropdown()"
+                           
+                        >
+
+                        <!-- Dropdown List -->
+                        <div id="stateDropdown" style="display: none; position: absolute; width: 100%; background: white; border: 1px solid #ccc; border-radius: 5px; box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2); max-height: 200px; overflow-y: auto; z-index: 1000;">
+                            <ul style="list-style: none; margin: 0; padding: 0;">
+                                @php
+                                    $states = [
+                                        "Abia", "Adamawa", "Akwa Ibom", "Anambra", "Bauchi", "Bayelsa", "Benue", "Borno", "Cross River",
+                                        "Delta", "Ebonyi", "Edo", "Ekiti", "Enugu", "Gombe", "Imo", "Jigawa", "Kaduna", "Kano",
+                                        "Katsina", "Kebbi", "Kogi", "Kwara", "Lagos", "Nasarawa", "Niger", "Ogun", "Ondo",
+                                        "Osun", "Oyo", "Plateau", "Rivers", "Sokoto", "Taraba", "Yobe", "Zamfara", "FCT"
+                                    ];
+                                @endphp
+                                @foreach($states as $state)
+                                    <li onclick="selectState('{{ $state }}')" style="padding: 10px; cursor: pointer; border-bottom: 1px solid #ddd;">
+                                        {{ $state }}
+                                    </li>
+                                @endforeach
+                            </ul>
+                        </div>
                     </div>
                     <div class="checkout__form__input">
                         <p>Postcode/Zip <span>*</span></p>
@@ -131,13 +160,13 @@ use App\Models\Product;
                 <div class="col-lg-6 col-md-6 col-sm-6">
                     <div class="checkout__form__input">
                         <p>Phone <span>*</span></p>
-                        <input type="text" name="phone" required>
-                    </div>
+                        <input type="text" name="phone" value="{{ isset($user) ? $user->phone_number : '' }}" required>
+                    </div> 
                 </div>
                 <div class="col-lg-6 col-md-6 col-sm-6">
                     <div class="checkout__form__input">
                         <p>Email <span>*</span></p>
-                        <input type="text" name="email" value="{{ Auth::user()->email }}" required>
+                        <input type="text" name="email" value="{{ isset($user) ? $user->email : '' }}" required>
                     </div>
                 </div>
 
@@ -320,6 +349,7 @@ $(document).ready(function () {
             subtotal: "{{ $subTotal }}",
             shipping_fee: parseFloat($('#rate').text().replace('₦', '').replace(/,/g, '')),
             reference: reference,
+            order_note: $('input[name="order_note"]').val(),
             _token: "{{ csrf_token() }}"
         };
 
@@ -350,8 +380,27 @@ $(document).ready(function () {
 });
 </script>
 
-
 <script>
+    function toggleDropdown() {
+        var dropdown = document.getElementById("stateDropdown");
+        dropdown.style.display = dropdown.style.display === "none" ? "block" : "none";
+    }
+
+    function selectState(state) {
+        document.getElementById("shippingState").value = state;
+        document.getElementById("stateDropdown").style.display = "none";
+    }
+
+    // Close dropdown when clicking outside
+    document.addEventListener("click", function(event) {
+        var input = document.getElementById("shippingState");
+        var dropdown = document.getElementById("stateDropdown");
+
+        if (!input.contains(event.target) && !dropdown.contains(event.target)) {
+            dropdown.style.display = "none";
+        }
+    });
+
     $(document).ready(function () {
         $('#calculateRates').click(function () {
             let shippingState = $('#shippingState').val().trim();
@@ -410,6 +459,7 @@ $(document).ready(function () {
         });
     });
 </script>
+
 
 
 <script>

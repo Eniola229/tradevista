@@ -67,11 +67,79 @@
                 <h4>Withdraw Funds</h4>
             </div>
             <div class="card-body">
-                <p><strong>Current Balance:</strong> ₦<span id="balance">{{ $balance->balance ?? 0 }}</span></p>
+                <p><strong>Total Balance:</strong> ₦<span id="balance">{{ $balance->balance ?? 0 }}</span></p>
                 <form id="withdrawForm">
                     <div class="mb-3">
                         <label for="amount" class="form-label">Withdrawal Amount</label>
                         <input type="number" id="amount" name="amount" class="form-control" min="1" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="bank_name" class="form-label">Select Bank</label>
+                        <select id="bank_name" name="bank_name" class="form-control" required>
+                            <option value="">Select Bank</option>
+                            <!-- Commercial Banks -->
+                            <option value="Access Bank Plc">Access Bank Plc</option>
+                            <option value="Citibank Nigeria Ltd">Citibank Nigeria Ltd</option>
+                            <option value="Ecobank Nigeria Plc">Ecobank Nigeria Plc</option>
+                            <option value="Fidelity Bank Plc">Fidelity Bank Plc</option>
+                            <option value="First Bank of Nigeria Ltd">First Bank of Nigeria Ltd</option>
+                            <option value="First City Monument Bank Plc">First City Monument Bank Plc</option>
+                            <option value="Globus Bank Ltd">Globus Bank Ltd</option>
+                            <option value="Guaranty Trust Bank Plc">Guaranty Trust Bank Plc</option>
+                            <option value="Keystone Bank Ltd">Keystone Bank Ltd</option>
+                            <option value="Parallex Bank Ltd">Parallex Bank Ltd</option>
+                            <option value="Polaris Bank Plc">Polaris Bank Plc</option>
+                            <option value="Premium Trust Bank">Premium Trust Bank</option>
+                            <option value="Providus Bank Ltd">Providus Bank Ltd</option>
+                            <option value="Stanbic IBTC Bank Plc">Stanbic IBTC Bank Plc</option>
+                            <option value="Standard Chartered Bank Nigeria Ltd">Standard Chartered Bank Nigeria Ltd</option>
+                            <option value="Sterling Bank Plc">Sterling Bank Plc</option>
+                            <option value="SunTrust Bank Nigeria Ltd">SunTrust Bank Nigeria Ltd</option>
+                            <option value="Titan Trust Bank Ltd">Titan Trust Bank Ltd</option>
+                            <option value="Union Bank of Nigeria Plc">Union Bank of Nigeria Plc</option>
+                            <option value="United Bank for Africa Plc">United Bank for Africa Plc</option>
+                            <option value="Unity Bank Plc">Unity Bank Plc</option>
+                            <option value="Wema Bank Plc">Wema Bank Plc</option>
+                            <option value="Zenith Bank Plc">Zenith Bank Plc</option>
+                            <!-- Digital Banks -->
+                            <option value="Kuda Bank">Kuda Bank</option>
+                            <option value="PalmPay">PalmPay</option>
+                            <option value="FairMoney Microfinance Bank">FairMoney Microfinance Bank</option>
+                            <option value="Sparkle Bank">Sparkle Bank</option>
+                            <option value="Moniepoint Microfinance Bank">Moniepoint Microfinance Bank</option>
+                            <option value="Opay">Opay</option>
+                            <option value="Rubies Bank">Rubies Bank</option>
+                            <option value="VFD Microfinance Bank">VFD Microfinance Bank</option>
+                            <option value="Mint Finex MFB">Mint Finex MFB</option>
+                            <option value="Mkobo MFB">Mkobo MFB</option>
+                            <option value="Raven Bank">Raven Bank</option>
+                            <option value="Rex Microfinance Bank">Rex Microfinance Bank</option>
+                            <option value="CashX">CashX</option>
+                            <!-- Microfinance Banks -->
+                            <option value="AB Microfinance Bank Limited">AB Microfinance Bank Limited</option>
+                            <option value="Accion Microfinance Bank">Accion Microfinance Bank</option>
+                            <option value="LAPO Microfinance Bank">LAPO Microfinance Bank</option>
+                            <option value="Mutual Trust Microfinance Bank">Mutual Trust Microfinance Bank</option>
+                            <option value="Rephidim Microfinance Bank">Rephidim Microfinance Bank</option>
+                            <option value="Empire Trust Microfinance Bank">Empire Trust Microfinance Bank</option>
+                            <option value="Finca Microfinance Bank Limited">Finca Microfinance Bank Limited</option>
+                            <option value="Moneyfield Microfinance Bank">Moneyfield Microfinance Bank</option>
+                            <option value="Peace Microfinance Bank">Peace Microfinance Bank</option>
+                            <option value="Infinity Microfinance Bank">Infinity Microfinance Bank</option>
+                            <option value="Covenant Microfinance Bank Ltd">Covenant Microfinance Bank Ltd</option>
+                            <option value="Solid Allianze Microfinance Bank">Solid Allianze Microfinance Bank</option>
+                            <option value="Advans La Fayette Microfinance Bank">Advans La Fayette Microfinance Bank</option>
+                            <!-- Add more banks as needed -->
+                        </select>
+
+                    </div>
+                    <div class="mb-3">
+                        <label for="account_number" class="form-label">Account Number</label>
+                        <input type="text" id="account_number" name="account_number" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="account_name" class="form-label">Account Name</label>
+                        <input type="text" id="account_name" name="account_name" class="form-control" required>
                     </div>
                     <button type="submit" class="btn btn-primary w-100" id="withdrawButton">
                         <span class="default-text">Request Withdrawal</span>
@@ -84,6 +152,7 @@
             </div>
         </div>
 
+
 <div class="mt-5">
     <h4 class="fw-bold text-primary">Your Withdrawal History</h4>
 
@@ -92,7 +161,11 @@
             <thead class="bg-primary text-white">
                 <tr>
                     <th>Amount</th>
+                    <th>Bank Name</th>
+                    <th>Account Number</th>
+                    <th>Account Name</th>
                     <th>Status</th>
+                    <th>Note</th>
                     <th>Receipt</th>
                 </tr>
             </thead>
@@ -100,6 +173,9 @@
                 @foreach($withdrawals as $withdrawal)
                 <tr>
                     <td class="fw-bold text-dark">₦{{ number_format($withdrawal->amount, 2) }}</td>
+                    <td class="fw-bold text-dark">{{ ($withdrawal->bank_name) }}</td>
+                    <td class="fw-bold text-dark">{{ ($withdrawal->account_number) }}</td>
+                    <td class="fw-bold text-dark">{{ ($withdrawal->account_name) }}</td>
                     <td>
                         <span class="badge bg-{{ 
                             $withdrawal->status === 'ACCEPTED' ? 'success' : 
@@ -108,6 +184,7 @@
                             {{ ucfirst(strtolower($withdrawal->status)) }}
                         </span>
                     </td>
+                    <td class="fw-bold text-dark" style="max-width: 500px; min-width: 350px; word-wrap: break-word; white-space: normal;">{{ ($withdrawal->note) }}</td>
                     <td>
                         @if($withdrawal->receipt)
                             <div class="d-flex gap-2">
@@ -143,44 +220,49 @@
 <script src="{{ asset('assets/js/plugins/chartjs.min.js') }}"></script>
 <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-   <script>
-        $(document).ready(function() {
-            $('#withdrawForm').submit(function(e) {
-                e.preventDefault();
 
-                let amount = $('#amount').val();
-                let button = $('#withdrawButton');
+<script>
+    $(document).ready(function() {
+        $('#withdrawForm').submit(function(e) {
+            e.preventDefault();
 
-                // Disable button and show loading state
-                button.prop('disabled', true);
-                button.find('.default-text').addClass('d-none');
-                button.find('.loading-text').removeClass('d-none');
+            let amount = $('#amount').val();
+            let bankName = $('#bank_name').val();
+            let accountNumber = $('#account_number').val();
+            let accountName = $('#account_name').val();
+            let button = $('#withdrawButton');
 
-                $.ajax({
-                    url: "{{ route('user-withdraw') }}",
-                    type: "POST",
-                    data: {
-                        _token: "{{ csrf_token() }}",
-                        amount: amount
-                    },
-                    success: function(response) {
-                        Swal.fire('Success', response.message, 'success').then(() => {
-                            location.reload();
-                        });
-                    },
-                    error: function(xhr) {
-                        Swal.fire('Error', xhr.responseJSON.message, 'error');
-                    },
-                    complete: function() {
-                        // Re-enable button and restore text
-                        button.prop('disabled', false);
-                        button.find('.default-text').removeClass('d-none');
-                        button.find('.loading-text').addClass('d-none');
-                    }
-                });
+            button.prop('disabled', true);
+            button.find('.default-text').addClass('d-none');
+            button.find('.loading-text').removeClass('d-none');
+
+            $.ajax({
+                url: "{{ route('user-withdraw') }}",
+                type: "POST",
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    amount: amount,
+                    bank_name: bankName,
+                    account_number: accountNumber,
+                    account_name: accountName
+                },
+                success: function(response) {
+                    Swal.fire('Success', response.message, 'success').then(() => {
+                        location.reload();
+                    });
+                },
+                error: function(xhr) {
+                    Swal.fire('Error', xhr.responseJSON.message, 'error');
+                },
+                complete: function() {
+                    button.prop('disabled', false);
+                    button.find('.default-text').removeClass('d-none');
+                    button.find('.loading-text').addClass('d-none');
+                }
             });
         });
-    </script>
+    });
+</script>
 <!-- JavaScript -->
 <script>
     // Handle state change to fetch cities

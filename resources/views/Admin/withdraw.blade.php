@@ -62,71 +62,95 @@
 
          <div class="row my-4">
         <div class="col-lg-12 col-md-12 mb-md-0 mb-4">
-         <div class="container py-5 d-flex flex-column align-items-center">
-            <div class="card shadow-lg p-4 withdraw-container">
-                <div class="card-header bg-dark text-white text-center">
-                    <h4 class="mb-0 text-white">Admin - Manage Withdrawals</h4>
-                </div>
-                <div class="card-body">
-                    @if($withdrawals->isEmpty())
-                        <p class="text-center text-muted">No withdrawal requests.</p>
-                    @else
-                        <div class="table-responsive">
-                            <table class="table table-striped">
-                                <thead class="table-dark">
-                                    <tr>
-                                        <th>Customer</th>
-                                        <th>Amount</th>
-                                        <th>Status</th>
-                                        <th>Receipt</th>
-                                        <th>Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach($withdrawals as $withdrawal)
-                                    <tr>
-                                        <td class="fw-bold">{{ $withdrawal->user->name }}</td>
-                                        <td class="fw-bold">₦{{ $withdrawal->amount }}</td>
-                                        <td>
-                                            <span class="status-badge 
-                                                {{ $withdrawal->status === 'ACCEPTED' ? 'bg-success text-white' : 
-                                                   ($withdrawal->status === 'REJECTED' ? 'bg-danger text-white' : 'bg-warning text-dark') }}">
-                                                {{ $withdrawal->status }}
-                                            </span>
-                                        </td>
-                                        <td class="receipt-links">
-                                            @if($withdrawal->receipt)
-                                                <a href="{{ $withdrawal->receipt }}" target="_blank" class="btn btn-success btn-sm">View</a>
-                                                <a href="{{ $withdrawal->receipt }}" download class="btn btn-secondary btn-sm">Download</a>
-                                            @else
-                                                <span class="text-muted">N/A</span>
-                                            @endif
-                                        </td>
-                                        <td>
-                                            <form class="receiptUploadForm" enctype="multipart/form-data">
-                                                <input type="hidden" name="withdrawal_id" value="{{ $withdrawal->id }}">
-                                                <input type="file" name="receipt" class="form-control form-control-sm receipt-file" required>
-                                                <button type="submit" class="btn btn-primary btn-sm mt-2 upload-btn">
-                                                    <span class="default-text">Upload</span>
-                                                    <span class="loading-text d-none">
-                                                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                                        Uploading...
-                                                    </span>
-                                                </button>
-                                            </form>
-                                        </td>
-                                    </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                        <div class="d-flex justify-content-center">
-                            {{ $withdrawals->links() }}
-                        </div>
-                    @endif
+            <div class="container py-5 d-flex flex-column align-items-center">
+                <div class="card shadow-lg p-4 withdraw-container">
+                    <div class="card-header bg-dark text-white text-center">
+                        <h4 class="mb-0 text-white">Admin - Manage Withdrawals</h4>
+                    </div>
+                    <div class="card-body">
+                        @if($withdrawals->isEmpty())
+                            <p class="text-center text-muted">No withdrawal requests.</p>
+                        @else
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th>Customer</th>
+                                            <th>Amount</th>
+                                            <th>Bank Name</th>
+                                            <th>Account Number</th>
+                                            <th>Account Name</th>
+                                            <th>Status</th>
+                                            <th>Receipt</th>
+                                            <th>Note</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach($withdrawals as $withdrawal)
+                                        <tr>
+                                            <td class="fw-bold">{{ $withdrawal->user->name }}</td>
+                                            <td class="fw-bold">₦{{ $withdrawal->amount }}</td>
+                                            <td class="fw-bold">{{ $withdrawal->bank_name }}</td>
+                                            <td class="fw-bold">{{ $withdrawal->account_number }}</td>
+                                            <td class="fw-bold">{{ $withdrawal->account_name }}</td>
+                                            <td>
+                                                <span class="status-badge 
+                                                    {{ $withdrawal->status === 'ACCEPTED' ? 'bg-success text-white' : 
+                                                       ($withdrawal->status === 'REJECTED' ? 'bg-danger text-white' : 'bg-warning text-dark') }}">
+                                                    {{ $withdrawal->status }}
+                                                </span>
+                                            </td>
+                                            <td class="receipt-links">
+                                                @if($withdrawal->receipt)
+                                                    <a href="{{ $withdrawal->receipt }}" target="_blank" class="btn btn-success btn-sm">View</a>
+                                                    <a href="{{ $withdrawal->receipt }}" download class="btn btn-secondary btn-sm">Download</a>
+                                                @else
+                                                    <span class="text-muted">N/A</span>
+                                                @endif
+                                            </td>
+                                           <td class="fw-bold" style="max-width: 500px; min-width: 350px; word-wrap: break-word; white-space: normal;">{{ $withdrawal->note }}</td>
+                                            <td>
+                                                <form class="manageWithdrawalForm" enctype="multipart/form-data">
+                                                    @csrf
+                                                    <input type="hidden" name="withdrawal_id" value="{{ $withdrawal->id }}">
+                                                    
+                                                    <!-- Status Selection -->
+                                                    <select name="status" class="form-select form-select-sm mb-2" required>
+                                                        <option value="PENDING" {{ $withdrawal->status === 'PENDING' ? 'selected' : '' }}>Pending</option>
+                                                        <option value="ACCEPTED" {{ $withdrawal->status === 'ACCEPTED' ? 'selected' : '' }}>Accepted</option>
+                                                        <option value="REJECTED" {{ $withdrawal->status === 'REJECTED' ? 'selected' : '' }}>Rejected</option>
+                                                    </select>
+                                                    
+                                                    <!-- Note Input -->
+                                                    <textarea name="note" class="form-control form-control-sm mb-2" placeholder="Add a note...">{{ $withdrawal->note }}</textarea>
+                                                    
+                                                    <!-- Receipt Upload -->
+                                                    <input type="file" name="receipt" class="form-control form-control-sm mb-2">
+                                                    
+                                                    <!-- Submit Button -->
+                                                    <button type="submit" class="btn btn-primary btn-sm">
+                                                        <span class="default-text">Update</span>
+                                                        <span class="loading-text d-none">
+                                                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                                            Updating...
+                                                        </span>
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="d-flex justify-content-center">
+                                {{ $withdrawals->links() }}
+                            </div>
+                        @endif
+                    </div>
                 </div>
             </div>
-        </div>
+
 
       </div>    
   </main>
@@ -136,47 +160,43 @@
 <!-- Add SweetAlert -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    <script>
-        $(document).ready(function() {
-            $('.receiptUploadForm').submit(function(e) {
-                e.preventDefault();
+<script>
+    $(document).ready(function() {
+        $('.manageWithdrawalForm').submit(function(e) {
+            e.preventDefault();
 
-                let form = $(this);
-                let fileInput = form.find('.receipt-file')[0].files[0];
-                let button = form.find('.upload-btn');
-                let formData = new FormData();
+            let form = $(this);
+            let formData = new FormData(this);
+            let button = form.find('button[type="submit"]');
 
-                formData.append('withdrawal_id', form.find('input[name="withdrawal_id"]').val());
-                formData.append('receipt', fileInput);
-                formData.append('_token', "{{ csrf_token() }}");
+            button.prop('disabled', true);
+            button.find('.default-text').addClass('d-none');
+            button.find('.loading-text').removeClass('d-none');
 
-                button.prop('disabled', true);
-                button.find('.default-text').addClass('d-none');
-                button.find('.loading-text').removeClass('d-none');
-
-                $.ajax({
-                    url: "{{ route('admin.uploadReceipt') }}",
-                    type: "POST",
-                    data: formData,
-                    processData: false,
-                    contentType: false,
-                    success: function(response) {
-                        Swal.fire('Success', response.message, 'success').then(() => {
-                            location.reload();
-                        });
-                    },
-                    error: function(xhr) {
-                        Swal.fire('Error', xhr.responseJSON.message, 'error');
-                    },
-                    complete: function() {
-                        button.prop('disabled', false);
-                        button.find('.default-text').removeClass('d-none');
-                        button.find('.loading-text').addClass('d-none');
-                    }
-                });
+            $.ajax({
+                url: "{{ route('admin.uploadReceipt') }}", 
+                type: "POST",
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    Swal.fire('Success', response.message, 'success').then(() => {
+                        location.reload();
+                    });
+                },
+                error: function(xhr) {
+                    Swal.fire('Error', xhr.responseJSON.message, 'error');
+                },
+                complete: function() {
+                    button.prop('disabled', false);
+                    button.find('.default-text').removeClass('d-none');
+                    button.find('.loading-text').addClass('d-none');
+                }
             });
         });
-    </script>
+    });
+</script>
+
 <script type="text/javascript">
 function searchTable() {
     // Get the input value and convert it to lowercase

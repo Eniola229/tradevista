@@ -3,6 +3,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Product;
 use App\Models\Category;
+use App\Models\Notification;
 use App\Models\ProductsAttribute;
 use App\Models\ProductsImage;
 use App\Models\Review;
@@ -17,15 +18,18 @@ $products = Product::where('status', 'ACTIVE')
                     ->get();
 
 $bestsellers = Product::where('status', 'ACTIVE')
-                    ->with('category')
-                    ->with('reviews')
-                    ->whereHas('reviews', function ($query) {
-                        // Ensure there are more than 5 reviews associated with the product
-                        $query->havingRaw('COUNT(*) > 5');
-                    })
-                    ->inRandomOrder() 
-                    ->take(5) 
-                    ->get();
+    ->with('category', 'reviews')
+    ->whereHas('reviews', function ($query) {
+        // Group by product_id to count reviews per product
+        $query->select('product_id')
+              ->groupBy('product_id')
+              ->havingRaw('COUNT(*) > 5');
+    })
+    ->inRandomOrder() 
+    ->take(5) 
+    ->get();
+
+                    
 $features = Product::where('status', 'ACTIVE')
                     ->where('is_featured', 'YES')
                     ->with('category')
@@ -43,11 +47,13 @@ $hots = Product::where('status', 'ACTIVE')
 
 
   $categories = Category::get();
+  $notifications = Notification::get();
 ?>
 
 
 @include('components.header')
 <body>
+    
     <!-- Page Preloder -->
     <div id="preloder">
         <div class="loader"></div>
@@ -56,10 +62,89 @@ $hots = Product::where('status', 'ACTIVE')
     <!-- Offcanvas Menu Begin -->
      @include('components.mobile-nav')
     <!-- Offcanvas Menu End -->
+    @php
+        $validNotifications = $notifications->where('expiry_date', '>', now())->filter(function ($notification) {
+            return $notification->type === 'GENERAL' || (auth()->check() && $notification->type === 'CUSTOMERS');
+        });
+    @endphp
+
+    @if ($validNotifications->isNotEmpty())
+<div style="position: fixed; top: 120px; left: 50%; transform: translateX(-50%); z-index: 1050; width: 500px; max-width: 90vw;">
+    <div id="notificationCarousel" class="carousel slide" data-bs-ride="carousel">
+        <div class="carousel-inner">
+            @foreach ($validNotifications as $key => $notification)
+                <div class="carousel-item {{ $key == 0 ? 'active' : '' }}">
+                    <div class="alert alert-primary shadow-lg p-4 rounded d-flex flex-column text-white bg-opacity-75" style="background-color: #007bff;">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <i class="fa fa-bell fa-lg me-2"></i>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+
+                        @if(!empty($notification->type))
+                            <span class="badge bg-warning text-dark align-self-start mb-3 px-3 py-2 fs-6 rounded-pill">{{ $notification->type }}</span>
+                        @endif
+
+                        @if(!empty($notification->image_url))
+                            <div class="text-center mb-3">
+                                <img src="{{ $notification->image_url }}"
+                                     class="img-fluid rounded"
+                                     style="max-height: 150px; object-fit: cover;"
+                                     alt="Notification Image">
+                            </div>
+                        @endif
+
+                        <h4 class="fw-bold text-center text-white fs-4 mb-2">Special Notification</h4>
+                        <p class="fw-bold text-center fs-5">{{ $notification->description }}</p>
+
+                        @if($notification->links)
+                            <div class="text-center mt-3">
+                                <a href="{{ $notification->links }}" class="btn btn-light btn-sm px-4 py-2 fw-bold" target="_blank">
+                                    Learn More
+                                </a>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            @endforeach
+        </div>
+
+        <!-- Carousel Controls Styled -->
+            <button class="carousel-control-prev" type="button" data-bs-target="#notificationCarousel" data-bs-slide="prev"
+                style="width: 35px; height: 35px; background-color: #000; border-radius: 50%; top: 50%; transform: translateY(-50%); opacity: 0.8;">
+                <span class="carousel-control-prev-icon" aria-hidden="true"
+                    style="background-size: 70% 70%; filter: invert(1);"></span>
+            </button>
+
+            <button class="carousel-control-next" type="button" data-bs-target="#notificationCarousel" data-bs-slide="next"
+                style="width: 35px; height: 35px; background-color: #000; border-radius: 50%; top: 50%; transform: translateY(-50%); opacity: 0.8;">
+                <span class="carousel-control-next-icon" aria-hidden="true"
+                    style="background-size: 70% 70%; filter: invert(1);"></span>
+            </button>
+
+    </div>
+</div>
+
+
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                var notificationCarousel = new bootstrap.Carousel(document.querySelector("#notificationCarousel"), {
+                    interval: 5000,
+                    pause: "hover",
+                    wrap: true
+                });
+
+                // Auto-hide after 10 seconds
+                setTimeout(() => {
+                    document.getElementById("notificationWrapper").style.display = "none";
+                }, 10000);
+            });
+        </script>
+    @endif
 
     <!-- Header Section Begin -->
     @include('components.nav-link')
     <!-- Header Section End -->
+
 
     <!-- Categories Section Begin -->
 <!--     <section class="categories">
@@ -152,6 +237,7 @@ $hots = Product::where('status', 'ACTIVE')
 </section>
 <!-- Banner Section End -->
 <!-- Product Section Begin -->
+
 <section class="product spad">
     <div class="container">
         <div class="row">

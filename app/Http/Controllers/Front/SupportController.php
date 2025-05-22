@@ -31,30 +31,29 @@ class SupportController extends Controller
         $request->validate([
             'message' => 'required|string',
             'problem_type' => 'required|string',
-            'image' => 'nullable|string|image|max:5000'
+            'image' => 'nullable|image|max:5000'
         ]);
 
-            // Handle Image Upload
-            if ($request->hasFile('image')) {
-                $uploadCloudinary = cloudinary()->upload(
-                    $request->file('image')->getRealPath(),
-                    [
-                        'folder' => 'tradevista/user/support/image',
-                        'resource_type' => 'auto',
-                    ]
-                );
+        $imageUrl = null;
+        $imageID = null;
 
-                // Get the URL and Public ID (Image ID)
-                $imageUrl = $uploadCloudinary->getSecurePath(); // This is the image URL
-                $imageID = $uploadCloudinary->getPublicId();   // This is the image ID
+        // Handle Image Upload
+        if ($request->hasFile('image')) {
+            $uploadCloudinary = cloudinary()->upload(
+                $request->file('image')->getRealPath(),
+                [
+                    'folder' => 'tradevista/user/support/image',
+                    'resource_type' => 'auto',
+                ]
+            );
 
-                // Save the image URL and ID to the ticket model
-                $ticket->image_url = $imageUrl;
-                $ticket->image_id = $imageID;
-            }
+            // Get the URL and Public ID (Image ID)
+            $imageUrl = $uploadCloudinary->getSecurePath(); // This is the image URL
+            $imageID = $uploadCloudinary->getPublicId();   // This is the image ID
+        }
 
-            $uuid = Str::uuid()->toString();
-            $shortUuid = substr($uuid, 0, 6);
+        $uuid = Str::uuid()->toString();
+        $shortUuid = substr($uuid, 0, 6);
 
         $ticket = Support::create([
             'user_id' => Auth::id(),
@@ -64,6 +63,8 @@ class SupportController extends Controller
             'problem_type' => $request->problem_type,
             'message' => $request->message,
             'answer' => null,
+            'image_url' => $imageUrl,
+            'image_id' => $imageID
         ]);
 
         return response()->json(['message' => 'Support ticket created successfully', 'ticket' => $ticket]);

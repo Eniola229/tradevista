@@ -15,9 +15,12 @@ return new class extends Migration
             $table->uuid('id')->primary(); // UUID as primary key
             $table->uuid('user_id');
             $table->string('transaction_id')->unique();
+            $table->string('shipping_charges')->nullable();
+            $table->string('courier_name')->nullable();
             $table->enum('payment_status', ['PAID', 'PENDING', 'FAILED'])->default('PENDING');
             $table->enum('delivery_status', ['Processing', 'Shipped', 'Delivered', 'Cancelled'])->default('Processing');
             $table->text('shipping_address');
+            $table->text('order_note');
             $table->decimal('total_weight', 10, 2)->default(0);
             $table->decimal('subtotal', 10, 2);
             $table->decimal('total', 10, 2);

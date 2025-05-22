@@ -65,31 +65,53 @@ class RegisteredUserController extends Controller
             // Check if 'referer' exists in the URL
             if ($request->has('referer')) {
                 $refererEmail = $request->input('referer');
-                // Find the user by their email
                 $user_referer = User::where('email', $refererEmail)->first();
 
                 if ($user_referer) {
-                    // Increment the balance by 100
+                    // Give ₦100 to the direct referrer (Mr B)
                     $user_referer->balance += 100;
                     $user_referer->save();
 
-                     // Log payment
-                    $payment = Referer::create([
+                    // Save referer relationship
+                    Referer::create([
                         'user_id' => $user_referer->id,
                         'referer_id' => $user->id,
                     ]);
 
-                    // Log payment
-                    $payment = Payment::create([
+                    // Log payment for direct referral
+                    Payment::create([
                         'user_id' => $user_referer->id,
                         'currency' => "NGN",
                         'amount' => 100,
-                        'description' => "REFERER BONUS",
+                        'description' => "DIRECT REFERER BONUS",
                         'payment_method' => "PAYSTACK",
                         'status' => "PAID",
                     ]);
-                } 
+
+                    // Check if Mr B (the direct referrer) also has a referrer (Mr A)
+                    $grand_referer = Referer::where('referer_id', $user_referer->id)->first();
+
+                    if ($grand_referer) {
+                        $grand_referer_user = User::find($grand_referer->user_id);
+                        if ($grand_referer_user) {
+                            // Give ₦50 to the indirect referrer (Mr A)
+                            $grand_referer_user->balance += 50;
+                            $grand_referer_user->save();
+
+                            // Log payment for indirect referral
+                            Payment::create([
+                                'user_id' => $grand_referer_user->id,
+                                'currency' => "NGN",
+                                'amount' => 50,
+                                'description' => "INDIRECT REFERER BONUS",
+                                'payment_method' => "PAYSTACK",
+                                'status' => "PAID",
+                            ]);
+                        }
+                    }
+                }
             }
+
 
 
             // Fire registered event and log in user
@@ -97,7 +119,7 @@ class RegisteredUserController extends Controller
             Auth::login($user);
 
             // Redirect to dashboard
-            return redirect()->route('dashboard');
+            return redirect()->route('verification.notice')->with('message', 'Please verify your email before logging in.');
         }
 
 }

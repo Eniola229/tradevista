@@ -63,7 +63,7 @@
                     <div class="product__details__text">
                         <h3>{{ $product->product_name }} <h6>Brand: {{ $setup->company_name }}</h6></h3>
                         <h6>Address: {{ $setup->address }}</h6><br>
-                       <span>You can contact the seller to place an order, <span style="color: red;">(though we recommend placing all orders online for security purposes)</span></span>
+                       <span>We recommend placing all orders online</span>
                         <h6>{{ $setup->company_mobile_1 }} | {{ $setup->company_mobile_1 }}</h6>
                         <div class="rating">
                             @if($reviews->isNotEmpty())
@@ -182,7 +182,7 @@
                         <div class="tab-content">
                             <div class="tab-pane active" id="tabs-1" role="tabpanel">
                                 <h6>Description</h6>
-                                <p>{{ $product->product_description }}</p>
+                                <p>{!! strip_tags($product->product_description, '<p><a><strong><em><ul><li><br>') !!}</p>
                             </div>
                             <div class="tab-pane" id="tabs-2" role="tabpanel">
                                 <h6>Meta Description</h6>

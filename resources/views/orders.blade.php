@@ -85,7 +85,7 @@
             @foreach($orders as $order)
                 <tr>
                     <td>
-                        <h6 class="mb-0 text-sm">{{ $order->id }}</h6>
+                        <h6 class="mb-0 text-sm">#{{ $order->transaction_id }}</h6>
                     </td>
                     <td>
                         <h6 class="mb-0 text-sm">₦ {{ number_format($order->total, 2) }}</h6>

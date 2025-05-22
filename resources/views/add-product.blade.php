@@ -20,6 +20,9 @@
 
   <!-- Nepcha Analytics -->
   <script defer data-site="YOUR_DOMAIN_HERE" src="https://api.nepcha.com/js/nepcha-analytics.js"></script>
+
+  <!-----rich text editor--->
+  <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
 </head>
 
 <body class="g-sidenav-show  bg-gray-100">
@@ -53,7 +56,7 @@
 
                 <!-- Product Price -->
                 <div class="col-md-6 mb-3">
-                    <label for="product_price" class="form-label">Product Price <span style="color: red;">(Kindly Note that on every product, we take 15% of the price as our charges)</span></label>
+                    <label for="product_price" class="form-label">Product Price <span style="color: red;">(Kindly Note that on every product, we take 9.5% of the price as our charges)</span></label>
                     <input type="number" id="product_price" name="product_price" class="form-control" value="{{ old('product_price', $productdata->product_price ?? '') }}" required>
                 </div>
 
@@ -72,22 +75,23 @@
 
                 <!-- Product Weight -->
                 <div class="col-md-6 mb-3">
-                    <label for="product_weight" class="form-label">Product Weight</label>
-                    <input type="text" id="product_weight" name="product_weight" class="form-control" value="{{ old('product_weight', $productdata->product_weight ?? '') }}" required>
+                    <label for="product_weight" class="form-label">Product Weight <span style="color: red;">In Kg</span></label>
+                    <input type="number" id="product_weight" name="product_weight" class="form-control" value="{{ old('product_weight', $productdata->product_weight ?? '') }}" required>
                 </div>
 
                 <!-- Product Discount -->
                 <div class="col-md-6 mb-3">
-                    <label for="product_discount" class="form-label">Product Discount <span style="color: red;">(Kindly Note that this will be use as the new price for the product)</span></label>
-                    <input type="text" id="product_discount" name="product_discount" class="form-control" value="{{ old('product_discount', $productdata->product_discount ?? '') }}" required>
+                    <label for="product_discount" class="form-label">Product Discount <span style="color: red;">(Please note that this will be the new price for the product. If there is no discount, simply leave it as 0.)</span></label>
+                    <input type="number" value="0" id="product_discount" name="product_discount" class="form-control" value="{{ old('product_discount', $productdata->product_discount ?? '') }}" required>
                 </div>
 
                 <!-- Product Description -->
                 <div class="col-12 mb-3">
                     <label for="product_description" class="form-label">Product Description</label>
-                    <textarea id="product_description" name="product_description" class="form-control" rows="4">{{ old('product_description', $productdata->product_description ?? '') }}</textarea>
+                    <textarea id="product_description" name="product_description" class="form-control" rows="4">
+                        {{ old('product_description', $productdata->product_description ?? '') }}
+                    </textarea>
                 </div>
-
                 <!-- Category -->
                
                     <div class="col-md-6 mb-3">
@@ -170,6 +174,23 @@
 <script src="{{ asset('assets/js/plugins/perfect-scrollbar.min.js') }}"></script>
 <script src="{{ asset('assets/js/plugins/smooth-scrollbar.min.js') }}"></script>
 <script src="{{ asset('assets/js/plugins/chartjs.min.js') }}"></script>
+<script type="text/javascript">
+    document.addEventListener("DOMContentLoaded", function () {
+        const inputNames = ["product_price", "shipping_fee", "stock", "product_weight", "product_discount"];
+        
+        inputNames.forEach(name => {
+            document.querySelectorAll(`input[name="${name}"]`).forEach(input => {
+                input.addEventListener("input", function () {
+                    this.value = this.value.replace(/[^0-9.]/g, ""); // Allow only numbers and decimal points
+                });
+            });
+        });
+    });
+</script>
+<script src="https://cdn.ckeditor.com/4.20.0/standard/ckeditor.js"></script>
+<script>
+    CKEDITOR.replace('product_description');
+</script>
 <script>
     document.getElementById('productForm').addEventListener('submit', function(event) {
         var categorySelect = document.getElementById('categorySelect');

@@ -40,6 +40,9 @@ class Order extends Model
         'total_weight',
         'subtotal',
         'total',
+        'order_note',
+        'shipping_charges',
+        'courier_name'
     ];
 
     public function user()

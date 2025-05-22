@@ -54,4 +54,18 @@ class AdminProductController extends Controller
         return redirect()->back()->with('message', 'Product status has been updated.');
     }
 
+    public function deleteProduct(Request $request)
+    {
+        $product = Product::find($request->product_id);
+
+        if (!$product) {
+            return redirect()->back()->with('error', 'Product not found.');
+        }
+
+        $product->delete();
+
+        return redirect()->route('admin.products')->with('success', 'Product deleted successfully.');
+    }
+
+
 }

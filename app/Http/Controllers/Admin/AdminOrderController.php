@@ -16,9 +16,9 @@ public function index()
 {
     $orders = Order::with([
         'user', 
-        'orderProducts.product', // ✅ Fixed relationship name
+        'orderProducts.product', 
         'shippingAddress', 
-        'orderProducts.product.seller' // ✅ Fixed relationship name
+        'orderProducts.product.seller' 
     ])
     ->whereNotNull('user_id')
     ->orderBy('created_at', 'desc')
@@ -43,7 +43,7 @@ public function index()
             'orderProducts.product',
             'shippingAddress',
             'orderProducts.product.seller'
-        ])->findOrFail($id);
+        ])->findOrFail($id); 
 
         // Attach seller details from the setup table
         foreach ($order->orderProducts as $orderProduct) {

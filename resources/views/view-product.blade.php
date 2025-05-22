@@ -271,7 +271,7 @@
                         <div class="tab-content">
                             <div class="tab-pane active" id="tabs-1" role="tabpanel">
                                 <h6>Description</h6>
-                                <p>{{ $product->product_description }}</p>
+                                <p>{!! strip_tags($product->product_description, '<p><a><strong><em><ul><li><br>') !!}</p>
                             </div>
                             <div class="tab-pane" id="tabs-2" role="tabpanel">
                                 <h6>Meta Description</h6>

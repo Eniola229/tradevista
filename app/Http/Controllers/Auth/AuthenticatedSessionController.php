@@ -33,6 +33,11 @@ class AuthenticatedSessionController extends Controller
             // Retrieve the logged-in user
             $user = $request->user();
 
+            // Check if the user's email is verified
+            if (!$user->hasVerifiedEmail()) {
+                return redirect()->route('verification.notice')->with('error', 'Please verify your email before proceeding.');
+            }
+
             // Retrieve the session ID
             $sessionId = $request->session()->getId();
 

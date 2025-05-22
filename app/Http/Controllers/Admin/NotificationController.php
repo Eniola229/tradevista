@@ -10,6 +10,7 @@ use App\Models\Admin;
 use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Http\RedirectResponse;
+use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 
 class NotificationController extends Controller
 {
@@ -31,24 +32,45 @@ class NotificationController extends Controller
             'expiry_date' => 'required|string|max:255',
             'description' => 'required|string|max:255',
             'links' => 'nullable|url|string|max:255',
+            'type' => 'required|in:GENERAL,CUSTOMERS',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
         $data = $request->all();
 
-        // Use the 'id' only if it exists, otherwise, create a new record
-        $category = Notification::updateOrCreate(
-            [
-                'id' => $data['id'] ?? null, 
-            ],
+        $imageUrl = null;
+        $imageID = null;
+
+        // Upload to Cloudinary if image is present
+        if ($request->hasFile('image')) {
+            $uploadCloudinary = cloudinary()->upload(
+                $request->file('image')->getRealPath(),
+                [
+                    'folder' => 'notifications',
+                    'resource_type' => 'image',
+                ]
+            );
+
+            $imageUrl = $uploadCloudinary->getSecurePath();
+            $imageID = $uploadCloudinary->getPublicId();
+        }
+
+        // Create or update the notification
+        Notification::updateOrCreate(
+            ['id' => $data['id'] ?? null],
             [
                 'expiry_date' => $data['expiry_date'],
                 'description' => $data['description'],
                 'links' => $data['links'],
+                'type' => $data['type'],
+                'image_url' => $imageUrl,
+                'image_id' => $imageID,
             ]
         );
 
-        return redirect()->back()->with('message', 'Great! The notification have been added and sent to all customer successfully.');
+        return redirect()->back()->with('message', 'Great! The notification has been added and sent successfully.');
     }
+
 
 
         public function delete($id)

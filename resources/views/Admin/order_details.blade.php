@@ -52,11 +52,12 @@
 
     <!-- Order Information -->
     <div class="card p-4 mb-4 shadow">
-        <h4>Order ID: <strong>#{{ $order->id }}</strong></h4>
+        <h4>Order ID: <strong>#{{ $order->transaction_id }}</strong></h4>
         <p><strong>Customer Name:</strong> {{ $order->user->name }}</p>
         <p><strong>Email:</strong> {{ $order->user->email }}</p>
         <p><strong>Total:</strong> ₦{{ number_format($order->total, 2) }}</p>
         <p><strong>Status:</strong> {{ ucfirst($order->delivery_status) }}</p>
+        <p><strong>Order Note:</strong> {{ ucfirst($order->order_note ?? 'N/A') }}</p>
 
         <!-- Delivery Status Dropdown -->
         <label for="delivery_status"><strong>Delivery Status:</strong></label>
@@ -69,10 +70,17 @@
     </div>
 
     <!-- Shipping Address -->
-    <div class="card p-4 mb-4 shadow">
-        <h4>Shipping Address</h4>
-        <p>{{ $order->shipping_address ?? 'N/A' }}</p>
+    <div class="card mb-4 shadow-sm border-0">
+        <div class="card-body">
+            <h5 class="card-title mb-3 text-primary fw-bold">Shipping Address</h5>
+            <ul class="list-unstyled mb-0">
+                <li><strong>Address:</strong> {{ $order->shipping_address ?? 'N/A' }}</li>
+                <li><strong>Courier:</strong> {{ $order->courier_name ?? 'N/A' }}</li>
+                <li><strong>Charges:</strong> ₦{{ number_format($order->shipping_charges ?? 0, 2) }}</li>
+            </ul>
+        </div>
     </div>
+
 
     <!-- Order Products -->
     <h4 class="mt-4">Order Products</h4>

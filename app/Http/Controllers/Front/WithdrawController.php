@@ -21,13 +21,10 @@ class WithdrawController extends Controller
 
     public function withdraw(Request $request)
     {
-        // Fetch user balance, order history, and setup
         $user = Auth::user();
         $userBalance = User::where('id', $user->id)->first();
-        $userOrder = Order::where('user_id', $user->id)->get();
-        $userSetup = Setup::where('user_id', $user->id)->first(); // Fetch a single setup
+        $userSetup = Setup::where('user_id', $user->id)->first();
 
-        // Check if user has a setup
         if (!$userSetup || !$userSetup->account_type) {
             return response()->json([
                 'status' => 'error',
@@ -35,7 +32,6 @@ class WithdrawController extends Controller
             ], 400);
         }
 
-        // Check for sufficient balance
         if (!$userBalance || $userBalance->balance < 1000) {
             return response()->json([
                 'status' => 'error',
@@ -43,11 +39,9 @@ class WithdrawController extends Controller
             ], 400);
         }
 
-        // Logic for seller or buyer
         if ($userSetup->account_type === 'SELLER') {
             $hasSoldProduct = Order::where('user_id', $user->id)->exists();
             $hasBoughtProduct = Order::where('user_id', $user->id)->exists();
-
             if (!$hasSoldProduct && !$hasBoughtProduct) {
                 return response()->json([
                     'status' => 'error',
@@ -56,7 +50,6 @@ class WithdrawController extends Controller
             }
         } elseif ($userSetup->account_type === 'BUYER') {
             $totalPurchase = Order::where('user_id', $user->id)->sum('total');
-            
             if ($totalPurchase < 1000) {
                 return response()->json([
                     'status' => 'error',
@@ -71,24 +64,31 @@ class WithdrawController extends Controller
         }
 
         $amount = $request->input('amount');
+        $accountNumber = $request->input('account_number');
+        $bankName = $request->input('bank_name');
+        $accountName = $request->input('account_name');
 
         if ($amount > $userBalance->balance) {
             return response()->json(['status' => 'error', 'message' => 'Withdrawal amount exceeds balance!'], 400);
         }
 
-        // Deduct balance
         $userBalance->balance -= $amount;
         $userBalance->save();
 
-        // Store withdrawal request
-        Withdraw::create([
-            'user_id' => Auth::id(),
+        $withdraw = Withdraw::create([
+            'user_id' => $user->id,
             'amount' => $amount,
-            'status' => 'PENDING'
+            'status' => 'PENDING',
+            'account_number' => $accountNumber,
+            'bank_name' => $bankName,
+            'account_name' => $accountName,
+            'receipt' => null, // Initially null until admin uploads
+            'receipt_id' => null,
         ]);
 
         return response()->json(['status' => 'success', 'message' => 'Withdrawal requested successfully!']);
     }
+
 
     public function uploadReceipt(Request $request, $id)
     {

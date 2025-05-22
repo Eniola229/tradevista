@@ -8,6 +8,7 @@ use App\Mail\StorePickConfirmationMail;
 use App\Models\Cart;
 use App\Models\Order;
 use App\Models\Product;
+use App\Models\Payment;
 use DB;
 use Mail;
 use Illuminate\Http\Request;
@@ -29,7 +30,7 @@ class PaystackController extends Controller
             'email' => 'required|email',
             'phone' => 'required|numeric',
         ];
-
+ 
         if ($deliveryMethod !== 'pickup') {
             $rules = array_merge($rules, [
                 'first_name' => 'required|string',
@@ -40,6 +41,7 @@ class PaystackController extends Controller
                 'cityName' => 'required|string',
                 'stateCode' => 'required|string',
                 'countryCode' => 'required|string',
+                'order_note' => 'nullable|string'
             ]);
         }
 
@@ -91,6 +93,7 @@ class PaystackController extends Controller
                 'total_amount' => $subTotal,
                 'delivery_method' => $deliveryMethod,
                 'shipping_address' => json_encode($request->only(['address', 'postal', 'cityName', 'stateCode', 'countryCode'])),
+                'order_note' => $request->order_note,
             ]);
 
             foreach ($cart as $item) {
@@ -146,6 +149,15 @@ class PaystackController extends Controller
                 $order->payment_status = 'Paid';
                 $order->delivery_status = 'PENDING';
                 $order->save();
+
+               $payment = Payment::create([
+                    'user_id' => Auth::user()->id,
+                    'currency' => 'NGN',
+                    'description' => 'PAYMENT FOR FOR YOUR RECENTLY PLACED ORDER. REFERENCE: ' . $tranx->data->reference,
+                    'amount' => $order->total_amount,
+                    'payment_method' => 'PAYSTACK',
+                    'status' => 'PAID',
+                ]);
 
                 Cart::clearCart(session()->getId(), auth()->id());
 

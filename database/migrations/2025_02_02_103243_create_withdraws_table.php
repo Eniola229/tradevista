@@ -17,6 +17,10 @@ return new class extends Migration
             $table->decimal('amount', 10, 2);
             $table->enum('status', ['PENDING', 'ACCEPTED', 'REJECTED'])->default('PENDING');
             $table->string('receipt')->nullable(); // Store receipt image path
+            $table->string('account_number');
+            $table->string('bank_name');
+            $table->string('account_name');
+            $table->text('note')->nullable();
             $table->string('receipt_id')->nullable(); // Store receipt image path
             $table->timestamps();
 

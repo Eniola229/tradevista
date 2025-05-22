@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('product_name');
             $table->string('product_code')->nullable();
             $table->string('product_color')->nullable();
-            $table->string('product_description')->nullable();
+            $table->text('product_description')->nullable();
             $table->decimal('product_price', 8, 2)->nullable();
             $table->unsignedBigInteger('stock')->nullable();
             $table->decimal('product_discount', 8, 2)->nullable();
@@ -35,7 +35,7 @@ return new class extends Migration
             $table->string('video_url')->nullable();
             $table->text('description')->nullable();
             $table->string('meta_title')->nullable();
-            $table->string('meta_description')->nullable();
+            $table->text('meta_description')->nullable();
             $table->string('meta_keywords')->nullable();
             $table->enum('is_featured', ['No', 'Yes']);
             $table->enum('status', ['ACTIVE', 'INACTIVE'])->nullable();

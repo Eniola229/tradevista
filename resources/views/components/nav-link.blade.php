@@ -100,7 +100,18 @@ $categories = Category::get();
                         <div class="header__right__auth">
                             @if(Auth::check())
                                 <!-- Show profile if the user is authenticated -->
-                                <a href="{{ url('dashboard') }}">Dashbaord</a>
+                              @if(auth()->check() && auth()->user()->email_verified_at)
+                                    <a href="{{ url('dashboard') }}">Dashboard</a>
+                                @else
+                                    <script>
+                                        Swal.fire({
+                                            icon: 'warning',
+                                            title: 'Account Not Verified',
+                                            text: 'Please verify your account to access the dashboard.',
+                                            confirmButtonText: 'OK'
+                                        });
+                                    </script>
+                                @endif
                             @else
                                 <!-- Show login and register links if the user is not authenticated -->
                                 <a href="{{ url('login') }}">Login</a>

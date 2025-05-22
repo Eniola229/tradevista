@@ -21,7 +21,7 @@
   <link id="pagestyle" href="{{ asset('assets/css/soft-ui-dashboard.css?v=1.0.7') }}" rel="stylesheet">
 
   <!-- Nepcha Analytics -->
-  <script defer data-site="YOUR_DOMAIN_HERE" src="https://api.nepcha.com/js/nepcha-analytics.js"></script>
+  <script defer data-site="www.tradevista.biz" src="https://api.nepcha.com/js/nepcha-analytics.js"></script>
 </head>
 
 <body class="g-sidenav-show  bg-gray-100">
@@ -38,7 +38,7 @@
               <div class="row">
                 <div class="col-8">
                   <div class="numbers">
-                    <p class="text-sm mb-0 text-capitalize font-weight-bold">Account Balance</p>
+                    <p class="text-sm mb-0 text-capitalize font-weight-bold">Total Balance</p>
                     <h5 class="font-weight-bolder mb-0">
                    
                      @php
@@ -137,13 +137,18 @@
         </div>
       </div>
 
-      <!-----Notification slide show----->
 <!-----Notification slide show----->
-@if ($notifications->where('expiry_date', '>', now())->isNotEmpty())
+@php
+    $validNotifications = $notifications->where('expiry_date', '>', now())->filter(function ($notification) {
+        return $notification->type === 'GENERAL' || (auth()->check() && $notification->type === 'CUSTOMERS');
+    });
+@endphp
+
+@if ($validNotifications->isNotEmpty())
     <div id="notificationWrapper" class="position-fixed top-0 start-50 translate-middle-x w-100 mt-3 z-index-1050">
         <div id="notificationCarousel" class="carousel slide" data-bs-ride="carousel">
             <div class="carousel-inner">
-                @foreach ($notifications->where('expiry_date', '>', now()) as $key => $notification)
+                @foreach ($validNotifications as $key => $notification)
                     <div class="carousel-item {{ $key == 0 ? 'active' : '' }}">
                         <div class="container">
                             <div class="row justify-content-center">
@@ -153,15 +158,32 @@
                                             <i class="fa fa-bell fa-lg me-2"></i>
                                             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
                                         </div>
-                                        <h4 class="fw-bold mt-2 text-center text-white">Special Notification</h4>
+
+                                        {{-- Type Badge --}}
+                                        @if(!empty($notification->type))
+                                            <span class="badge bg-warning text-dark align-self-start mb-2">{{ $notification->type }}</span>
+                                        @endif
+
+                                        {{-- Image (small & responsive) --}}
+                                        @if(!empty($notification->image_url))
+                                            <div class="text-center mb-2">
+                                                <img src="{{ $notification->image_url }}"
+                                                     class="img-fluid rounded"
+                                                     style="max-height: 250px; object-fit: cover;"
+                                                     alt="Notification Image">
+                                            </div>
+                                        @endif
+
+                                        <h4 class="fw-bold text-center text-white">Special Notification</h4>
                                         <p class="fw-bold mt-2 text-center">{{ $notification->description }}</p>
-                                        <div class="text-center mt-2">
-                                            @if($notification->links)
+
+                                        @if($notification->links)
+                                            <div class="text-center mt-2">
                                                 <a href="{{ $notification->links }}" class="btn btn-light btn-sm" target="_blank">
                                                     Learn More
                                                 </a>
-                                            @endif
-                                        </div>
+                                            </div>
+                                        @endif
                                     </div>
                                 </div>
                             </div>
@@ -183,9 +205,9 @@
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             var notificationCarousel = new bootstrap.Carousel(document.querySelector("#notificationCarousel"), {
-                interval: 5000, // Change notification every 5 seconds
-                pause: "hover", // Pause on hover
-                wrap: true // Loop notifications
+                interval: 5000,
+                pause: "hover",
+                wrap: true
             });
 
             // Auto-hide after 10 seconds
@@ -195,6 +217,7 @@
         });
     </script>
 @endif
+
 
     <!-----End of Notification slide show----->
     <!-----Errror messages----->

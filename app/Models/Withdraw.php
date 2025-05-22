@@ -29,7 +29,7 @@ class Withdraw extends Model
         });
     }
 
-    protected $fillable = ['user_id', 'amount', 'status', 'receipt', 'receipt_id'];
+    protected $fillable = ['user_id', 'amount', 'status', 'receipt', 'receipt_id', 'account_number', 'bank_name', 'account_name', 'note'];
 
     public function user()
     {

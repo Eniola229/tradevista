@@ -33,7 +33,7 @@ public function index()
         ->unique('product_id'); // Ensure no duplicates by product_id
 
     if ($cartItems->isEmpty()) {
-        return redirect()->back()->with('info', 'Your cart is empty.');
+        return redirect()->back()->with('message', 'Your cart is empty.');
     }
 
     $countries = "NIGERIA";
@@ -48,7 +48,7 @@ public function index()
         // Get the seller's user_id (assuming product has a `user_id` field that represents the seller)
         $sellerId = $product->user_id;  // This is the seller's user_id for the current product
 
-        // Optionally, get seller details (like name, email, etc.) if you need them later
+        // get seller details
         $seller = User::find($sellerId);  // Fetch seller user details
 
         $discountedPrice = Product::getDiscountedPrice($product->id);
@@ -70,12 +70,12 @@ public function index()
             'size' => $item->size,
             'weight' => $itemWeight,
             'seller_id' => $sellerId, // Add seller_id to cart data
-            'seller_name' => $seller ? $seller->name : 'Unknown Seller', // Optional: Add seller's name
+            'seller_name' => $seller ? $seller->name : 'Unknown Seller', //Add seller's name
         ];
     }
 
 
-    return view('checkout', compact('countries', 'cart', 'subTotal', 'totalWeight', 'store', 'deliveryAddress', 'address'));
+    return view('checkout', compact('countries', 'cart', 'subTotal', 'totalWeight', 'store', 'deliveryAddress', 'address', 'user'));
 }
 
 

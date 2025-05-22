@@ -14,7 +14,7 @@ class UsersController extends Controller
 {
    public function index(Request $request)
     {
-        $users = User::orderBy('created_at', 'desc')->get();
+        $users = User::orderBy('created_at', 'desc')->paginate(10);
 
         // Pass the collection to the view
         return view('admin.users', compact('users'));
@@ -24,9 +24,9 @@ class UsersController extends Controller
     {
        $user = User::with('setup')->findOrFail($id);
        $setup = $user->setup;
-       $products = Product::where('user_id', $id)->paginate(5);
-       $payments = Payment::where('user_id', $id)->paginate(5);
-       $orders = Order::where('user_id', $id)->paginate(5);
+       $products = Product::where('user_id', $id)->orderBy('created_at', 'desc')->paginate(5);
+       $payments = Payment::where('user_id', $id)->orderBy('created_at', 'desc')->paginate(5);
+       $orders = Order::where('user_id', $id)->orderBy('created_at', 'desc')->paginate(5);
         return view('admin.view-user', compact('user', 'setup', 'products', 'payments', 'orders'));
     }
 }

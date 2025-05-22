@@ -68,24 +68,47 @@
 
                 <h3 class="text-center">Add New Notification</h3>
                 <div class="card p-4">
-                    <form action="{{ route('admin-add-notification') }}" method="post">
-                      @csrf
+                    <form action="{{ route('admin-add-notification') }}" method="post" enctype="multipart/form-data">
+                        @csrf
 
-                        <!-- First and Last Name -->
+                        <!-- Expiry Date and Description -->
                         <div class="row mb-3">
                             <div class="col-sm-6">
-                                <label for="fname" class="form-label">Expity Date and Time<span class="text-danger"> *</span></label>
-                                <input type="datetime-local" value="{{ old('expiry_date') }}" class="form-control" id="expiry_date" name="expiry_date" placeholder="Enter expiry_date">
+                                <label for="expiry_date" class="form-label">Expiry Date and Time <span class="text-danger">*</span></label>
+                                <input type="datetime-local" value="{{ old('expiry_date') }}" class="form-control" id="expiry_date" name="expiry_date" required>
                             </div>
                             <div class="col-sm-6">
-                                <label for="description" class="form-label">Description<span class="text-danger"> *</span></label>
-                                <textarea type="email" class="form-control" id="description" name="description" placeholder="Enter description">{{ old('description') }}</textarea>
+                                <label for="description" class="form-label">Description <span class="text-danger">*</span></label>
+                                <textarea class="form-control" id="description" name="description" placeholder="Enter description" required>{{ old('description') }}</textarea>
                             </div>
                         </div>
+
+                        <!-- Type Selector -->
+                        <div class="row mb-3">
                             <div class="col-sm-6">
-                                <label for="fname" class="form-label">Link<span class="text-danger"></span></label>
+                                <label for="type" class="form-label">Notification Type <span class="text-danger">*</span></label>
+                                <select class="form-select" id="type" name="type" required>
+                                    <option value="">Select type</option>
+                                    <option value="GENERAL">GENERAL</option>
+                                    <option value="CUSTOMERS">CUSTOMERS</option>
+                                </select>
+                            </div>
+
+                            <!-- Link -->
+                            <div class="col-sm-6">
+                                <label for="link" class="form-label">Link</label>
                                 <input type="text" value="{{ old('links') }}" class="form-control" id="link" name="links" placeholder="Enter link">
                             </div>
+                        </div>
+
+                        <!-- Upload Image -->
+                        <div class="row mb-4">
+                            <div class="col-sm-6">
+                                <label for="image" class="form-label">Upload Image</label>
+                                <input type="file" name="image" id="image" class="form-control" accept="image/*">
+                            </div>
+                        </div>
+
                         <!-- Submit Button -->
                         <div class="row">
                             <div class="col-sm-6 ms-auto">
@@ -93,6 +116,7 @@
                             </div>
                         </div>
                     </form>
+
                 </div>
             </div>
         </div>

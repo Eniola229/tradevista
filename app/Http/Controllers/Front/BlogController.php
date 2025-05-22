@@ -25,6 +25,11 @@ class BlogController extends Controller
     {
         return view('about');
     }
+
+    public function policy(Request $request)
+    {
+        return view('use-policy');
+    }
         // Store contact form submission
     public function storeContact(Request $request)
     {

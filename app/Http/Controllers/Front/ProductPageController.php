@@ -157,15 +157,17 @@ class ProductPageController extends Controller
 
 
             $bestsellers = Product::where('status', 'ACTIVE')
-                                ->with('category')
-                                ->with('reviews')
-                                ->whereHas('reviews', function ($query) {
-                                    // Ensure there are more than 5 reviews associated with the product
-                                    $query->havingRaw('COUNT(*) > 5');
-                                })
-                                ->inRandomOrder() 
-                                ->take(5) 
-                                ->get();
+                ->with('category', 'reviews')
+                ->whereHas('reviews', function ($query) {
+                    // Group by product_id to count reviews per product
+                    $query->select('product_id')
+                          ->groupBy('product_id')
+                          ->havingRaw('COUNT(*) > 5');
+                })
+                ->inRandomOrder() 
+                ->take(5) 
+                ->get();
+
             $features = Product::where('status', 'ACTIVE')
                                 ->where('is_featured', 'YES')
                                 ->with('category')

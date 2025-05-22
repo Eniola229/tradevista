@@ -75,6 +75,7 @@
                           <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Customer Name</th>
                           <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Customer Email</th>
                           <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Status</th>
+                          <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Image</th>
                           <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Date Requested</th>
                           <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Action</th>
                         </tr>
@@ -98,7 +99,9 @@
                                 <td>
                                     <h6 class="mb-0 text-sm {{ $support->status === 'ISSUE FIXED' ? 'text-success' : 'text-danger' }}">{{ $support->status }}</h6>
                                 </td>
+                                <td><a href="{{ $support->image_url }}" target="_blank">View</a></td>
                                 <td>
+                                     
                                     <div class="d-flex px-2 py-1">
                                         <div class="d-flex flex-column justify-content-center">
                                             <h6 class="mb-0 text-sm">{{ $support->created_at->format('F j, Y g:i A') }}</h6>

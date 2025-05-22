@@ -136,6 +136,10 @@
                             <button type="button" class="cart-btn" id="toggleProductStatus" onclick="changeProductStatus('{{ $product->id }}', '{{ $product->status }}')">
                                 {{ $product->status == 'ACTIVE' ? 'Deactivate Product' : 'Activate Product' }}
                             </button>
+<!--                             <button type="button" class="cart-btn" id="deleteProduct" onclick="deleteProduct('{{ $product->id }}')">
+                                Delete
+                            </button>
+ -->
 
                          
 
@@ -201,7 +205,7 @@
                         <div class="tab-content">
                             <div class="tab-pane active" id="tabs-1" role="tabpanel">
                                 <h6>Description</h6>
-                                <p>{{ $product->product_description }}</p>
+                                <p>{!! strip_tags($product->product_description, '<p><a><strong><em><ul><li><br>') !!}</p>
                             </div>
                             <div class="tab-pane" id="tabs-2" role="tabpanel">
                                 <h6>Meta Description</h6>
@@ -247,6 +251,23 @@
             }
         });
     }
+    
+    function deleteProduct(productId) {
+    Swal.fire({
+        title: 'Are you sure?',
+        text: 'This action cannot be undone!',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, delete it!',
+        cancelButtonText: 'No, cancel!',
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Redirect to a route with GET method
+            window.location.href = `/admin/delete-product?product_id=${productId}`;
+        }
+    });
+}
+
 </script>
   <!--   Core JS Files   -->
 <script src="{{ asset('js/jquery-3.3.1.min.js') }}"></script>

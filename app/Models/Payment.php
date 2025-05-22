@@ -51,6 +51,8 @@ class Payment extends Authenticatable
         'description',
         'payment_method',
         'status',
+        'BANK TRANSFER',
+        'REFUND'
     ];
 
 }

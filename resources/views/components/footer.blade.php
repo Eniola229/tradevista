@@ -21,8 +21,8 @@ document.querySelectorAll('.view-product-btn').forEach(button => {
                     </div>
                     <p>Connecting buyers and sellers...</p>
                     <div class="footer__payment">
-                        <a href="#"><img src="img/payment/payment-1.png" alt=""></a>
-                        <a href="#"><img src="img/payment/payment-2.png" alt=""></a>
+                        <a href="#"><img src="https://assets.paystack.com/assets/img/hero/paystack-opengraph.png" height="50" width="50" style="border-radius: 50%;" alt=""></a><!-- 
+                        <a href="#"><img src="img/payment/payment-2.png" alt=""></a> -->
                     </div>
                 </div>
             </div>
@@ -33,6 +33,7 @@ document.querySelectorAll('.view-product-btn').forEach(button => {
                         <li><a href="{{ url('about') }}">About</a></li>
                         <li><a href="{{ url('blogs') }}">Blogs</a></li>
                         <li><a href="{{ url('contact') }}">Contact</a></li>
+                        <li><a href="{{ url('use-policy') }}">Acceptable Use Policy</a></li>
                         <li><a href="#">FAQ</a></li>
                     </ul>
                 </div>
@@ -67,7 +68,7 @@ document.querySelectorAll('.view-product-btn').forEach(button => {
                         <button type="submit" class="site-btn">Subscribe</button>
                     </form>
                     <div class="footer__social">
-                        <a href="#"><i class="fa fa-facebook"></i></a>
+                        <a href="https://web.facebook.com/profile.php?id=61572441363277"><i class="fa fa-facebook"></i></a>
                         <a href="#"><i class="fa fa-whatsapp"></i></a>
                     </div>
                 </div>
@@ -75,7 +76,6 @@ document.querySelectorAll('.view-product-btn').forEach(button => {
         </div>
         <div class="row">
             <div class="col-lg-12">
-                <!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
                 <div class="footer__copyright__text">
                     <p>Copyright &copy; <script>document.write(new Date().getFullYear());</script> All rights reserved | Built by AfricTech
                 </div>

@@ -41,26 +41,30 @@
         </div>
     @endif
 
-<div class="container mt-4">
-    <div class="card p-3 shadow-lg">
-        <h4 class="text-primary fw-bold">Order Details</h4>
+<div class="container my-5">
+    <div class="card p-4 shadow-sm border-0">
+        <h4 class="text-primary fw-bold border-bottom pb-2">Order Details</h4>
+        
         <div class="card-body">
-            <h5 class="fw-bold">Order ID: <span class="text-muted">#{{ $order->id }}</span></h5>
-            <p><strong>Total Price:</strong> <span class="text-dark">₦{{ number_format($order->total_price, 2) }}</span></p>
-            <p>
+            <h5 class="fw-bold">Order ID: <span class="text-muted">#{{ $order->transaction_id }}</span></h5>
+            <p class="mb-2"><strong>Total Price:</strong> <span class="text-dark">₦{{ number_format($order->total, 2) }} (Shipping fee included)</span></p>
+            <p class="mb-2">
                 <strong>Payment Status:</strong> 
                 <span class="fw-bold {{ $order->payment_status === 'PAID' ? 'text-success' : 'text-danger' }}">
                     {{ $order->payment_status }}
                 </span>
             </p>
-            <p><strong>Delivery Status:</strong> <span class="text-info">{{ $order->delivery_status }}</span></p>
-            <p><strong>Date Added:</strong> <span class="text-secondary">{{ $order->created_at->format('F j, Y g:i A') }}</span></p>
+            <p class="mb-2"><strong>Delivery Status:</strong> <span class="text-info">{{ $order->delivery_status }}</span></p>
+            <p class="mb-2"><strong>Courier Name:</strong> <span class="text-info">{{ $order->courier_name }}</span></p>
+            <p class="mb-2"><strong>Shipping Fee:</strong> <span class="text-dark">₦{{ number_format($order->shipping_charges, 2) }} </span></p>
+            <p class="mb-2"><strong>Date Added:</strong> <span class="text-secondary">{{ $order->created_at->format('F j, Y g:i A') }}</span></p>
+            <p><strong>Order Note:</strong> <span class="text-secondary">{{ $order->order_note ?? 'N/A' }}</span></p>
         </div>
 
-        <h5 class="mt-4 text-primary fw-bold">Ordered Products</h5>
+        <h5 class="mt-4 text-primary fw-bold border-bottom pb-2">Ordered Products</h5>
 
         <div class="table-responsive">
-            <table class="table table-striped table-bordered">
+            <table class="table table-hover table-bordered align-middle">
                 <thead class="bg-primary text-white">
                     <tr>
                         <th>Product Name</th>
@@ -77,25 +81,28 @@
                             $totalAmount += $subtotal;
                         @endphp
                         <tr>
-                            <td>{{ $orderProduct->product->product_name ?? 'Unknown Product' }}</td>
+                            <td class="fw-medium">{{ $orderProduct->product->product_name ?? 'Unknown Product' }}</td>
                             <td>₦{{ number_format($orderProduct->product_price, 2) }}</td>
-                            <td>{{ $orderProduct->product_qty }}</td>
-                            <td>₦{{ number_format($subtotal, 2) }}</td>
+                            <td class="text-center">{{ $orderProduct->product_qty }}</td>
+                            <td class="fw-bold text-success">₦{{ number_format($subtotal, 2) }}</td>
                         </tr>
                     @endforeach
                 </tbody>
                 <tfoot>
-                    <tr class="bg-light">
+                    <tr class="bg-light fw-bold">
                         <th colspan="3" class="text-end">Grand Total:</th>
-                        <th class="text-dark fw-bold">₦{{ number_format($totalAmount, 2) }}</th>
+                        <th class="text-dark">₦{{ number_format($totalAmount, 2) }}</th>
                     </tr>
                 </tfoot>
             </table>
         </div>
     </div>
 
-    <a href="{{ url('/user/orders') }}" class="btn btn-primary mt-3 shadow">Back to Orders</a>
+    <div class="text-center mt-4">
+        <a href="{{ url('/user/orders') }}" class="btn btn-primary px-4 py-2 shadow-sm fw-bold">Back to Orders</a>
+    </div>
 </div>
+
 
     </main>
 

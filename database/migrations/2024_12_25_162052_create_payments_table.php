@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('description'); 
             $table->decimal('amount', 15, 2);
             $table->string('reference')->nullable();
-            $table->enum('payment_method', ['INTERSWTICH', 'PAYSTACK',])->default('PAYSTACK');
+            $table->enum('payment_method', ['INTERSWTICH', 'PAYSTACK', 'REFUND', 'BANK TRANSFER'])->default('PAYSTACK');
             $table->enum('status', ['PENDING', 'PAID', 'FAILED'])->default('PENDING');
             $table->timestamps();
 

@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Auth;
 
 class ShippingController extends Controller
 {
-      public function calculateShipping(Request $request)
+    public function calculateShipping(Request $request)
     {
         $request->validate([
             'stateCode' => 'required|string|max:255'
@@ -28,7 +28,10 @@ class ShippingController extends Controller
             return response()->json(['success' => false, 'message' => 'Your cart is empty!'], 400);
         }
 
-        $shippingPrices = [];
+        $sellerShippingPrices = []; // Stores shipping price per seller
+
+        // Keep track of sellers we have already added shipping for
+        $processedSellers = [];
 
         foreach ($cartItems as $cartItem) {
             $product = Product::find($cartItem->product_id);
@@ -43,6 +46,11 @@ class ShippingController extends Controller
                 continue;
             }
 
+            // If we've already processed this seller, skip
+            if (in_array($seller->id, $processedSellers)) {
+                continue;
+            }
+
             $startup = Setup::where('user_id', $seller->id)->first();
 
             if (!$startup) {
@@ -51,23 +59,27 @@ class ShippingController extends Controller
 
             $sellerState = $startup->state;
 
-            // Check if there's a shipping price for this route
+            // Check if there's a shipping price for this seller's route
             $statePrice = StatePrice::where('origin', $sellerState)
                 ->where('destination', $shippingState)
                 ->first();
 
             if ($statePrice) {
-                $shippingPrices[] = $statePrice->price;
+                // Store only the first shipping price per seller
+                $sellerShippingPrices[$seller->id] = $statePrice->price;
+                $processedSellers[] = $seller->id; // Mark seller as processed
             }
         }
 
-        if (empty($shippingPrices)) {
+        if (empty($sellerShippingPrices)) {
             return response()->json(['success' => false, 'message' => 'No shipping price found for the selected state.'], 404);
         }
 
-        // Get the highest shipping price (assuming multiple products might have different shipping costs)
-        $maxPrice = max($shippingPrices);
+        // Sum up unique seller shipping prices
+        $totalShipping = array_sum($sellerShippingPrices);
 
-        return response()->json(['success' => true, 'price' => $maxPrice]);
+        return response()->json(['success' => true, 'price' => $totalShipping]);
     }
+
+
 }

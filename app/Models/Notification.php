@@ -48,6 +48,9 @@ class Notification extends Authenticatable
         'expiry_date',
         'description',
         'links',
+        'type',
+        'image_url',
+        'image_id',
     ];
 
 }

@@ -49,6 +49,7 @@ Route::post('/contact', [BlogController::class, 'storeContact']);
 Route::post('/newsletter', [BlogController::class, 'storeNewsletter']);
 Route::get('/blog', [BlogController::class, 'blogs']);
 Route::get('/about', [BlogController::class, 'about']);
+Route::get('/use-policy', [BlogController::class, 'policy']);
 
 //WISHLIST
 Route::prefix('wishlist')->controller(WishlistController::class)->group(function () {
@@ -158,12 +159,13 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
  Route::get('/products', [AdminProductController::class, 'index'])->name('admin.products');
  Route::get('/view/product/{id}', [AdminProductController::class, 'view'])->name('admin.view-products');
  Route::get('/change-product-status', [AdminProductController::class, 'changeStatus']);
+ Route::get('/delete-product', [AdminProductController::class, 'deleteProduct'])->name('admin.deleteProduct');
  Route::get('/users', [UsersController::class, 'index'])->name('admin.users');
  Route::get('/view/user/{id}', [UsersController::class, 'view'])->name('admin.view-user');
  Route::get('/support', [SupportTicketController::class, 'index'])->name('support');
  Route::post('/support/answer/{id}', [SupportTicketController::class, 'answer'])->name('support.answer');
  Route::get('/withdraw', [WIthdraweralController::class, 'index'])->name('withdraw');
- Route::post('/upload-receipt', [WIthdraweralController::class, 'uploadReceipt'])->name('admin.uploadReceipt');
+ Route::post('/upload-receipt', [WIthdraweralController::class, 'manageWithdrawal'])->name('admin.uploadReceipt');
  Route::resource('state_prices', StatePriceController::class);
  Route::get('/orders', [AdminOrderController::class, 'index'])->name('orders.index');
  Route::get('/orders/{id}', [AdminOrderController::class, 'show'])->name('orders.show');

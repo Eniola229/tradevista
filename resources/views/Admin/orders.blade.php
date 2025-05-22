@@ -67,7 +67,7 @@
         <tbody id="orderTableBody">
             @foreach ($orders as $order)
                 <tr>
-                    <td>{{ $order->id }}</td>
+                    <td>#{{ $order->transaction_id }}</td>
                     <td>{{ $order->user->name }}</td>
                     <td>₦{{ number_format($order->total, 2) }}</td>
                     <td>
