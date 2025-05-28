@@ -40,7 +40,9 @@ class SetupController extends Controller
 
         $notifications = Notification::all();
 
-        return view('dashboard', compact('setup', 'DeliveredOrder', 'pendingOrder', 'payments', 'pendingPayment', 'productCount', 'notifications'));
+        $contestant = \App\Models\Contestant::where('email', auth()->user()->email)->first();
+
+        return view('dashboard', compact('setup', 'DeliveredOrder', 'pendingOrder', 'payments', 'pendingPayment', 'productCount', 'notifications', 'contestant'));
 
     }
 

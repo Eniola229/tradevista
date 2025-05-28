@@ -40,6 +40,54 @@ use App\Models\Product;
         color: #007bff;
     }
     </style>
+    <style>
+    /* Loading spinner animation */
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    .spinner-border {
+        display: inline-block;
+        width: 1rem;
+        height: 1rem;
+        vertical-align: text-bottom;
+        border: 0.2em solid currentColor;
+        border-right-color: transparent;
+        border-radius: 50%;
+        animation: spin 0.75s linear infinite;
+    }
+
+    /* Disabled button state */
+    .btn:disabled {
+        opacity: 0.65;
+        cursor: not-allowed;
+    }
+
+    /* Shipping method cards */
+    .shipping-method-card {
+        transition: all 0.3s ease;
+    }
+
+    .shipping-method-card:hover {
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    }
+
+    #addressSuggestions {
+        display: none;
+        max-height: 200px;
+        overflow-y: auto;
+        cursor: pointer;
+    }
+
+    #addressSuggestions li:hover {
+        background-color: #f1f1f1;
+    }
+
+    .input-error {
+        border: 1px solid red !important;
+    }
+</style>
    <!-- Breadcrumb Begin -->
     <div class="breadcrumb-option">
         <div class="container">
@@ -95,13 +143,13 @@ use App\Models\Product;
                 <div class="col-lg-6 col-md-6 col-sm-6">
                     <div class="checkout__form__input">
                         <p>First Name <span>*</span></p>
-                        <input type="text" name="first_name" value="{{ explode(' ', Auth::user()->name)[0] }}">
+                        <input type="text" name="first_name" id="firstname" value="{{ explode(' ', Auth::user()->name)[0] }}">
                     </div>
                 </div>
                 <div class="col-lg-6 col-md-6 col-sm-6">
                     <div class="checkout__form__input">
                         <p>Last Name <span>*</span></p>
-                        <input type="text" name="last_name" value="{{ count(explode(' ', Auth::user()->name)) > 1 ? explode(' ', Auth::user()->name)[1] : null }}" required>
+                        <input type="text" name="last_name" id="lastname" value="{{ count(explode(' ', Auth::user()->name)) > 1 ? explode(' ', Auth::user()->name)[1] : null }}" required>
                     </div>
                 </div>
 
@@ -112,12 +160,13 @@ use App\Models\Product;
                     </div>
                     <div class="checkout__form__input">
                         <p>Address <span>*</span></p>
-                        <input type="text" placeholder="Street Address" value="{{ isset($address) ? $address->address : '' }}" name="shipping_address" required>
-                        <input type="text" placeholder="Apartment. suite, etc (Optional)" name="address" >
+                        <input type="text" placeholder="Street Address" value="{{ isset($address) ? $address->address : '' }}" name="shipping_address" id="toAddress" required>
+                        <ul id="addressSuggestions" class="list-group position-absolute w-80" style="z-index: 1000;"></ul>
+                       
                     </div>
                     <div class="checkout__form__input">
                         <p>Town/City <span>*</span></p>
-                        <input type="text" value="{{ isset($address) ? $address->town_city : '' }}" name="cityName" required>
+                        <input type="text" value="{{ isset($address) ? $address->town_city : '' }}" name="citySelect" placeholder="City" name="cityName" required>
                     </div>
                     <div class="checkout__form__input" style="position: relative;">
                         <p>State <span>*</span></p>
@@ -126,6 +175,7 @@ use App\Models\Product;
                             id="shippingState" 
                             name="stateCode" 
                             value="{{ old('stateCode', isset($address) ? $address->state : '') }}" 
+                            id="toState"
                             required 
                             placeholder="Select State"
                             autocomplete="off"
@@ -154,13 +204,13 @@ use App\Models\Product;
                     </div>
                     <div class="checkout__form__input">
                         <p>Postcode/Zip <span>*</span></p>
-                        <input type="text" value="{{ isset($address) ? $address->zip : '' }}" name="zip" required>
+                        <input type="readonly" placeholder="postal code" value="{{ isset($address) ? $address->zip : '' }}" id="postal" name="zip" required>
                     </div>
                 </div>
                 <div class="col-lg-6 col-md-6 col-sm-6">
                     <div class="checkout__form__input">
                         <p>Phone <span>*</span></p>
-                        <input type="text" name="phone" value="{{ isset($user) ? $user->phone_number : '' }}" required>
+                        <input type="text" id="phone" name="phone" value="{{ isset($user) ? $user->phone_number : '' }}" required>
                     </div> 
                 </div>
                 <div class="col-lg-6 col-md-6 col-sm-6">
@@ -169,6 +219,32 @@ use App\Models\Product;
                         <input type="text" name="email" value="{{ isset($user) ? $user->email : '' }}" required>
                     </div>
                 </div>
+                <!------Calculate shipping--->
+                            <div id="shipping-method" >
+                                <div class="container mt-4">
+                                    <h6 class="font-bold" style="font-size: 1.4rem">Shipping method</h6>
+                                    
+                                    <button id="calculateShippingBtn" class="site-btn mt-2">
+                                        Calculate Shipping
+                                    </button>
+
+                                    <div id="noShippingMethods" class="border rounded p-3 bg-light text-danger" 
+                                         style="font-size: 1.2rem;">
+                                        Enter your valid shipping address to view available shipping methods.
+                                    </div>
+                                </div>
+
+                                <div class="text-center" id="loadingIndicator" style="display: none;">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Loading rates...</span>
+                                    </div>
+                                    <p class="mt-2">Calculating shipping options...</p>
+                                </div>
+
+                                <div class="container my-4">
+                                    <div id="shippingMethodsContainer"></div>
+                                </div>
+                            </div>
 
                 <div class="col-lg-12">
                     <div class="checkout__form__checkbox">
@@ -226,7 +302,6 @@ use App\Models\Product;
                     </div>
                 </div>
             </div>
-            <button type="button" id="calculateRates" class="site-btn">Calculate Rates</button>
             <ul id="shippingForm" class="mt-4 list-group">
             <!-- Shipping methods will be dynamically added here -->
             </ul>
@@ -270,6 +345,312 @@ use App\Models\Product;
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://js.paystack.co/v1/inline.js"></script>
+<script>
+ window.cartItems = {!! json_encode($cart) !!};
+
+let debounceTimer;
+
+function highlightIfEmpty(selector) {
+    const input = $(selector);
+    if (!input.val().trim()) {
+        input.addClass('input-error');
+        return true;
+    } else {
+        input.removeClass('input-error');
+        return false;
+    }
+}
+
+// Make address details readonly
+$(document).ready(function () {
+    $('#toCity').prop('readonly', true);
+    $('#toState').prop('readonly', true);
+    $('input[name="country"]').prop('readonly', true);
+    $('#postal').prop('readonly', true);
+});
+
+$('#toAddress').on('input', function () {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+        const address = $('#toAddress').val().trim();
+        const firstname = $('#firstname').val().trim();
+        const lastname = $('#lastname').val().trim();
+        const phone = $('#phone').val().trim();
+        const email = $('input[name="email"]').val().trim();
+
+        const hasError = [
+            highlightIfEmpty('#firstname'),
+            highlightIfEmpty('#lastname'),
+            highlightIfEmpty('#phone'),
+            highlightIfEmpty('input[name="email"]'),
+            highlightIfEmpty('#toAddress')
+        ].includes(true);
+
+        if (hasError) {
+            $('#addressSuggestions').hide().empty();
+            return;
+        }
+
+        if (address.length > 4) {
+            // Show loading message
+            $('#addressSuggestions').empty().show().append(`
+                <li class="list-group-item text-muted">Validating address...</li>
+            `);
+
+            $.ajax({
+                url: '/validate-address',
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                data: {
+                    name: firstname + ' ' + lastname,
+                    email: email,
+                    phone: phone,
+                    address: address
+                },
+                success: function (response) {
+                    const data = response.data;
+
+                    $('#addressSuggestions').empty().show().append(`
+                        <li class="list-group-item suggestion-item" data-address='${JSON.stringify(data)}'>
+                            ${data.formatted_address}
+                        </li>
+                    `);
+                },
+                error: function (xhr) {
+                    let message = "We couldn’t validate your address. Please use Google Maps to confirm it, then copy and paste it here.";
+
+                    $('#addressSuggestions').empty().show().append(`
+                        <span class="text-danger fw-bold d-block px-2 py-1">${message}</span>
+                    `);
+                }
+            });
+        } else {
+            $('#addressSuggestions').hide().empty();
+        }
+    }, 500);
+});
+
+// Fill form fields when suggestion is selected
+$(document).on('click', '.suggestion-item', function () {
+    const data = $(this).data('address');
+
+    $('#toAddress').val(data.formatted_address);
+    $('#toCity').val(data.city);
+    $('#toState').val(data.state);
+    $('input[name="country"]').val(data.country);
+    $('#postal').val(data.address_code);
+
+    $('#addressSuggestions').hide().empty();
+});
+</script>
+
+<script>
+ window.cartItems = @json(array_values($cart));
+document.addEventListener('DOMContentLoaded', function () {
+    const calculateShippingBtn = document.getElementById('calculateShippingBtn');
+    const toStateInput = document.getElementById('toState');
+    const toCityInput = document.getElementById('toCity');
+    const toAddressInput = document.getElementById('toAddress');
+    const postalInput = document.getElementById('postal');
+    const shippingMethodSection = document.getElementById('shipping-method');
+    const loadingIndicator = document.getElementById('loadingIndicator');
+    const shippingMethodsContainer = document.getElementById('shippingMethodsContainer');
+
+  
+    const originalSubTotal = {{ $subTotal }};
+
+    calculateShippingBtn.addEventListener('click', async function () {
+        const toState = toStateInput.value.trim();
+        const toCity = toCityInput.value.trim();
+        const toAddress = toAddressInput.value.trim();
+        const postal = postalInput.value.trim();
+
+        if (!toState || !toCity || !toAddress || !postal) {
+            showError('Please fill in all fields (state, city, address, and postal code)');
+            return;
+        }
+
+        startLoading();
+
+        try {
+            const response = await fetch('/calculate-shipping', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({
+                    receiver: {
+                        state: toState,
+                        city: toCity,
+                        address: toAddress,
+                        postal: postal
+                    },
+                    items: getCartItemsWithDimensions()
+                })
+            });
+
+            const data = await response.json();
+
+            console.log('Backend response:', data);
+
+            if (!response.ok) throw new Error(data.message || 'Failed to calculate shipping');
+            if (!data.data.couriers || data.data.couriers.length === 0) {
+                showNoMethodsAvailable();
+                return;
+            }
+
+            displayShippingMethods(data.data.couriers);
+        } catch (error) {
+            showError(error.message);
+        } finally {
+            stopLoading();
+        }
+    });
+
+    function startLoading() {
+        loadingIndicator.style.display = 'block';
+        shippingMethodsContainer.innerHTML = '';
+        calculateShippingBtn.disabled = true;
+        calculateShippingBtn.innerHTML = 'Calculating...';
+    }
+
+    function stopLoading() {
+        loadingIndicator.style.display = 'none';
+        calculateShippingBtn.disabled = false;
+        calculateShippingBtn.innerHTML = 'Calculate Shipping';
+    }
+
+    function showError(message) {
+        shippingMethodsContainer.innerHTML = `
+            <div class="alert alert-danger mt-3">${message}</div>
+        `;
+    }
+
+    function showNoMethodsAvailable() {
+        shippingMethodsContainer.innerHTML = `
+            <div class="alert alert-warning mt-3">No shipping methods available for this address</div>
+        `;
+    }
+
+    function displayShippingMethods(couriers) {
+        let html = '<h5 class="mt-3">Available Shipping Methods:</h5>';
+        couriers.forEach((courier, index) => {
+            html += `
+            <div class="card mb-3 shipping-option" style="border: 2px solid #ccc; border-radius: 12px; transition: border-color 0.3s; cursor: pointer;">
+              <div class="card-body d-flex flex-column flex-md-row align-items-md-center justify-content-between">
+                <div class="form-check" style="flex-grow: 1;">
+                  <input class="form-check-input shipping-radio" type="radio" name="shippingMethod"
+                    value="${courier.courier_id}" data-total="${courier.total}" id="ship-${index}" ${index === 0 ? 'checked' : ''}>
+                   <input class="form-check-input shipping-radio" type="hidden" name="shippingPrice"
+                    value="${courier.total}" data-total="${courier.total}" id="shippingPrice">
+                  <label class="form-check-label" for="ship-${index}" style="cursor: pointer;">
+                    <strong>${courier.courier_name}</strong><br>
+                    <span>₦${Number(courier.total).toLocaleString()}</span><br>
+                    <small>Delivery ETA: ${courier.delivery_eta}</small><br>
+                    <small>Pickup ETA: ${courier.pickup_eta}</small><br>
+                    <small style="color: red;">Discount: ${courier.discount.discounted}${courier.discount.symbol}</small>
+                  </label>
+                </div>
+                <div class="text-center mt-3 mt-md-0">
+                  <img src="${courier.courier_image}" alt="${courier.courier_name}" width="80" style="border-radius: 6px;">
+                </div>
+              </div>
+            </div>
+
+            `;
+        });
+        shippingMethodsContainer.innerHTML = html;
+
+        
+        updateTotalWithShipping();
+        document.querySelectorAll('.shipping-radio').forEach(input => {
+            input.addEventListener('change', updateTotalWithShipping);
+        });
+    }
+
+  
+    function updateTotalWithShipping() {
+        const selected = document.querySelector('.shipping-radio:checked');
+        const shippingFee = selected ? parseFloat(selected.dataset.total) : 0;
+
+      
+        const shippingDisplay = document.getElementById('selected-shipping-fee');
+        if (shippingDisplay) {
+            shippingDisplay.textContent = `₦${shippingFee.toLocaleString()}`;
+        }
+
+       
+        const totalDisplay = document.getElementById('total-amount');
+        if (totalDisplay) {
+            const newTotal = originalSubTotal + shippingFee;
+            totalDisplay.textContent = newTotal.toLocaleString();
+        }
+    }
+
+    function getCartItemsWithDimensions() {
+        const items = Array.isArray(window.cartItems) ? window.cartItems : [];
+
+        const result = items.map(item => {
+            const name = item.product_name;
+            const amount = item.product_price;
+
+            if (!name || amount === undefined || amount === null) {
+                console.warn("Invalid cart item:", item);
+                return null;
+            }
+
+            return {
+                name,
+                description: item.description || 'No description',
+                unit_weight: String(item.unit_weight || '1.0'), // cast to string
+                unit_amount: String(amount), // cast to string
+                quantity: parseInt(item.quantity || 1),
+                dimension: {
+                    length: parseInt(item.length || 10),
+                    width: parseInt(item.width || 10),
+                    height: parseInt(item.height || 10)
+                }
+            };
+        }).filter(item => item !== null);
+
+        console.log("Validated Cart Items:", result);
+        return result;
+    }
+});
+
+document.querySelectorAll('.shipping-option').forEach(option => {
+  option.addEventListener('click', function (e) {
+    // Prevent double triggering if clicking the radio directly
+    const radio = this.querySelector('.shipping-radio');
+
+    // Set this radio to checked
+    radio.checked = true;
+
+    // Remove green border from all
+    document.querySelectorAll('.shipping-option').forEach(opt => {
+      opt.style.borderColor = '#ccc';
+      opt.querySelector('.form-check-input').style.accentColor = '';
+    });
+
+    // Add green border to selected
+    this.style.borderColor = 'green';
+    radio.style.accentColor = 'green';
+  });
+});
+
+// On page load, highlight already checked one
+document.querySelectorAll('.shipping-option').forEach(option => {
+  const radio = option.querySelector('.shipping-radio');
+  if (radio.checked) {
+    option.style.borderColor = 'green';
+    radio.style.accentColor = 'green';
+  }
+});
+</script>
+
 <script>
 $(document).ready(function () {
     $('#placeOrderBtn').click(function (event) {
@@ -401,65 +782,64 @@ $(document).ready(function () {
         }
     });
 
-    $(document).ready(function () {
-        $('#calculateRates').click(function () {
-            let shippingState = $('#shippingState').val().trim();
+    // $(document).ready(function () {
+    //     $('#calculateRates').click(function () {
+    //         let shippingState = $('#shippingState').val().trim();
             
-            if (shippingState === '') {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'Please enter a state before calculating rates!',
-                });
-                return;
-            }
+    //         if (shippingState === '') {
+    //             Swal.fire({
+    //                 icon: 'error',
+    //                 title: 'Error',
+    //                 text: 'Please enter a state before calculating rates!',
+    //             });
+    //             return;
+    //         }
 
-            $('#loading').removeClass('d-none'); // Show loading message
+    //         $('#loading').removeClass('d-none'); // Show loading message
 
-            $.ajax({
-                url: "{{ route('calculate.shipping') }}",
-                type: "POST",
-                data: {
-                    stateCode: shippingState,
-                    _token: "{{ csrf_token() }}"
-                },
-                success: function (response) {
-                    $('#loading').addClass('d-none'); // Hide loading message
+    //         $.ajax({
+    //             url: "{{ route('calculate.shipping') }}",
+    //             type: "POST",
+    //             data: {
+    //                 stateCode: shippingState,
+    //                 _token: "{{ csrf_token() }}"
+    //             },
+    //             success: function (response) {
+    //                 $('#loading').addClass('d-none'); // Hide loading message
 
-                    if (response.success) {
-                        let shippingPrice = response.price;
-                        let subTotal = parseFloat("{{ $subTotal }}".replace(/,/g, '')); // Convert subtotal from Blade
+    //                 if (response.success) {
+    //                     let shippingPrice = response.price;
+    //                     let subTotal = parseFloat("{{ $subTotal }}".replace(/,/g, '')); // Convert subtotal from Blade
 
-                        let totalAmount = subTotal + shippingPrice; // Calculate new total
+    //                     let totalAmount = subTotal + shippingPrice; // Calculate new total
 
-                        // Update shipping price in UI
-                        $('#rate').text(`₦ ${shippingPrice.toLocaleString()}`);
-                        $('#totalAmount').text(`₦ ${totalAmount.toLocaleString()}`);
+    //                     // Update shipping price in UI
+    //                     $('#rate').text(`₦ ${shippingPrice.toLocaleString()}`);
+    //                     $('#totalAmount').text(`₦ ${totalAmount.toLocaleString()}`);
 
-                        // Add shipping price inside #shippingForm
-                        let priceList = `<li class="list-group-item">Shipping Price: ₦${shippingPrice.toLocaleString()}</li>`;
-                        $('#shippingForm').html(priceList); // Replace existing content
-                    } else {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error',
-                            text: response.message,
-                        });
-                    }
-                },
-                error: function (xhr) {
-                    $('#loading').addClass('d-none');
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: xhr.responseJSON?.message || "Something went wrong!",
-                    });
-                }
-            });
-        });
-    });
+    //                     // Add shipping price inside #shippingForm
+    //                     let priceList = `<li class="list-group-item">Shipping Price: ₦${shippingPrice.toLocaleString()}</li>`;
+    //                     $('#shippingForm').html(priceList); // Replace existing content
+    //                 } else {
+    //                     Swal.fire({
+    //                         icon: 'error',
+    //                         title: 'Error',
+    //                         text: response.message,
+    //                     });
+    //                 }
+    //             },
+    //             error: function (xhr) {
+    //                 $('#loading').addClass('d-none');
+    //                 Swal.fire({
+    //                     icon: 'error',
+    //                     title: 'Error',
+    //                     text: xhr.responseJSON?.message || "Something went wrong!",
+    //                 });
+    //             }
+    //         });
+    //     });
+    // });
 </script>
-
 
 
 <script>

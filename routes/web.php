@@ -15,6 +15,7 @@ use App\Http\Controllers\Admin\WIthdraweralController;
 use App\Http\Controllers\Admin\StatePriceController;
 use App\Http\Controllers\Admin\AdminOrderController;
 use App\Http\Controllers\Admin\NotificationController;
+use App\Http\Controllers\Admin\GiveawayController;
 
 //USER
 use App\Http\Controllers\Front\SetupController;
@@ -31,15 +32,16 @@ use App\Http\Controllers\Front\WithdrawController;
 use App\Http\Controllers\Front\OrderController;
 use App\Http\Controllers\Front\BusOrdersController;
 use App\Http\Controllers\Front\ReviewController;
+use App\Http\Controllers\Front\ContestantController;
 use App\Http\Controllers\LocationController;
+use App\Http\Controllers\VoteController;
 
 
 Route::get('/', function () {
     return view('welcome');
 });
 
-//ALL THIS ROUTE ARE FOR PLACING ORDERS, PLS KINDLY WATCH WHEN HANDLING THEM. I INTENTIONAL MADE IT OPEN (JOSHUA ADEYEMI --- AFRICTECH --- 08035906313)    
-Route::post('/calculate-shipping', [ShippingController::class, 'calculateShipping'])->name('calculate.shipping');
+
 Route::post('/verify-payment', [OrderController::class, 'verifyPayment'])->name('verify.payment');
 Route::post('/place-order', [OrderController::class, 'placeOrder'])->name('place.order');
 
@@ -50,6 +52,10 @@ Route::post('/newsletter', [BlogController::class, 'storeNewsletter']);
 Route::get('/blog', [BlogController::class, 'blogs']);
 Route::get('/about', [BlogController::class, 'about']);
 Route::get('/use-policy', [BlogController::class, 'policy']);
+
+//SHIPPING
+Route::post('/validate-address', [ShippingController::class, 'validateAddress']);
+Route::post('/calculate-shipping', [ShippingController::class, 'calculateShipping'])->name('calculate.shipping');
 
 //WISHLIST
 Route::prefix('wishlist')->controller(WishlistController::class)->group(function () {
@@ -83,6 +89,12 @@ Route::prefix('carts')->controller(CartController::class)->group(function () {
     Route::get('/cart/decrease', 'update_decrease_cart')->name('update.decrease.cart');
 
 });
+// Voting
+Route::get('/vote/{link}', [VoteController::class, 'showVotePage'])->name('vote.page');
+Route::post('/vote/{link}/cast', [VoteController::class, 'castVote'])->name('vote.cast');
+
+// Results
+Route::get('/results', [VoteController::class, 'results'])->name('vote.results');
 
 //COUNTRY AND CITIES 
 Route::get('/location-form', [LocationController::class, 'showForm'])->name('location.form');
@@ -134,7 +146,9 @@ Route::middleware('auth')->group(function () {
     //Review 
     Route::get('/user/reviews', [ReviewController::class, 'pendingReviews'])->name('reviews.pending');
     Route::post('/reviews', [ReviewController::class, 'store'])->name('reviews.store');
-    
+    //contest
+    Route::post('/contest/quick-register', [ContestantController::class, 'quickRegister'])->name('contestant.quick-register');
+
 });
 
 //ADMIN
@@ -174,6 +188,9 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
  Route::get('/add/notification', [NotificationController::class, 'add'])->name('notification.add');
  Route::post('/add/notification', [NotificationController::class, 'addNotification'])->name('admin-add-notification'); 
  Route::get('/notification/delete/{id}', [NotificationController::class, 'delete'])->name('admin-delete-notification');
+ Route::get('/giveaways', [GiveawayController::class, 'index']);
+ Route::get('/giveaways/create', [GiveawayController::class, 'create']);
+ Route::post('/giveaways', [GiveawayController::class, 'store']);
 });
 
 //TO ANY DEVELOPER --- IF YOU NEED EXPLANTION AND CLERITY ON SOME CODES - CALL OR WHATSAPP - 08035906313

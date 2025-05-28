@@ -62,53 +62,56 @@ $hots = Product::where('status', 'ACTIVE')
     <!-- Offcanvas Menu Begin -->
      @include('components.mobile-nav')
     <!-- Offcanvas Menu End -->
-    @php
-        $validNotifications = $notifications->where('expiry_date', '>', now())->filter(function ($notification) {
+@php
+    $validNotifications = $notifications
+        ->where('expiry_date', '>', now())
+        ->filter(function ($notification) {
             return $notification->type === 'GENERAL' || (auth()->check() && $notification->type === 'CUSTOMERS');
-        });
-    @endphp
+        })
+        ->values();
+@endphp
 
-    @if ($validNotifications->isNotEmpty())
-<div style="position: fixed; top: 120px; left: 50%; transform: translateX(-50%); z-index: 1050; width: 500px; max-width: 90vw;">
-    <div id="notificationCarousel" class="carousel slide" data-bs-ride="carousel">
-        <div class="carousel-inner">
-            @foreach ($validNotifications as $key => $notification)
-                <div class="carousel-item {{ $key == 0 ? 'active' : '' }}">
-                    <div class="alert alert-primary shadow-lg p-4 rounded d-flex flex-column text-white bg-opacity-75" style="background-color: #007bff;">
-                        <div class="d-flex align-items-center justify-content-between mb-2">
-                            <i class="fa fa-bell fa-lg me-2"></i>
-                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+@if ($validNotifications->isNotEmpty())
+    <div id="notificationWrapper" style="position: fixed; top: 100px; left: 50%; transform: translateX(-50%); z-index: 1050; width: 500px; max-width: 90vw;">
+        <div id="notificationCarousel" class="carousel slide" data-bs-ride="carousel">
+            <div class="carousel-inner">
+                @foreach ($validNotifications as $key => $notification)
+                    <div class="carousel-item {{ $key === 0 ? 'active' : '' }}">
+                        <div class="alert alert-primary shadow-lg p-4 rounded d-flex flex-column text-white bg-opacity-75" style="background-color: #053262;">
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <i class="fa fa-bell fa-lg me-2"></i>
+                                <button type="button" class="btn-close btn-close-white" id="closeNotificationBtn" style="background: none; color: red; font-weight: bold; border: none; font-size: 30px;">×</button>
+                            </div>
+
+                            @if(!empty($notification->type))
+                                <span class="badge bg-warning text-dark align-self-start mb-3 px-3 py-2 fs-6 rounded-pill">{{ $notification->type }}</span>
+                            @endif
+
+                            @if(!empty($notification->image_url))
+                                <div class="text-center mb-3">
+                                    <img src="{{ $notification->image_url }}"
+                                         class="img-fluid rounded"
+                                         style="max-height: 200px; object-fit: cover;"
+                                         alt="Notification Image">
+                                </div>
+                            @endif
+
+                            <h4 class="fw-bold text-center text-white fs-4 mb-2">Special Notification</h4>
+                            <p class="fw-bold text-center fs-5">{{ $notification->description }}</p>
+
+                            @if($notification->links)
+                                <div class="text-center mt-3">
+                                    <a href="{{ $notification->links }}" class="btn btn-secondary btn-sm px-4 py-2 fw-bold" target="_blank">
+                                        Learn More
+                                    </a>
+                                </div>
+                            @endif
                         </div>
-
-                        @if(!empty($notification->type))
-                            <span class="badge bg-warning text-dark align-self-start mb-3 px-3 py-2 fs-6 rounded-pill">{{ $notification->type }}</span>
-                        @endif
-
-                        @if(!empty($notification->image_url))
-                            <div class="text-center mb-3">
-                                <img src="{{ $notification->image_url }}"
-                                     class="img-fluid rounded"
-                                     style="max-height: 150px; object-fit: cover;"
-                                     alt="Notification Image">
-                            </div>
-                        @endif
-
-                        <h4 class="fw-bold text-center text-white fs-4 mb-2">Special Notification</h4>
-                        <p class="fw-bold text-center fs-5">{{ $notification->description }}</p>
-
-                        @if($notification->links)
-                            <div class="text-center mt-3">
-                                <a href="{{ $notification->links }}" class="btn btn-light btn-sm px-4 py-2 fw-bold" target="_blank">
-                                    Learn More
-                                </a>
-                            </div>
-                        @endif
                     </div>
-                </div>
-            @endforeach
-        </div>
+                @endforeach
+            </div>
 
-        <!-- Carousel Controls Styled -->
+            <!-- Carousel Controls -->
             <button class="carousel-control-prev" type="button" data-bs-target="#notificationCarousel" data-bs-slide="prev"
                 style="width: 35px; height: 35px; background-color: #000; border-radius: 50%; top: 50%; transform: translateY(-50%); opacity: 0.8;">
                 <span class="carousel-control-prev-icon" aria-hidden="true"
@@ -120,26 +123,33 @@ $hots = Product::where('status', 'ACTIVE')
                 <span class="carousel-control-next-icon" aria-hidden="true"
                     style="background-size: 70% 70%; filter: invert(1);"></span>
             </button>
-
+        </div>
     </div>
-</div>
 
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const notificationWrapper = document.getElementById("notificationWrapper");
+            const closeBtn = document.getElementById("closeNotificationBtn");
 
-        <script>
-            document.addEventListener("DOMContentLoaded", function () {
-                var notificationCarousel = new bootstrap.Carousel(document.querySelector("#notificationCarousel"), {
-                    interval: 5000,
-                    pause: "hover",
-                    wrap: true
-                });
+            // Auto-hide after 10 seconds
+            setTimeout(() => {
+                notificationWrapper.style.display = "none";
+            }, 10000);
 
-                // Auto-hide after 10 seconds
-                setTimeout(() => {
-                    document.getElementById("notificationWrapper").style.display = "none";
-                }, 10000);
+            // Manual close
+            closeBtn.addEventListener("click", () => {
+                notificationWrapper.style.display = "none";
             });
-        </script>
-    @endif
+
+            // Initialize carousel
+            new bootstrap.Carousel(document.querySelector("#notificationCarousel"), {
+                interval: 8000,
+                pause: "hover",
+                wrap: true
+            });
+        });
+    </script>
+@endif
 
     <!-- Header Section Begin -->
     @include('components.nav-link')

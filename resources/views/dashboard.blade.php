@@ -22,6 +22,7 @@
 
   <!-- Nepcha Analytics -->
   <script defer data-site="www.tradevista.biz" src="https://api.nepcha.com/js/nepcha-analytics.js"></script>
+  <link rel="stylesheet" href="{{ asset('css/font-awesome.min.css') }}" type="text/css">
 </head>
 
 <body class="g-sidenav-show  bg-gray-100">
@@ -139,81 +140,90 @@
 
 <!-----Notification slide show----->
 @php
-    $validNotifications = $notifications->where('expiry_date', '>', now())->filter(function ($notification) {
-        return $notification->type === 'GENERAL' || (auth()->check() && $notification->type === 'CUSTOMERS');
-    });
+    $validNotifications = $notifications
+        ->where('expiry_date', '>', now())
+        ->filter(function ($notification) {
+            return $notification->type === 'GENERAL' || (auth()->check() && $notification->type === 'CUSTOMERS');
+        })
+        ->values();
 @endphp
 
 @if ($validNotifications->isNotEmpty())
-    <div id="notificationWrapper" class="position-fixed top-0 start-50 translate-middle-x w-100 mt-3 z-index-1050">
+    <div id="notificationWrapper" style="position: fixed; top: 70px; left: 50%; transform: translateX(-50%); z-index: 1050; width: 500px; max-width: 90vw;">
         <div id="notificationCarousel" class="carousel slide" data-bs-ride="carousel">
             <div class="carousel-inner">
                 @foreach ($validNotifications as $key => $notification)
-                    <div class="carousel-item {{ $key == 0 ? 'active' : '' }}">
-                        <div class="container">
-                            <div class="row justify-content-center">
-                                <div class="col-md-6 col-11">
-                                    <div class="alert alert-primary shadow-lg p-3 rounded d-flex flex-column text-white">
-                                        <div class="d-flex align-items-center justify-content-between">
-                                            <i class="fa fa-bell fa-lg me-2"></i>
-                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
-                                        </div>
-
-                                        {{-- Type Badge --}}
-                                        @if(!empty($notification->type))
-                                            <span class="badge bg-warning text-dark align-self-start mb-2">{{ $notification->type }}</span>
-                                        @endif
-
-                                        {{-- Image (small & responsive) --}}
-                                        @if(!empty($notification->image_url))
-                                            <div class="text-center mb-2">
-                                                <img src="{{ $notification->image_url }}"
-                                                     class="img-fluid rounded"
-                                                     style="max-height: 250px; object-fit: cover;"
-                                                     alt="Notification Image">
-                                            </div>
-                                        @endif
-
-                                        <h4 class="fw-bold text-center text-white">Special Notification</h4>
-                                        <p class="fw-bold mt-2 text-center">{{ $notification->description }}</p>
-
-                                        @if($notification->links)
-                                            <div class="text-center mt-2">
-                                                <a href="{{ $notification->links }}" class="btn btn-light btn-sm" target="_blank">
-                                                    Learn More
-                                                </a>
-                                            </div>
-                                        @endif
-                                    </div>
-                                </div>
+                    <div class="carousel-item {{ $key === 0 ? 'active' : '' }}">
+                        <div class="alert alert-primary shadow-lg p-4 rounded d-flex flex-column text-white bg-opacity-75" style="background-color: #053262;">
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <i class="fa fa-bell fa-lg me-2"></i>
+                                <button type="button" class="btn-close btn-close-white" id="closeNotificationBtn" style="background: none; color: red; font-weight: bold; border: none; font-size: 30px;">×</button>
                             </div>
+
+                            @if(!empty($notification->type))
+                                <span class="badge bg-warning text-dark align-self-start mb-3 px-3 py-2 fs-6 rounded-pill">{{ $notification->type }}</span>
+                            @endif
+
+                            @if(!empty($notification->image_url))
+                                <div class="text-center mb-3">
+                                    <img src="{{ $notification->image_url }}"
+                                         class="img-fluid rounded"
+                                         style="max-height: 200px; object-fit: cover;"
+                                         alt="Notification Image">
+                                </div>
+                            @endif
+
+                            <h4 class="fw-bold text-center text-white fs-4 mb-2">Special Notification</h4>
+                            <p class="fw-bold text-center fs-5">{{ $notification->description }}</p>
+
+                            @if($notification->links)
+                                <div class="text-center mt-3">
+                                    <a href="{{ $notification->links }}" class="btn btn-secondary btn-sm px-4 py-2 fw-bold" target="_blank">
+                                        Learn More
+                                    </a>
+                                </div>
+                            @endif
                         </div>
                     </div>
                 @endforeach
             </div>
 
             <!-- Carousel Controls -->
-            <button class="carousel-control-prev d-none d-md-block" type="button" data-bs-target="#notificationCarousel" data-bs-slide="prev">
-                <span class="carousel-control-prev-icon bg-dark rounded-circle p-2"></span>
+            <button class="carousel-control-prev" type="button" data-bs-target="#notificationCarousel" data-bs-slide="prev"
+                style="width: 35px; height: 35px; background-color: #000; border-radius: 50%; top: 50%; transform: translateY(-50%); opacity: 0.8;">
+                <span class="carousel-control-prev-icon" aria-hidden="true"
+                    style="background-size: 70% 70%; filter: invert(1);"></span>
             </button>
-            <button class="carousel-control-next d-none d-md-block" type="button" data-bs-target="#notificationCarousel" data-bs-slide="next">
-                <span class="carousel-control-next-icon bg-dark rounded-circle p-2"></span>
+
+            <button class="carousel-control-next" type="button" data-bs-target="#notificationCarousel" data-bs-slide="next"
+                style="width: 35px; height: 35px; background-color: #000; border-radius: 50%; top: 50%; transform: translateY(-50%); opacity: 0.8;">
+                <span class="carousel-control-next-icon" aria-hidden="true"
+                    style="background-size: 70% 70%; filter: invert(1);"></span>
             </button>
         </div>
     </div>
 
     <script>
         document.addEventListener("DOMContentLoaded", function () {
-            var notificationCarousel = new bootstrap.Carousel(document.querySelector("#notificationCarousel"), {
-                interval: 5000,
-                pause: "hover",
-                wrap: true
-            });
+            const notificationWrapper = document.getElementById("notificationWrapper");
+            const closeBtn = document.getElementById("closeNotificationBtn");
 
             // Auto-hide after 10 seconds
             setTimeout(() => {
-                document.getElementById("notificationWrapper").style.display = "none";
+                notificationWrapper.style.display = "none";
             }, 10000);
+
+            // Manual close
+            closeBtn.addEventListener("click", () => {
+                notificationWrapper.style.display = "none";
+            });
+
+            // Initialize carousel
+            new bootstrap.Carousel(document.querySelector("#notificationCarousel"), {
+                interval: 8000,
+                pause: "hover",
+                wrap: true
+            });
         });
     </script>
 @endif
@@ -452,11 +462,39 @@
         </div>
       </div>
       @endif
+        <div class="d-flex flex-column flex-md-row align-items-center justify-content-between mt-4 p-4 rounded shadow-sm gap-3 border">
+            <h2 class="h5 text-dark mb-0">Invite Friends to Vote for you & Win Exciting Giveaway Prizes!</h2>
+
+            @if(!$contestant)
+                <form method="POST" action="{{ route('contestant.quick-register') }}">
+                    @csrf
+                    <button type="submit" class="btn btn-success">Register to Join Giveaway</button>
+                </form>
+            @else
+                <div class="d-flex flex-column flex-md-row align-items-center gap-3">
+                    <p class="alert alert-info text-light mb-0" id="textToCopy" style="cursor: pointer;">
+                        {{ url('/vote/' . $contestant->unique_link) }}
+                    </p>
+                    <button class="btn btn-primary" id="copyButton">Copy Link</button>
+                </div>
+            @endif
+        </div>
+
+        <script>
+            document.getElementById("copyButton")?.addEventListener("click", function () {
+                const textToCopy = document.getElementById("textToCopy").innerText;
+                navigator.clipboard.writeText(textToCopy).then(() => {
+                    alert("Link copied to clipboard!");
+                });
+            });
+        </script>
+
       <div class="d-flex flex-column flex-md-row align-items-center justify-content-between mt-4 p-4 rounded shadow-sm gap-3">
         <h2 class="h5 text-dark mb-0">Refer a friend and earn ₦100</h2>
         <p class="alert alert-info text-white" id="textToCopy">https://tradevista.biz/register?referer_code={{ Auth::user()->email }}</p>
           <button class="btn btn-primary" id="copyButton">Copy link</button>
       </div>
+
       <div class="row my-4">
         <div class="col-lg-12 col-md-6 mb-md-0 mb-4">
           <div class="card">
