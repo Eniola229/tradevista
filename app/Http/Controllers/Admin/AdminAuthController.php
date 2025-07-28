@@ -12,6 +12,7 @@ use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 use App\Models\User;
 use App\Models\Product;
+use App\Models\OrderProduct;
 use App\Models\Waitlist;
 use App\Models\Withdraw;
 
@@ -110,6 +111,32 @@ class AdminAuthController extends Controller
 
         return view('admin.dashboard', compact("users", "productCount", "userCount", "totalBalance", 'pendingProductCount', 'withdrawCount'));
     }
+
+    public function generateAdminSalesReport()
+    {
+        // Total products in the system
+        $totalProducts = Product::count();
+
+        // Get sales data grouped by product
+        $salesData = OrderProduct::with('product')
+            ->selectRaw('product_id, SUM(product_qty) as product_total, SUM(product_qty * product_price) as total_revenue')
+            ->groupBy('product_id')
+            ->get();
+
+        $report = $salesData->map(function ($item) {
+            return [
+                'product_name' => $item->product->product_name ?? 'Unknown',
+                'quantity_sold' => $item->product_total,
+                'total_revenue' => $item->total_revenue,
+            ];
+        });
+
+        return response()->json([
+            'total_products' => $totalProducts,
+            'sales' => $report,
+        ]);
+    }
+
 
     /**
      * Create a new admin instance.

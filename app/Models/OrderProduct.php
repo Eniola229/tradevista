@@ -45,7 +45,7 @@ class OrderProduct extends Model
         return $this->belongsTo(Product::class);
     }
  
-    // ✅ Relationship to Order
+    // Relationship to Order
     public function order()
     {
         return $this->belongsTo(Order::class);

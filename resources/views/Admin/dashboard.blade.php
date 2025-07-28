@@ -167,6 +167,119 @@
         </div>
       </div>
 
+    <div class="container mt-5">
+        <div class="card p-4 shadow-sm">
+            <div class="d-flex flex-column flex-md-row align-items-center justify-content-between mb-3 gap-3">
+                <h4 class="mb-0">Admin Sales Report</h4>
+                <p class="mb-0"><strong>Total Products in Store:</strong> <span id="total-products">Loading...</span></p>
+            </div>
+
+            <div class="chart-container" style="position: relative; height: 400px;">
+                <canvas id="adminSalesChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        fetch('/admin/sales-report')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('total-products').innerText = data.total_products;
+
+                const labels = data.sales.map(item => item.product_name);
+                const quantities = data.sales.map(item => item.quantity_sold);
+                const revenues = data.sales.map(item => item.total_revenue);
+
+                const nairaFormat = new Intl.NumberFormat('en-NG', {
+                    style: 'currency',
+                    currency: 'NGN'
+                });
+
+                const ctx = document.getElementById('adminSalesChart').getContext('2d');
+
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: 'Quantity Sold',
+                                data: quantities,
+                                backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                                borderColor: 'rgba(54, 162, 235, 1)',
+                                borderWidth: 1,
+                                yAxisID: 'y'
+                            },
+                            {
+                                label: 'Revenue (₦)',
+                                data: revenues,
+                                backgroundColor: 'rgba(255, 99, 132, 0.7)',
+                                borderColor: 'rgba(255, 99, 132, 1)',
+                                borderWidth: 1,
+                                yAxisID: 'y1'
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        interaction: {
+                            mode: 'index',
+                            intersect: false
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                position: 'left',
+                                title: {
+                                    display: true,
+                                    text: 'Quantity'
+                                }
+                            },
+                            y1: {
+                                beginAtZero: true,
+                                position: 'right',
+                                grid: {
+                                    drawOnChartArea: false
+                                },
+                                ticks: {
+                                    callback: function(value) {
+                                        return nairaFormat.format(value);
+                                    }
+                                },
+                                title: {
+                                    display: true,
+                                    text: 'Revenue (₦)'
+                                }
+                            }
+                        },
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        if (context.dataset.label.includes('Revenue')) {
+                                            return context.dataset.label + ': ' + nairaFormat.format(context.raw);
+                                        }
+                                        return context.dataset.label + ': ' + context.raw;
+                                    }
+                                }
+                            },
+                            title: {
+                                display: true,
+                                text: 'Sales by Product (All Sellers)'
+                            }
+                        }
+                    }
+                });
+            })
+            .catch(error => {
+                console.error('Error loading admin sales report:', error);
+                alert("Could not load admin sales report.");
+            });
+    </script>
+
 <!--       <div class="row mt-4">
         <div class="col-lg-5 mb-lg-0 mb-4">
           <div class="card z-index-2">
