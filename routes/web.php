@@ -111,6 +111,7 @@ Route::middleware('auth')->group(function () {
     Route::put('/setup/{id}', [SetupController::class, 'update'])->name('update.setup');
     //DASHBOARD
     Route::get('dashboard', [SetupController::class, 'setup'])->name('dashboard');
+    Route::get('/sales-report', [SetupController::class, 'generateSalesReport']);
     //SETUP
     Route::post('/create-setup', [SetupController::class, 'createSetup'])->name('create.setup');
     Route::get('/payment/callback', [SetupController::class, 'paymentCallback'])->name('payment.callback');

@@ -106,7 +106,7 @@ use App\Models\Payment;
                 </g>
               </svg>
             </div>
-            <span class="nav-link-text ms-1">Sold Products</span>
+            <span class="nav-link-text ms-1">Products Sold</span>
           </a>
         </li>
         <hr class="border border-dark border-1 my-2">

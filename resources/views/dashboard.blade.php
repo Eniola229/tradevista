@@ -28,6 +28,8 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <!-- Include jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.5/css/jquery.dataTables.min.css">
   <!--csrf token-->
   <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
@@ -78,6 +80,14 @@
     .input-error {
         border: 1px solid red !important;
     }
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 30px;
+        }
+        canvas {
+            max-width: 100%;
+        }
 </style>
 
 <body class="g-sidenav-show  bg-gray-100">
@@ -319,6 +329,120 @@
           <button class="btn btn-primary">Click here</button>
         </a>
       </div>
+        <div class="container mt-5">
+            <div class="card p-4 shadow-sm">
+                <div class="d-flex flex-column flex-md-row align-items-center justify-content-between mb-3 gap-3">
+                    <h4 class="mb-0">Sales Report</h4>
+                    <p class="mb-0"><strong>Total Products Listed:</strong> <span id="total-products">Loading...</span></p>
+                </div>
+
+                <div class="chart-container" style="position: relative; height: 400px;">
+                    <canvas id="salesChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chart.js -->
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+        <script>
+            fetch('/sales-report')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('total-products').innerText = data.total_products;
+
+                    const labels = data.sales.map(item => item.product_name);
+                    const quantities = data.sales.map(item => item.quantity_sold);
+                    const revenues = data.sales.map(item => item.total_revenue);
+
+                    const nairaFormat = new Intl.NumberFormat('en-NG', {
+                        style: 'currency',
+                        currency: 'NGN'
+                    });
+
+                    const ctx = document.getElementById('salesChart').getContext('2d');
+
+                    new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: labels,
+                            datasets: [
+                                {
+                                    label: 'Quantity Sold',
+                                    data: quantities,
+                                    backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                                    borderColor: 'rgba(54, 162, 235, 1)',
+                                    borderWidth: 1,
+                                    yAxisID: 'y'
+                                },
+                                {
+                                    label: 'Revenue (₦)',
+                                    data: revenues,
+                                    backgroundColor: 'rgba(40, 167, 69, 0.7)',
+                                    borderColor: 'rgba(40, 167, 69, 1)',
+                                    borderWidth: 1,
+                                    yAxisID: 'y1'
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            interaction: {
+                                mode: 'index',
+                                intersect: false
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    position: 'left',
+                                    title: {
+                                        display: true,
+                                        text: 'Quantity'
+                                    }
+                                },
+                                y1: {
+                                    beginAtZero: true,
+                                    position: 'right',
+                                    grid: {
+                                        drawOnChartArea: false
+                                    },
+                                    ticks: {
+                                        callback: function(value) {
+                                            return nairaFormat.format(value);
+                                        }
+                                    },
+                                    title: {
+                                        display: true,
+                                        text: 'Revenue (₦)'
+                                    }
+                                }
+                            },
+                            plugins: {
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            if (context.dataset.label === 'Revenue (₦)') {
+                                                return context.dataset.label + ': ' + nairaFormat.format(context.raw);
+                                            }
+                                            return context.dataset.label + ': ' + context.raw;
+                                        }
+                                    }
+                                },
+                                title: {
+                                    display: true,
+                                    text: 'Sales by Product'
+                                }
+                            }
+                        }
+                    });
+                })
+                .catch(error => {
+                    console.error('Error loading report:', error);
+                    alert("Could not load sales report.");
+                });
+        </script>
+
+
       @endif
       @endif
       @else
@@ -588,7 +712,7 @@
           <div class="card">
             <div class="card-header pb-0">
               <div class="row">
-                <div class="col-lg-6 col-7">
+                <div class="col-lg-12 col-7">
                   <h6>Payment History</h6>
                 
                 </div>
@@ -598,7 +722,7 @@
                       <i class="fa fa-ellipsis-v text-secondary"></i>
                     </a>
                     <ul class="dropdown-menu px-2 py-3 ms-sm-n4 ms-n5" aria-labelledby="dropdownTable">
-                      <li><a class="dropdown-item border-radius-md" href="javascript:;">Null</a></li>
+                      <li><a class="dropdown-item border-radius-md" href="javascript:;">All</a></li>
                     </ul>
                   </div>
                 </div>

@@ -11,6 +11,7 @@ use App\Models\Setup;
 use App\Models\Payment;
 use App\Models\Product;
 use App\Models\Order;
+use App\Models\OrderProduct;
 use App\Models\Notification;
 use Illuminate\Support\Facades\Http;
 
@@ -36,15 +37,46 @@ class SetupController extends Controller
                          ->where('delivery_status', 'Delivered')
                          ->count();
 
-        $productCount = Product::where('user_id', $userInfo->id)->count();
-
         $notifications = Notification::all();
+
+        $productCount = Product::where('user_id', $userInfo->id)->count();
 
         $contestant = \App\Models\Contestant::where('email', auth()->user()->email)->first();
 
         return view('dashboard', compact('setup', 'DeliveredOrder', 'pendingOrder', 'payments', 'pendingPayment', 'productCount', 'notifications', 'contestant'));
 
     }
+
+        public function generateSalesReport(Request $request)
+        {
+            $user = auth()->user();
+
+            // Total products listed
+            $totalProducts = Product::where('user_id', $user->id)->count();
+
+            // Sales details
+            $salesData = OrderProduct::whereHas('product', function ($query) use ($user) {
+                $query->where('user_id', $user->id);
+            })
+            ->with(['product', 'order'])
+            ->selectRaw('product_id, SUM(product_qty) as product_total, SUM(product_qty * product_price) as total_revenue')
+            ->groupBy('product_id')
+            ->get();
+
+            $report = $salesData->map(function ($item) {
+                return [
+                    'product_name' => $item->product->product_name ?? 'Unknown',
+                    'quantity_sold' => $item->product_total,
+                    'total_revenue' => number_format($item->total_revenue, 2),
+                ];
+            });
+
+            return response()->json([
+                'total_products' => $totalProducts,
+                'sales' => $report,
+            ]);
+        }
+
 
 
     public function createSetup(Request $request)

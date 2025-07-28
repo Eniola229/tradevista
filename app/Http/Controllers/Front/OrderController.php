@@ -203,27 +203,40 @@ public function getUserOrders()
         // Notify each seller with details about the products sold
         foreach ($sellerAmounts as $sellerId => $data) {
             $seller = User::find($sellerId);
-            Mail::send('emails.seller_notification', [
-                'order'    => $order,
-                'seller'   => $seller,
-                'amount'   => $data['amount'],
-                'products' => $data['products']
-            ], function ($message) use ($seller) {
-                $message->to($seller->email)
-                        ->subject("New Order Received - " . config('app.name'));
-            });
+            try {
+                Mail::send('emails.seller_notification', [
+                    'order'    => $order,
+                    'seller'   => $seller,
+                    'amount'   => $data['amount'],
+                    'products' => $data['products']
+                ], function ($message) use ($seller) {
+                    $message->to($seller->email)
+                            ->subject("New Order Received - " . config('app.name'));
+                });
+            } catch (\Exception $e) {
+                \Log::error('Failed to send seller email to ' . ($seller->email ?? 'unknown') . ': ' . $e->getMessage());
+            }
         }
-        
+
         // Notify the admin
-        Mail::send('emails.admin_notification', ['order' => $order], function ($message) {
-            $message->to("tradevista2015@gmail.com")
-                    ->subject("New Order Placed - " . config('app.name'));
-        });
-        
+        try {
+            Mail::send('emails.admin_notification', ['order' => $order], function ($message) {
+                $message->to("tradevista2015@gmail.com")
+                        ->subject("New Order Placed - " . config('app.name'));
+            });
+        } catch (\Exception $e) {
+            \Log::error('Failed to send admin email: ' . $e->getMessage());
+        }
+
         // Send order confirmation to the buyer
-        Mail::send('emails.buyer_confirmation', ['order' => $order], function ($message) use ($buyer) {
-            $message->to($buyer->email)
-                    ->subject("Order Confirmation - " . config('app.name'));
-        });
+        try {
+            Mail::send('emails.buyer_confirmation', ['order' => $order], function ($message) use ($buyer) {
+                $message->to($buyer->email)
+                        ->subject("Order Confirmation - " . config('app.name'));
+            });
+        } catch (\Exception $e) {
+            \Log::error('Failed to send buyer confirmation email to ' . ($buyer->email ?? 'unknown') . ': ' . $e->getMessage());
+        }
     }
+
 }
