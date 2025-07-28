@@ -130,7 +130,29 @@
           </tbody>
         </table>
           <div class="d-flex justify-content-center mt-4">
-              {{ $users->links() }}
+              <ul class="pagination">
+                  @if ($users->onFirstPage())
+                      <li class="page-item disabled"><span class="page-link">«</span></li>
+                  @else
+                      <li class="page-item">
+                          <a class="page-link" href="{{ $users->previousPageUrl() }}">«</a>
+                      </li>
+                  @endif
+
+                  @foreach ($users->getUrlRange(1, $users->lastPage()) as $page => $url)
+                      <li class="page-item {{ $users->currentPage() == $page ? 'active' : '' }}">
+                          <a class="page-link" href="{{ $url }}">{{ $page }}</a>
+                      </li>
+                  @endforeach
+
+                  @if ($users->hasMorePages())
+                      <li class="page-item">
+                          <a class="page-link" href="{{ $users->nextPageUrl() }}">»</a>
+                      </li>
+                  @else
+                      <li class="page-item disabled"><span class="page-link">»</span></li>
+                  @endif
+              </ul>
           </div>
               </div>
             </div>

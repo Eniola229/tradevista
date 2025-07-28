@@ -58,30 +58,39 @@
                 </div>
 
                 <!-- RESULTS TABLE -->
-                <div class="col-lg-6 col-md-6">
-                    <div class="contact__content">
-                        <div class="contact__form">
-                            <h4 class="mb-3">Live Voting Results</h4>
-                            <table class="table table-bordered">
-                                <thead>
-                                    <tr>
-                                        <th>Contestant</th>
-                                        <th>Votes</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach($allContestants as $person)
-                                        <tr @if($person->id == $contestant->id) style="background-color: #f0f8ff;" @endif>
-                                            <td>{{ $person->name }}</td>
-                                            <td><strong>{{ $person->votes_count }}</strong></td>
+                    <div class="col-lg-6 col-md-6">
+                        <div class="contact__content">
+                            <div class="contact__form">
+                                <h4 class="mb-3 text-center" style="color: #053262;">Live Voting Results</h4>
+                                <table class="table table-hover table-striped table-bordered rounded shadow-sm">
+                                    <thead style="background-color: #053262; color: #fff;">
+                                        <tr class="text-center">
+                                            <th>Contestant</th>
+                                            <th>Votes</th>
                                         </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                            <p class="text-muted">Updated live as users vote.</p>
+                                    </thead>
+                                    <tbody>
+                                        @foreach($allContestants->sortByDesc('votes_count') as $person)
+                                            <tr class="text-center align-middle"
+                                                @if($person->id == $contestant->id) style="background-color: #f0f8ff;" @endif>
+                                                <td>
+                                                    <strong>{{ $person->name }}</strong>
+                                                    @if($loop->first)
+                                                        <span class="badge" style="background-color: #053262; color: white;">Leading</span>
+                                                    @endif
+                                                </td>
+                                                <td>
+                                                    <span class="badge bg-primary fs-6">{{ $person->votes_count }}</span>
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                                <p class="text-muted text-center mt-3">Updated live as users vote.</p>
+                            </div>
                         </div>
                     </div>
-                </div>
+
             </div>
         </div>
     </section>

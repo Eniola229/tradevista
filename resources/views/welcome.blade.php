@@ -246,8 +246,39 @@ $hots = Product::where('status', 'ACTIVE')
     </div>
 </section>
 <!-- Banner Section End -->
-<!-- Product Section Begin -->
 
+<!---Start of Contest banner--->
+<section class="discount mt-3 mb-3">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-6 p-0">
+                <div class="discount__pic">
+                    <img src="{{ asset('https://res.cloudinary.com/di2ci6rz8/image/upload/v1748966428/notifications/xvt7rfxgvrx1frlxljjb.jpg') }}" style="height: 400px;" alt="Giveaway">
+                </div>
+            </div>
+            <div class="col-lg-6 p-0">
+                <div class="discount__text">
+                    <div class="discount__text__title">
+                        <span>Public Notice</span>
+                        <h2>Giveaway Contest 2025</h2>
+                        <h5><span>Join</span> & Win Big!</h5>
+                    </div>
+                    <p>
+                        The 2025 Giveaway is live! Register now to compete and stand a chance to win exciting prizes 
+                        like a fridge, iron, or toaster. Limited slots available – only 50 contestants allowed!
+                    </p>
+                    <div class="mt-4 d-flex">
+                        <a href="{{ url('results') }}"><button class="site-btn me-2">Live Results</button></a>
+                        <a href="{{ route('dashboard') }}"><button  class="site-btn">Register</button></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!----End of contest banner---->
+
+<!-- Product Section Begin -->
 <section class="product spad">
     <div class="container">
         <div class="row">

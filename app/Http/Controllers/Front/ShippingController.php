@@ -47,7 +47,7 @@ class ShippingController extends Controller
     }
 
 
-     public function calculateShipping(Request $request)
+    public function calculateShipping(Request $request)
     {
         try {
             $request->validate([
@@ -64,36 +64,60 @@ class ShippingController extends Controller
 
             $groupedItemsBySeller = [];
 
-            // Group cart items by seller
             foreach ($cartItems as $cartItem) {
                 $product = Product::find($cartItem->product_id);
-                if (!$product || !$product->user) continue;
+
+                if (!$product) {
+                    Log::warning("Product not found for cartItem", ['product_id' => $cartItem->product_id]);
+                    continue;
+                }
 
                 $seller = $product->user;
-                $startup = Setup::where('user_id', $seller->id)->first();
-                if (!$startup || empty($startup->postal_code)) continue;
+                if (!$seller) {
+                    Log::warning("Product has no associated seller", ['product_id' => $product->id]);
+                    continue;
+                }
 
-                $groupedItemsBySeller[$seller->id]['sender_postal'] = $startup->postal_code;
+                if (
+                    empty($product->product_name) ||
+                    empty($product->product_price) ||
+                    empty($product->product_weight)
+                ) {
+                    Log::warning("Product missing required fields", ['product_id' => $product->id, 'product_name' => $product->product_name, 'product price' => $product->product_price, "product_weight" => $product->product_weight]);
+                    continue;
+                }
+
+                $startup = Setup::where('user_id', $seller->id)->first();
+                if (!$startup || empty($startup->zipcode)) {
+                    Log::warning("Seller setup missing or zipcode empty", ['seller_id' => $seller->id]);
+                    continue;
+                }
+
+                $groupedItemsBySeller[$seller->id]['sender_postal'] = $startup->zipcode;
 
                 $groupedItemsBySeller[$seller->id]['items'][] = [
-                    'name'        => $product->name,
-                    'description' => $product->description,
-                    'unit_weight' => $product->weight ?? 1, // default 1kg if not set
-                    'unit_amount' => $product->price,
-                    'quantity'    => $cartItem->quantity,
+                    'name'        => $product->product_name,
+                    'description' => strip_tags($product->product_description ?? 'No description'),
+                    'unit_weight' => floatval($product->product_weight),
+                    'unit_amount' => floatval($product->product_price),
+                    'quantity'    => intval($cartItem->quantity ?? 1),
                     'dimension'   => [
-                        'length' => $product->length ?? 10,
-                        'width'  => $product->width ?? 10,
-                        'height' => $product->height ?? 10,
+                        'length' => floatval($product->length ?? 10),
+                        'width'  => floatval($product->width ?? 10),
+                        'height' => floatval($product->height ?? 10),
                     ],
                 ];
             }
 
-            $totalShipping = 0;
+            if (empty($groupedItemsBySeller)) {
+                return response()->json(['success' => false, 'message' => 'No valid sellers found for your cart items.'], 400);
+            }
+
             $shippingDetails = [];
 
             foreach ($groupedItemsBySeller as $sellerId => $data) {
                 $dimension = $this->calculateMaxDimension($data['items']);
+
                 $packageItems = collect($data['items'])->map(function ($item) {
                     return [
                         'name'         => $item['name'],
@@ -121,39 +145,25 @@ class ShippingController extends Controller
                 if (!$response->ok()) {
                     return response()->json([
                         'success' => false,
-                        'message' => 'Failed to fetch rate for seller ID: ' . $sellerId,
-                        'error'   => $response->body()
+                        'message' => "Shipping API error for seller $sellerId: " . $response->body()
                     ], 500);
                 }
 
-                $rates = $response->json()['rates'] ?? [];
-                $rate = collect($rates)->first();
-
-                if ($rate && isset($rate['amount'])) {
-                    $shippingDetails[] = [
-                        'seller_id' => $sellerId,
-                        'amount' => $rate['amount'],
-                        'service_name' => $rate['service_name'] ?? 'N/A',
-                    ];
-                    $totalShipping += $rate['amount'];
-                } else {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'No valid shipping rate found for one or more sellers.'
-                    ], 500);
-                }
+                $shippingDetails[$sellerId] = $response->json();
             }
 
+            Log::error('Shipping' , $shippingDetails);        
             return response()->json([
                 'success' => true,
-                'total_shipping' => $totalShipping,
-                'breakdown' => $shippingDetails
+                'shipping_rates' => $shippingDetails,
             ]);
 
         } catch (\Exception $e) {
+            Log::error('Exception in calculateShipping', ['error' => $e->getMessage()]);
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
+
 
     private function calculateMaxDimension($items)
     {

@@ -130,7 +130,7 @@ use App\Models\Payment;
                 </g>
               </svg>
             </div>
-            <span class="nav-link-text ms-1">Request Redrawer</span>
+            <span class="nav-link-text ms-1">Withdraw</span>
           </a>
         </li>
         <li class="nav-item">

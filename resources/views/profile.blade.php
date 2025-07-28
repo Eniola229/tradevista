@@ -22,7 +22,10 @@
   <link id="pagestyle" href="{{ asset('assets/css/soft-ui-dashboard.css?v=1.0.7') }}" rel="stylesheet">
 
   <!-- Nepcha Analytics -->
-  <script defer data-site="YOUR_DOMAIN_HERE" src="https://api.nepcha.com/js/nepcha-analytics.js"></script>
+  <script defer data-site="www.tradevista.biz" src="https://api.nepcha.com/js/nepcha-analytics.js"></script>
+  <!--csrf token-->
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+
 </head>
 
 <body class="g-sidenav-show  bg-gray-100">
@@ -30,6 +33,54 @@
   <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg ">
     <!-- Navbar -->
     @include('components.nav')
+        <style>
+    /* Loading spinner animation */
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    .spinner-border {
+        display: inline-block;
+        width: 1rem;
+        height: 1rem;
+        vertical-align: text-bottom;
+        border: 0.2em solid currentColor;
+        border-right-color: transparent;
+        border-radius: 50%;
+        animation: spin 0.75s linear infinite;
+    }
+
+    /* Disabled button state */
+    .btn:disabled {
+        opacity: 0.65;
+        cursor: not-allowed;
+    }
+
+    /* Shipping method cards */
+    .shipping-method-card {
+        transition: all 0.3s ease;
+    }
+
+    .shipping-method-card:hover {
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    }
+
+    #addressSuggestions {
+        display: none;
+        max-height: 200px;
+        overflow-y: auto;
+        cursor: pointer;
+    }
+
+    #addressSuggestions li:hover {
+        background-color: #f1f1f1;
+    }
+
+    .input-error {
+        border: 1px solid red !important;
+    }
+</style>
 
               @if(session('message'))
               <div class="alert alert-success alert-dismissible fade show" role="alert" style="color: white;">
@@ -213,7 +264,7 @@
                                     <div class="mb-4">
                                         <label for="state" class="block text-sm font-medium text-gray-700">State</label><br>
                                         <select
-                                            id="state"
+                                            id="toState"
                                             name="state"
                                             class="block w-full p-3 border border-gray-900 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                                             style="width: 100%;"
@@ -262,25 +313,30 @@
                                         </select>
                                     </div>
 
-                        
+                                    <!-----Hidden because of validating address---->
+                                     <input type="hidden" name="first_name" id="firstname" value="{{ explode(' ', Auth::user()->name)[0] }}">
+                                     <input type="hidden" name="last_name" id="lastname" value="{{ count(explode(' ', Auth::user()->name)) > 1 ? explode(' ', Auth::user()->name)[1] : 'null' }}" required>
+                                      <input type="hidden" name="email" value="{{ Auth::user()->email }}" required>
+
                                     <div class="mb-4">
                                         <label for="address" class="block text-sm font-medium text-gray-700">Address</label><br>
                                         <input
                                             type="text"
-                                            id="address"
+                                            id="toAddress"
                                             name="address"
                                             class="block w-full p-3 border border-gray-900 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                                             style="width: 100%;"
                                             value="{{ old('address', $setup->address) }}"
                                         required>
+                                        <ul id="addressSuggestions" class="list-group position-absolute w-80" style="z-index: 1000;"></ul>
                                     </div>
 
                                     <!-- Repeat for all seller-specific fields, preloading $setup data -->
                                     <div class="mb-4">
                                         <label for="zipcode" class="block text-sm font-medium text-gray-700">Zip Code</label><br>
                                         <input
-                                            type="text"
-                                            id="zipcode"
+                                            type="readonly"
+                                            id="postal"
                                             name="zipcode"
                                             class="block w-full p-3 border border-gray-900 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                                             style="width: 100%;"
@@ -290,10 +346,10 @@
 
                                     
                                     <div class="mb-4">
-                                        <label for="zipcode" class="block text-sm font-medium text-gray-700">Mobile 1</label><br>
+                                        <label for="company_mobile_1" class="block text-sm font-medium text-gray-700">Mobile 1</label><br>
                                         <input
                                             type="number"
-                                            id="company_mobile_1"
+                                            id="phone"
                                             name="company_mobile_1"
                                             class="block w-full p-3 border border-gray-900 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                                             style="width: 100%;"
@@ -303,7 +359,7 @@
 
                                     
                                     <div class="mb-4">
-                                        <label for="zipcode" class="block text-sm font-medium text-gray-700">Mobile 2</label><br>
+                                        <label for="company_mobile_2" class="block text-sm font-medium text-gray-700">Mobile 2</label><br>
                                         <input
                                             type="number"
                                             id="company_mobile_2"
@@ -805,6 +861,109 @@
       },
     });
   </script>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+
+let debounceTimer;
+
+function highlightIfEmpty(selector) {
+    const input = $(selector);
+    if (!input.val().trim()) {
+        input.addClass('input-error');
+        return true;
+    } else {
+        input.removeClass('input-error');
+        return false;
+    }
+}
+
+// Make address details readonly
+$(document).ready(function () {
+    $('#toCity').prop('readonly', true);
+    $('#toState').prop('readonly', true);
+    $('input[name="country"]').prop('readonly', true);
+    $('#postal').prop('readonly', true);
+});
+
+$('#toAddress').on('input', function () {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+        const address = $('#toAddress').val().trim();
+        const firstname = $('#firstname').val().trim();
+        const lastname = $('#lastname').val().trim();
+        const phone = $('#phone').val().trim();
+        const email = $('input[name="email"]').val().trim();
+
+        const hasError = [
+            highlightIfEmpty('#firstname'),
+            highlightIfEmpty('#lastname'),
+            highlightIfEmpty('#phone'),
+            highlightIfEmpty('input[name="email"]'),
+            highlightIfEmpty('#toAddress')
+        ].includes(true);
+
+        if (hasError) {
+            $('#addressSuggestions').hide().empty();
+            return;
+        }
+
+        if (address.length > 4) {
+            // Show loading message
+            $('#addressSuggestions').empty().show().append(`
+                <li class="list-group-item text-muted">Validating address...</li>
+            `);
+
+            $.ajax({
+                url: '/validate-address',
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                data: {
+                    name: firstname + ' ' + lastname,
+                    email: email,
+                    phone: phone,
+                    address: address
+                },
+                success: function (response) {
+                    const data = response.data;
+
+                    $('#addressSuggestions').empty().show().append(`
+                        <li class="list-group-item suggestion-item" data-address='${JSON.stringify(data)}'>
+                            ${data.formatted_address}
+                        </li>
+                    `);
+                },
+                error: function (xhr) {
+                    let message = "We couldn’t validate your address. Please use Google Maps to confirm it, then copy and paste it here.";
+
+                    $('#addressSuggestions').empty().show().append(`
+                        <span class="text-danger fw-bold d-block px-2 py-1">${message}</span>
+                    `);
+                }
+            });
+        } else {
+            $('#addressSuggestions').hide().empty();
+        }
+    }, 500);
+});
+
+// Fill form fields when suggestion is selected
+$(document).on('click', '.suggestion-item', function () {
+    const data = $(this).data('address');
+
+    $('#toAddress').val(data.formatted_address);
+    $('#toCity').val(data.city);
+    $('#toState').val(data.state);
+    $('input[name="country"]').val(data.country);
+    $('#postal').val(data.address_code);
+
+    $('#addressSuggestions').hide().empty();
+});
+</script>
+
   <script>
     var win = navigator.platform.indexOf('Win') > -1;
     if (win && document.querySelector('#sidenav-scrollbar')) {

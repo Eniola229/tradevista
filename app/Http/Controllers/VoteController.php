@@ -21,9 +21,10 @@ class VoteController extends Controller
     public function castVote(Request $request, $link)
     {
         $contestant = Contestant::where('unique_link', $link)->firstOrFail();
+        $ipPlusAgent = $request->ip() . ' | ' . $request->header('User-Agent');
 
         $existingVote = Vote::where('contestant_id', $contestant->id)
-            ->where('ip_address', $request->ip())
+            ->where('ip_address', $ipPlusAgent)
             ->first();
 
         if ($existingVote) {
@@ -32,11 +33,12 @@ class VoteController extends Controller
 
         Vote::create([
             'contestant_id' => $contestant->id,
-            'ip_address' => $request->ip()
+            'ip_address' => $ipPlusAgent
         ]);
 
         return back()->with('status', 'Your vote has been cast successfully!');
     }
+    
     public function results()
     {
         $allContestants = Contestant::withCount('votes')->orderByDesc('votes_count')->get();
