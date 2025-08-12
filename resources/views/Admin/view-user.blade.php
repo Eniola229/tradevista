@@ -55,6 +55,7 @@
                 <div class="card-body text-center">
                     <h4 class="text-primary fw-bold">{{ $user->name }}</h4>
                     <p class="text-muted">{{ $user->email }}</p>
+                    <p class="text-muted">{{ $user->phone_number }}</p>
                    @if($setup)
                         <span class="badge bg-{{ $setup->account_type == 'SELLER' ? 'success' : 'info' }}">
                             {{ strtoupper($setup->account_type) }}
@@ -137,6 +138,7 @@
                                     <tr>
                                         <th>Amount</th>
                                         <th>Description</th>
+                                        <th>Status</th> 
                                         <th>Date</th>
                                     </tr>
                                 </thead>
@@ -145,11 +147,32 @@
                                     <tr>
                                         <td>₦{{ number_format($payment->amount, 2) }}</td>
                                         <td>{{ $payment->description }}</td>
+                                                                                <td>
+                                            @php
+                                                switch(strtolower($payment->status)) {
+                                                    case 'success':
+                                                        $badgeClass = 'bg-success text-white';
+                                                        break;
+                                                    case 'failed':
+                                                        $badgeClass = 'bg-danger text-white';
+                                                        break;
+                                                    case 'pending':
+                                                        $badgeClass = 'bg-warning text-dark';
+                                                        break;
+                                                    default:
+                                                        $badgeClass = 'bg-secondary text-white';
+                                                }
+                                            @endphp
+                                            <span class="badge {{ $badgeClass }}">
+                                                {{ ucfirst($payment->status) }}
+                                            </span>
+                                        </td>
                                         <td>{{ $payment->created_at->format('d M Y, h:i A') }}</td>
                                     </tr>
                                     @endforeach
                                 </tbody>
                             </table>
+
                         </div>
                         {{ $payments->links('pagination::bootstrap-5') }}
                     @else

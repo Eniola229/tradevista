@@ -62,7 +62,6 @@
                                 <tr class="text-center">
                                     <th>Contestant</th>
                                     <th>Votes</th>
-                                    <th>Action</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -71,17 +70,17 @@
                                         <td>
                                             <strong>{{ $person->name }}</strong>
                                             @if($loop->first)
-                                                <span class="badge ms-2" style="background: #053262; color: white;">Leading</span>
+                                                <span class="badge ms-2" style="background: #053262; color: white;">Winner</span>
                                             @endif
                                         </td>
                                         <td>
                                             <span class="badge bg-primary fs-6">{{ $person->votes_count }}</span>
                                         </td>
-                                        <td>
+                                       <!--  <td>
                                             <a href="{{ url('vote/' . $person->unique_link) }}" class="site-btn">
                                                 Vote
                                             </a>
-                                        </td>
+                                        </td> -->
                                     </tr>
                                 @endforeach
                             </tbody>

@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
+    /** 
      * Run the migrations.
      */
     public function up(): void
@@ -17,7 +17,7 @@ return new class extends Migration
             $table->uuid('attendant_id')->nullable();
             $table->string('ticket_id');
             $table->string('problem_type');
-            $table->enum('status', ['REJECTED', 'PENDING', 'APPROVED', 'ISSUE FIXED']);
+            $table->enum('status', ['REJECTED', 'PENDING', 'APPROVED', 'ISSUE FIXED', 'CLOSED']);
             $table->text('message');
             $table->string('image_url')->nullable();
             $table->string('image_id')->nullable();

@@ -59,16 +59,19 @@
                                     @enderror
 
                                     <!-- Password Field -->
-                                    <input type="password" name="password" placeholder="Password" required>
+                                    <input type="password" name="password" id="password" placeholder="Password" required>
                                     @error('password')
                                        <div class="alert alert-danger mb-2">{{ $message }}</div>
                                     @enderror
 
                                     <!-- Confirm Password Field -->
-                                    <input type="password" name="password_confirmation" placeholder="Confirm Password" required>
+                                    <input type="password" name="password_confirmation" id="password_confirmation" placeholder="Confirm Password" required>
                                     @error('password_confirmation')
                                        <div class="alert alert-danger mb-2">{{ $message }}</div>
                                     @enderror
+
+                                    <!-- Feedback Message -->
+                                    <div id="password-match-feedback" class="mt-1 small"></div>
 
                                     <!-- Submit Button -->
                                     <button type="submit" class="site-btn">Register</button>
@@ -98,6 +101,29 @@
       document.getElementById('refererEmail').value = refererEmail;
     }
   </script>
+<script>
+  const password = document.getElementById('password');
+  const confirm = document.getElementById('password_confirmation');
+  const feedback = document.getElementById('password-match-feedback');
+
+  function checkMatch() {
+    if (!confirm.value) {
+      feedback.textContent = '';
+      return;
+    }
+
+    if (password.value === confirm.value) {
+      feedback.textContent = '✅ Passwords match';
+      feedback.className = 'text-success mt-1 small';
+    } else {
+      feedback.textContent = '❌ Passwords do not match';
+      feedback.className = 'text-danger mt-1 small';
+    }
+  }
+
+  password.addEventListener('input', checkMatch);
+  confirm.addEventListener('input', checkMatch);
+</script>
 
 @include('components.footer')
 </html>

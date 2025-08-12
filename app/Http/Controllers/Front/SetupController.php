@@ -34,7 +34,7 @@ class SetupController extends Controller
                          ->count();
 
         $DeliveredOrder = Order::where('user_id', $userInfo->id)
-                         ->where('delivery_status', 'Delivered')
+                         ->where('delivery_status', 'Shipped')
                          ->count();
 
         $notifications = Notification::all();
@@ -47,35 +47,36 @@ class SetupController extends Controller
 
     }
 
-        public function generateSalesReport(Request $request)
-        {
-            $user = auth()->user();
+    public function generateSalesReport(Request $request)
+    {
+        $user = auth()->user();
 
-            // Total products listed
-            $totalProducts = Product::where('user_id', $user->id)->count();
+        // Total products listed by this user
+        $totalProducts = Product::where('user_id', $user->id)->count();
 
-            // Sales details
-            $salesData = OrderProduct::whereHas('product', function ($query) use ($user) {
-                $query->where('user_id', $user->id);
-            })
-            ->with(['product', 'order'])
-            ->selectRaw('product_id, SUM(product_qty) as product_total, SUM(product_qty * product_price) as total_revenue')
-            ->groupBy('product_id')
-            ->get();
+        // Get OrderProducts where the product belongs to the seller
+        $salesData = OrderProduct::whereHas('product', function ($query) use ($user) {
+            $query->where('user_id', $user->id);
+        })
+        ->with('product') // Eager load the product
+        ->selectRaw('product_id, SUM(product_qty) as product_total, SUM(product_qty * product_price) as total_revenue')
+        ->groupBy('product_id')
+        ->get();
 
-            $report = $salesData->map(function ($item) {
-                return [
-                    'product_name' => $item->product->product_name ?? 'Unknown',
-                    'quantity_sold' => $item->product_total,
-                    'total_revenue' => number_format($item->total_revenue, 2),
-                ];
-            });
+        // Format the report
+        $report = $salesData->map(function ($item) {
+            return [
+                'product_name' => $item->product->product_name ?? 'Unknown',
+                'quantity_sold' => $item->product_total,
+                'total_revenue' => round($item->total_revenue, 2), // Keep as number for formatting in JS
+            ];
+        });
 
-            return response()->json([
-                'total_products' => $totalProducts,
-                'sales' => $report,
-            ]);
-        }
+        return response()->json([
+            'total_products' => $totalProducts,
+            'sales' => $report,
+        ]);
+    }
 
 
 

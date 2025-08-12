@@ -95,6 +95,7 @@
                         </tr>
                     </thead>
                     <tbody>
+                      @if($supports && count($supports) > 0)
                       @foreach($supports as $support)
                         <tr>
                             <td>{{ $support->ticket_id }}</td>
@@ -110,16 +111,22 @@
                             <td>{{ \Carbon\Carbon::parse($support->created_at)->format('l, F j, Y g:i A') }}
                             </td>
                              <td>
-                            <button class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#viewTicketModal"
+                            <!-- <button class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#viewTicketModal"
                                     data-ticket-id="{{ $support->ticket_id }}"
                                     data-issue-type="{{ $support->problem_type }}"
                                     data-status="{{ $support->status }}"
                                     data-created-at="{{ \Carbon\Carbon::parse($support->created_at)->format('l, F j, Y g:i A') }}"
                                     data-message="{{ $support->message }}"
                                     data-answer="{{ $support->answer }}">View
-                            </button></td>
+                            </button> --><button class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#replyModal{{ $support->id }}">View</button>
+                            </td>
                         </tr>
-                      @endforeach
+                    @endforeach
+                    @else
+                        <tr>
+                            <td colspan="6" class="text-center">NO SUPPORT TICKET FOUND</td>
+                        </tr>
+                    @endif
                     </tbody>
                 </table>
             </div>
@@ -148,6 +155,49 @@
             </div>
         </div>
     </div>
+@foreach ($supports as $support)
+  <!-- Reply Modal -->
+  <div class="modal fade" id="replyModal{{ $support->id }}" tabindex="-1" aria-labelledby="replyModalLabel{{ $support->id }}" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title text-primary" id="replyModalLabel{{ $support->id }}">Your Support Ticket</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <div class="modal-body">
+          <p><strong>Ticket ID:</strong> {{ $support->ticket_id }}</p>
+          <p><strong>Status:</strong> {{ $support->status }}</p>
+          <p><strong>Issue Type:</strong> {{ $support->problem_type }}</p>
+          <p>Attended to by: <strong>{{ $support->attendant->name ?? 'N/A' }}</strong></p>
+          <hr>
+
+          <!-- 🗨️ Conversation Thread -->
+            <div 
+              class="conversation-thread mb-4"
+              style="max-height: 300px; overflow-y: auto; background-color: #f8f9fa; padding: 10px; border-radius: 5px;"
+              data-support-id="{{ $support->id }}"
+              data-fetch-url="{{ route('support.messages.fetch', $support->id) }}"
+              id="conversation-{{ $support->id }}" 
+            >
+              <!-- Messages will be loaded here -->
+            </div>
+
+            <!-- ✍️ Reply Form -->
+            <form class="user-reply-form" data-support-id="{{ $support->id }}">
+              @csrf
+              <div class="mb-3">
+                <label class="form-label fw-bold">Your Reply</label>
+                <textarea name="message" class="form-control" rows="3" placeholder="Type your message..." required></textarea>
+              </div>
+              <button type="submit" class="btn btn-primary">Send Reply</button>
+            </form>
+
+        </div>
+      </div>
+    </div>
+  </div>
+@endforeach
 
 
         <!-- Support Ticket Modal -->
@@ -261,6 +311,140 @@ $(document).ready(function () {
             }
         });
     });
+});
+</script>
+<script>
+$(document).ready(function () {
+
+// 1. Load messages when modal is shown
+let messageInterval = null;
+
+// Load messages (extracted to reuse inside interval)
+function loadMessages(modal) {
+  const conversationBox = modal.find('.conversation-thread');
+  const fetchUrl = conversationBox.data('fetch-url');
+
+  $.get(fetchUrl, function (data) {
+    if (!data || !data.initial) {
+      conversationBox.html('<p class="text-danger">Failed to load messages.</p>');
+      return;
+    }
+
+    let output = '';
+
+    // ✉️ Initial message
+    output += `
+      <div class="mb-3">
+        <div>
+          <strong>${data.initial.sender}</strong>
+          <span class="text-muted small">– ${data.initial.time}</span>
+        </div>
+        <div class="border p-2 rounded bg-white">
+          ${data.initial.message}
+        </div>
+      </div>
+    `;
+
+    // 📨 Reply messages
+    if (data.messages && data.messages.length > 0) {
+      data.messages.forEach(msg => {
+        const label = msg.sender_type === 'admin' ? 'Support Team' : 'You';
+
+        output += `
+          <div class="mb-3">
+            <div>
+              <strong class="${msg.sender_type === 'user' ? 'text-primary' : 'text-dark'}">${label}</strong>
+              <span class="text-muted small">– ${msg.created_at}</span>
+            </div>
+            <div class="border p-2 rounded bg-white">
+              ${msg.message}
+            </div>
+          </div>
+        `;
+      });
+    } else {
+      output += `<p class="text-muted">No replies yet.</p>`;
+    }
+
+    conversationBox.html(output);
+
+    // Auto scroll to bottom
+    if (conversationBox.length && conversationBox[0]) {
+      conversationBox.scrollTop(conversationBox[0].scrollHeight);
+    }
+  }).fail(() => {
+    conversationBox.html('<p class="text-danger">Failed to load messages. Please try again.</p>');
+  });
+}
+
+// When modal is shown
+$('.modal').on('shown.bs.modal', function () {
+  const modal = $(this);
+  const conversationBox = modal.find('.conversation-thread');
+  conversationBox.html('<p class="text-muted">Loading messages...</p>');
+
+  // Load first time
+  loadMessages(modal);
+
+  // Start interval (1 second)
+  messageInterval = setInterval(() => {
+    loadMessages(modal);
+  }, 1000);
+});
+
+// Clear interval when modal is hidden
+$('.modal').on('hidden.bs.modal', function () {
+  if (messageInterval) {
+    clearInterval(messageInterval);
+    messageInterval = null;
+  }
+});
+
+
+  // 2. Handle reply form via AJAX
+  $(document).on('submit', '.user-reply-form', function (e) {
+    e.preventDefault();
+
+    const form = $(this);
+    const supportId = form.data('support-id');
+    const messageBox = form.find('textarea[name="message"]');
+    const message = messageBox.val();
+    const conversationBox = $(`#conversation-${supportId}`);
+
+    if (!message.trim()) return;
+
+    form.find('button').prop('disabled', true).text('Sending...');
+
+    $.post(`/support/${supportId}/messages/reply`, {
+      message,
+      _token: '{{ csrf_token() }}'
+    }, function (res) {
+      if (res.success) {
+        messageBox.val('');
+        conversationBox.append(`
+          <div class="mb-3">
+            <div>
+              <strong>You</strong>
+              <span class="text-muted small">– just now</span>
+            </div>
+            <div class="border p-2 rounded bg-white">
+              ${message}
+            </div>
+          </div>
+        `);
+        if (conversationBox.length && conversationBox[0]) {
+          conversationBox.scrollTop(conversationBox[0].scrollHeight);
+        }
+      } else {
+        alert('Failed to send reply.');
+      }
+    }).fail(() => {
+      alert('Server error. Please try again.');
+    }).always(() => {
+      form.find('button').prop('disabled', false).text('Send Reply');
+    });
+  });
+
 });
 </script>
 

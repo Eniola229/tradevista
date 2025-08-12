@@ -80,6 +80,7 @@ class ProductController extends Controller
                 'product_price' => 'required|string',
                 'stock' => 'required',
                 'product_weight' => 'required'
+                'product_video' => 'nullable|mimetypes:video/mp4,video/avi,video/mpeg,video/quicktime|max:10240',
             ], [
                 'product_name.unique' => 'This product name already exists',
             ]);

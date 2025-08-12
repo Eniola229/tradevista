@@ -43,6 +43,12 @@ class Support extends Model
         'answer'
     ];
 
+    public function messages()
+    {
+        return $this->hasMany(SupportMessage::class);
+    }
+
+
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id');

@@ -90,7 +90,7 @@ Route::prefix('carts')->controller(CartController::class)->group(function () {
 
 });
 // Voting
-Route::get('/vote/{link}', [VoteController::class, 'showVotePage'])->name('vote.page');
+Route::get('/votes/{link}', [VoteController::class, 'showVotePage'])->name('vote.page');
 Route::post('/vote/{link}/cast', [VoteController::class, 'castVote'])->name('vote.cast');
 
 // Results
@@ -131,6 +131,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/support-tickets/{id}', [SupportController::class, 'show']);
     Route::put('/support-tickets/{id}', [SupportController::class, 'update']);
     Route::delete('/support-tickets/{id}', [SupportController::class, 'destroy']);
+    Route::get('/support/{id}/messages', [SupportController::class, 'fetchMessages'])->name('support.messages.fetch');
+    Route::post('/support/{id}/messages/reply', [SupportController::class, 'reply'])->name('support.messages.reply');
+
+
     //REDRAW
     Route::get('user/withdraw', [WithdrawController::class, 'index'])->name('withdraw.index');
     Route::post('user/withdraw', [WithdrawController::class, 'withdraw'])->name('user-withdraw');
@@ -180,6 +184,11 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
  Route::get('/view/user/{id}', [UsersController::class, 'view'])->name('admin.view-user');
  Route::get('/support', [SupportTicketController::class, 'index'])->name('support');
  Route::post('/support/answer/{id}', [SupportTicketController::class, 'answer'])->name('support.answer');
+Route::post('/support/{id}/message/send', [SupportTicketController::class, 'sendMessage'])->name('admin.support.message.send');
+('admin.support.message.send');
+Route::get('/support/{id}/message/fetch', [SupportTicketController::class, 'fetchMessages'])->name('admin.support.message.fetch');
+
+Route::post('/support/{id}/close', [SupportTicketController::class, 'closeTicket'])->name('admin.support.close');
  Route::get('/withdraw', [WIthdraweralController::class, 'index'])->name('withdraw');
  Route::post('/upload-receipt', [WIthdraweralController::class, 'manageWithdrawal'])->name('admin.uploadReceipt');
  Route::resource('state_prices', StatePriceController::class);

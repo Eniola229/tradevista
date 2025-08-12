@@ -24,6 +24,8 @@
 
   <!-- CSS Files -->
   <link id="pagestyle" href="{{ asset('assets/css/soft-ui-dashboard.css?v=1.0.7') }}" rel="stylesheet">
+  
+  <meta name="csrf-token" content="{{ csrf_token() }}">
 
   <!-- Nepcha Analytics -->
   <script defer data-site="YOUR_DOMAIN_HERE" src="https://api.nepcha.com/js/nepcha-analytics.js"></script>
@@ -124,42 +126,68 @@
                             <div class="modal fade" id="viewModal{{ $support->id }}" tabindex="-1" aria-labelledby="viewModalLabel{{ $support->id }}" aria-hidden="true">
                               <div class="modal-dialog modal-lg">
                                 <div class="modal-content">
+                                  
                                   <div class="modal-header">
                                     <h5 class="modal-title" id="viewModalLabel{{ $support->id }}">Ticket Details</h5>
                                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                   </div>
+
                                   <div class="modal-body">
-                                    <!-- Display support ticket details -->
+                                    <!-- Ticket Info -->
                                     <p><strong>Ticket ID:</strong> {{ $support->ticket_id }}</p>
-                                    <p><strong>Customer Name:</strong> {{ $support->user->name }}</p>
-                                    <p><strong>Customer Email:</strong> {{ $support->user->email }}</p>
+                                    <p><strong>Customer:</strong> {{ $support->user->name }} ({{ $support->user->email }})</p>
                                     <p><strong>Problem Type:</strong> {{ $support->problem_type }}</p>
                                     <p><strong>Status:</strong> {{ $support->status }}</p>
-                                    <p><strong>Date Requested:</strong> {{ $support->created_at->format('F j, Y g:i A') }}</p>
+                                    <p><strong>Date:</strong> {{ $support->created_at->format('F j, Y g:i A') }}</p>
                                     <hr>
-                                    <hr style="border: 0; height: 2px; background: linear-gradient(to right, #ff7e5f, #feb47b); margin: 20px 0;">
-                                    <p><strong>Question:</strong> {{ $support->message }}</p>
-                                    @if(empty($support->answer))
-                                        <form id="answerForm" action="{{ url('admin/support/answer', ['id' => $support->id]) }}" method="POST">
-                                            @csrf
-                                            <div class="mb-3">
-                                                <label for="answer" class="form-label">Your Answer</label>
-                                                <textarea class="form-control" id="answer" name="answer" rows="4" required></textarea>
-                                            </div>
-                                                   <button id="submitBtn" type="submit" class="btn btn-primary">Submit Answer</button>
-                                        </form>
-                                    @else
-                                        <p><strong>Answer:</strong> {{ $support->answer }}</p>
-                                        <p><strong>Attended to by:</strong> {{ $support->attendant->name }}</p>
+
+                                    <!-- Chat Messages -->
+                                     <!-- Conversation -->
+                                    <h6 class="mb-3">Conversation</h6>
+                                    <div class="border rounded p-3 mb-3 support-messages" 
+                                         id="messages-{{ $support->id }}" 
+                                         style="max-height: 300px; overflow-y: auto;"
+                                         data-fetch-url="{{ route('admin.support.message.fetch', $support->id) }}"
+                                         data-user-name="{{ $support->user->name }}"
+                                         data-initial-message="{{ $support->message }}"
+                                         data-initial-time="{{ $support->created_at->diffForHumans() }}">
+                                      <!-- Messages will be loaded here by JS -->
+                                    </div>
+
+                                    <!-- Reply Form -->
+                                    <form class="reply-form" data-id="{{ $support->id }}">
+                                      @csrf
+                                      <div class="mb-3">
+                                        <label for="message-{{ $support->id }}" class="form-label">Reply</label>
+                                        <textarea 
+                                          class="form-control" 
+                                          name="message" 
+                                          id="message-{{ $support->id }}" 
+                                          rows="3" 
+                                          required></textarea>
+                                      </div>
+                                      <button type="submit" class="btn btn-primary">Send Reply</button>
+                                    </form>
+
+                                    <div class="reply-status text-success mt-2" style="display: none;">Reply sent!</div>
+                                   </div>
+
+                                    <!-- Close Ticket Option -->
+                                    @if($support->status !== 'ISSUE FIXED')
+                                      <form method="POST" action="{{ route('admin.support.close', $support->id) }}" class="mt-3">
+                                        @csrf
+                                        <button class="btn btn-success">Mark as Resolved</button>
+                                      </form>
                                     @endif
 
-                                  </div>
                                   <div class="modal-footer">
                                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                                   </div>
+
                                 </div>
                               </div>
                             </div>
+
                         @endforeach
                         @else
                             <tr>
@@ -189,53 +217,6 @@
 <!-- Add SweetAlert -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-<script>
-$(document).ready(function() {
-    $('#answerForm').on('submit', function(e) {
-        e.preventDefault(); // Prevent the default form submission
-        
-        var formData = $(this).serialize(); // Serialize form data
-        var submitBtn = $('#submitBtn'); // Get the submit button
-
-        // Disable the button and show loading text
-        submitBtn.prop('disabled', true).text('Submitting...');
-
-        $.ajax({
-            url: $(this).attr('action'),
-            method: 'POST',
-            data: formData,
-            success: function(response) {
-                if (response.status === 'success') {
-                    // Show success message using SweetAlert
-                    Swal.fire({
-                        title: 'Success!',
-                        text: response.message,
-                        icon: 'success',
-                        confirmButtonText: 'OK'
-                    }).then((result) => {
-                        // After closing SweetAlert, reload the page
-                        if (result.isConfirmed) {
-                            location.reload(); // Reload the page
-                        }
-                    });
-                }
-            },
-            error: function(xhr, status, error) {
-                // Handle error response
-                Swal.fire({
-                    title: 'Error!',
-                    text: 'An error occurred. Please try again.',
-                    icon: 'error',
-                    confirmButtonText: 'OK'
-                }).then(() => {
-                    // Enable the button again if there was an error
-                    submitBtn.prop('disabled', false).text('Submit Answer');
-                });
-            }
-        });
-    });
-});
-</script>
 
     <script type="text/javascript">
 function searchTable() {
@@ -296,6 +277,118 @@ function searchTable() {
   <script async defer src="https://buttons.github.io/buttons.js"></script>
   <!-- Control Center for Soft Dashboard: parallax effects, scripts for the example pages etc -->
   <script src="{{ asset('assets/js/soft-ui-dashboard.min.js') }}?v={{ time() }}"></script>
+<script>
+  $.ajaxSetup({
+    headers: {
+      'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+    }
+  });
+</script>
+
+<script>
+function loadMessages(container) {
+  const url = container.data('fetch-url');
+  const initialMessage = container.data('initial-message');
+  const initialSender = container.data('user-name');
+  const initialTime = container.data('initial-time');
+
+  $.get(url, function (res) {
+    if (!res.messages) return;
+
+    container.html('');
+
+    // Initial message
+    container.append(`
+      <div class="mb-2">
+        <div><strong>${initialSender}</strong> <small class="text-muted">• ${initialTime}</small></div>
+        <div>${initialMessage}</div>
+      </div>
+    `);
+
+    res.messages.forEach(msg => {
+      const sender = msg.sender_type === 'admin' ? 'Admin' : initialSender;
+      container.append(`
+        <div class="mb-2">
+          <div><strong class="${msg.sender_type === 'admin' ? 'text-primary' : 'text-dark'}">${sender}</strong> 
+            <small class="text-muted">• ${msg.created_at}</small>
+          </div>
+          <div>${msg.message}</div>
+        </div>
+      `);
+    });
+
+    container.scrollTop(container[0].scrollHeight);
+  });
+}
+
+$(document).ready(function () {
+  $('.support-messages').each(function () {
+    const container = $(this);
+    const id = container.attr('id').split('-')[1];
+
+    loadMessages(container);
+    setInterval(() => loadMessages(container), 5000);
+  });
+$(document).on('submit', '.reply-form', function (e) {
+  e.preventDefault();
+
+  const form = $(this);
+  const id = form.data('id');
+  const messageBox = $(`#message-${id}`); // ✅ Find by ID
+  const csrfToken = form.find('input[name="_token"]').val();
+
+  console.log('[DEBUG] Submitting form for ID:', id);
+  console.log('[DEBUG] Found messageBox length:', messageBox.length);
+  console.log('[DEBUG] messageBox ID:', `#message-${id}`);
+  console.log('[DEBUG] Form HTML:', form.html());
+
+  if (messageBox.length === 0) {
+    alert('Could not find message textarea. Please check form markup.');
+    return;
+  }
+
+  const message = messageBox.val() || '';
+  const status = form.next('.reply-status');
+  const container = $(`#messages-${id}`);
+
+  if (!message.trim()) {
+    alert('Please enter a message before sending.');
+    return;
+  }
+
+  messageBox.prop('disabled', true);
+  form.find('button').text('Sending...');
+
+  $.ajax({
+    url: `/admin/support/${id}/message/send`,
+    method: 'POST',
+    data: {
+      message: message,
+      _token: csrfToken
+    },
+    success: function (res) {
+      if (res.success) {
+        messageBox.val('');
+        status.text('Reply sent!').fadeIn().delay(1500).fadeOut();
+        loadMessages(container); // Make sure this function exists and works
+      } else {
+        alert('Reply failed. Please try again.');
+      }
+    },
+    error: function (xhr, status, error) {
+      console.error('[ERROR]', xhr.responseText);
+      alert('Failed to send message. Please try again.');
+    },
+    complete: function () {
+      messageBox.prop('disabled', false);
+      form.find('button').text('Send Reply');
+    }
+  });
+});
+
+
+});
+</script>
 
 </body>
 

@@ -64,9 +64,8 @@
                       <i class="fa fa-ellipsis-v text-secondary"></i>
                     </a>
                     <ul class="dropdown-menu px-2 py-3 ms-sm-n4 ms-n5" aria-labelledby="dropdownTable">
-                      <li><a class="dropdown-item border-radius-md" href="javascript:;">Action</a></li>
-                      <li><a class="dropdown-item border-radius-md" href="javascript:;">Another action</a></li>
-                      <li><a class="dropdown-item border-radius-md" href="javascript:;">Something else here</a></li>
+                      <li><a class="dropdown-item border-radius-md" href="javascript:;">All</a></li>
+                      
                     </ul>
                   </div>
                 </div>
@@ -85,7 +84,8 @@
               <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Image</th>
               <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Name</th>
               <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Account Balance</th>
-              <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Date Added</th>
+              <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Account Type</th>
+              <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Date Joined</th>
               <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Action</th>
             </tr>
           </thead>
@@ -101,6 +101,9 @@
                   </td>
                   <td>
                     <h6 class="mb-0 text-sm">₦ {{ number_format($user->balance, 2) }}</h6>
+                  </td>
+                  <td>
+                    <h6 class="mb-0 text-sm">{{ $user->setup?->account_type ?? 'NOT SET' }}</h6>
                   </td>
                   <td>
                     <div class="d-flex px-2 py-1">

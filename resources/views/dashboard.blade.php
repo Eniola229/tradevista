@@ -202,6 +202,7 @@
           </div>
         </div>
       </div>
+      </div>
 
 <!-----Notification slide show----->
 @php
@@ -329,118 +330,159 @@
           <button class="btn btn-primary">Click here</button>
         </a>
       </div>
-        <div class="container mt-5">
-            <div class="card p-4 shadow-sm">
-                <div class="d-flex flex-column flex-md-row align-items-center justify-content-between mb-3 gap-3">
-                    <h4 class="mb-0">Sales Report</h4>
-                    <p class="mb-0"><strong>Total Products Listed:</strong> <span id="total-products">Loading...</span></p>
-                </div>
+<style>
+  .chart-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 10px;
+  }
 
-                <div class="chart-container" style="position: relative; height: 400px;">
-                    <canvas id="salesChart"></canvas>
-                </div>
-            </div>
-        </div>
+  .chart-wrapper canvas {
+    min-width: 400px;
+    height: 300px !important;
+  }
+</style>
 
-        <!-- Chart.js -->
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-        <script>
-            fetch('/sales-report')
-                .then(response => response.json())
-                .then(data => {
-                    document.getElementById('total-products').innerText = data.total_products;
+<div class="container mt-5">
+  <div class="card p-4 shadow-sm">
+    <!-- Header -->
+    <div class="row align-items-center mb-3 text-center text-md-start">
+      <div class="col-12 col-md-6 mb-2 mb-md-0">
+        <h4 class="mb-0">Sales Report</h4>
+      </div>
+      <div class="col-12 col-md-6">
+        <p class="mb-0">
+          <strong>Total Products Listed:</strong>
+          <span id="total-products">Loading...</span>
+        </p>
+      </div>
+    </div>
 
-                    const labels = data.sales.map(item => item.product_name);
-                    const quantities = data.sales.map(item => item.quantity_sold);
-                    const revenues = data.sales.map(item => item.total_revenue);
+    <!-- Chart -->
+    <div class="chart-wrapper">
+      <canvas id="salesChart"></canvas>
+    </div>
+  </div>
+</div>
 
-                    const nairaFormat = new Intl.NumberFormat('en-NG', {
-                        style: 'currency',
-                        currency: 'NGN'
-                    });
 
-                    const ctx = document.getElementById('salesChart').getContext('2d');
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  fetch('/sales-report')
+    .then(response => response.json())
+    .then(data => {
+      document.getElementById('total-products').innerText = data.total_products;
 
-                    new Chart(ctx, {
-                        type: 'bar',
-                        data: {
-                            labels: labels,
-                            datasets: [
-                                {
-                                    label: 'Quantity Sold',
-                                    data: quantities,
-                                    backgroundColor: 'rgba(54, 162, 235, 0.7)',
-                                    borderColor: 'rgba(54, 162, 235, 1)',
-                                    borderWidth: 1,
-                                    yAxisID: 'y'
-                                },
-                                {
-                                    label: 'Revenue (₦)',
-                                    data: revenues,
-                                    backgroundColor: 'rgba(40, 167, 69, 0.7)',
-                                    borderColor: 'rgba(40, 167, 69, 1)',
-                                    borderWidth: 1,
-                                    yAxisID: 'y1'
-                                }
-                            ]
-                        },
-                        options: {
-                            responsive: true,
-                            interaction: {
-                                mode: 'index',
-                                intersect: false
-                            },
-                            scales: {
-                                y: {
-                                    beginAtZero: true,
-                                    position: 'left',
-                                    title: {
-                                        display: true,
-                                        text: 'Quantity'
-                                    }
-                                },
-                                y1: {
-                                    beginAtZero: true,
-                                    position: 'right',
-                                    grid: {
-                                        drawOnChartArea: false
-                                    },
-                                    ticks: {
-                                        callback: function(value) {
-                                            return nairaFormat.format(value);
-                                        }
-                                    },
-                                    title: {
-                                        display: true,
-                                        text: 'Revenue (₦)'
-                                    }
-                                }
-                            },
-                            plugins: {
-                                tooltip: {
-                                    callbacks: {
-                                        label: function(context) {
-                                            if (context.dataset.label === 'Revenue (₦)') {
-                                                return context.dataset.label + ': ' + nairaFormat.format(context.raw);
-                                            }
-                                            return context.dataset.label + ': ' + context.raw;
-                                        }
-                                    }
-                                },
-                                title: {
-                                    display: true,
-                                    text: 'Sales by Product'
-                                }
-                            }
-                        }
-                    });
-                })
-                .catch(error => {
-                    console.error('Error loading report:', error);
-                    alert("Could not load sales report.");
-                });
-        </script>
+      const labels = data.sales.map(item => item.product_name);
+      const quantities = data.sales.map(item => item.quantity_sold);
+      const revenues = data.sales.map(item => item.total_revenue);
+
+      const nairaFormat = new Intl.NumberFormat('en-NG', {
+        style: 'currency',
+        currency: 'NGN'
+      });
+
+      const ctx = document.getElementById('salesChart').getContext('2d');
+
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: 'Quantity Sold',
+              data: quantities,
+              backgroundColor: 'rgba(54, 162, 235, 0.7)',
+              borderColor: 'rgba(54, 162, 235, 1)',
+              borderWidth: 1,
+              yAxisID: 'y'
+            },
+            {
+              label: 'Revenue (₦)',
+              data: revenues,
+              backgroundColor: 'rgba(40, 167, 69, 0.7)',
+              borderColor: 'rgba(40, 167, 69, 1)',
+              borderWidth: 1,
+              yAxisID: 'y1'
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: {
+            mode: 'index',
+            intersect: false
+          },
+          layout: {
+            padding: {
+              top: 10,
+              bottom: 10,
+              left: 10,
+              right: 10
+            }
+          },
+          scales: {
+            x: {
+              ticks: {
+                maxRotation: 20,
+                minRotation: 0,
+                autoSkip: false
+              }
+            },
+            y: {
+              beginAtZero: true,
+              position: 'left',
+              title: {
+                display: true,
+                text: 'Quantity'
+              }
+            },
+            y1: {
+              beginAtZero: true,
+              position: 'right',
+              grid: {
+                drawOnChartArea: false
+              },
+              title: {
+                display: true,
+                text: 'Revenue (₦)'
+              },
+              ticks: {
+                callback: function(value) {
+                  return nairaFormat.format(value);
+                }
+              }
+            }
+          },
+          plugins: {
+            title: {
+              display: true,
+              text: 'Sales by Product'
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  if (context.dataset.label === 'Revenue (₦)') {
+                    return context.dataset.label + ': ' + nairaFormat.format(context.raw);
+                  }
+                  return context.dataset.label + ': ' + context.raw;
+                }
+              }
+            }
+          }
+        }
+      });
+    })
+    .catch(error => {
+      console.error('Error loading report:', error);
+      alert("Could not load sales report.");
+    });
+</script>
 
 
       @endif
@@ -457,7 +499,7 @@
         enctype="multipart/form-data"
     >
         @csrf
-        <h3 class="font-bold text-2xl mb-4 text-gray-800">Complete you Account Set up</h3>
+        <h3 class="font-bold text-2xl mb-4 text-gray-800">Complete your account aset up</h3>
 
         <!-- Account Type Dropdown -->
         <div class="mb-4">
@@ -645,52 +687,6 @@
         </div>
       </div>
       @endif
-        <div class="d-flex flex-column flex-md-row align-items-center justify-content-between mt-4 p-4 rounded shadow-sm gap-3 border">
-            <h2 class="h5 text-dark mb-0">Invite Friends to Vote for you & Win Exciting Giveaway Prizes!</h2>
-
-            @if(!$contestant)
-                <form id="registerForm" method="POST" action="{{ route('contestant.quick-register') }}">
-                    @csrf
-                    <button type="button" id="showRules" class="btn btn-success">Register to Join Giveaway</button>
-                </form>
-
-                <script>
-                    $('#showRules').on('click', function(e) {
-                        Swal.fire({
-                            title: 'Contest Rules',
-                            html: `
-                                <ul style="text-align:left">
-                                    <li>1. Only 50 contestants allowed.</li>
-                                    <li>2. Winner must get at least 200 votes.</li>
-                                    <li>3. The winner casts a vote to choose a gift (fridge, iron, or toaster).</li>
-                                    <li>4. Winner must create a gratitude video and post with picture.</li>
-                                    <li>5. If not registered as a seller, winner must do so (₦2,875) before receiving gift.</li>
-                                </ul>
-                                <strong>Do you accept these rules?</strong>
-                            `,
-                            icon: 'info',
-                            showCancelButton: true,
-                            confirmButtonText: 'I Agree',
-                            cancelButtonText: "No, Cancel",
-                            confirmButtonColor: '#28a745',
-                            cancelButtonColor: '#d33'
-                        }).then((result) => {
-                            if (result.isConfirmed) {
-                                $('#registerForm').submit();
-                            }
-                        });
-                    });
-                </script>
-
-            @else
-                <div class="d-flex flex-column flex-md-row align-items-center gap-3">
-                    <p class="alert alert-info text-light mb-0" id="textToCopy" style="cursor: pointer;">
-                        {{ url('/vote/' . $contestant->unique_link) }}
-                    </p>
-                    <button class="btn btn-primary" id="copyButton">Copy Link</button>
-                </div>
-            @endif
-        </div>
 
         <script>
             document.getElementById("copyButton")?.addEventListener("click", function () {

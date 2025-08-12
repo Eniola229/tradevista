@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Models\Support;
 use App\Models\Store;
+use App\Models\SupportMessage;
 use App\Models\User;
 use Auth;
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
@@ -16,11 +17,53 @@ class SupportTicketController extends Controller
 {
     public function index(Request $request)
     {
-        $supports = Support::orderBy('created_at', 'desc')
-                        ->paginate(10); 
+        $supports = Support::with(['user', 'messages']) 
+                         ->orderBy('created_at', 'desc')
+                         ->paginate(10); 
+
         return view('admin.support', compact('supports'));
     }
     
+    public function fetchMessages($id)
+    {
+        $support = Support::with(['messages'])->findOrFail($id);
+
+        return response()->json([
+            'initial' => [
+                'message' => $support->message,
+                'sender' => $support->user->name,
+                'time' => $support->created_at->diffForHumans(),
+            ],
+            'messages' => $support->messages->map(function ($msg) {
+                return [
+                    'message' => $msg->message,
+                    'sender_type' => $msg->sender_type,
+                    'created_at' => $msg->created_at->diffForHumans(),
+                ];
+            }),
+        ]);
+    }
+
+    public function sendMessage(Request $request, $id)
+    {
+        $request->validate(['message' => 'required|string']);
+
+        $support = Support::findOrFail($id);
+
+        $msg = new SupportMessage();
+        $msg->support_id = $support->id;
+        $msg->message = $request->message;
+        $msg->sender_type = 'admin';
+        $msg->sender_id = Auth::id();
+        $msg->save();
+
+        $support->attendant_id = Auth::id();
+        $support->update();
+
+        return response()->json(['success' => true]);
+    }
+
+
     public function answer(Request $request, $id)
     {
         // Validate the answer
@@ -44,4 +87,14 @@ class SupportTicketController extends Controller
             'answer' => $support->answer
         ]);
     }
+
+    public function closeTicket($id)
+    {
+        $support = Support::findOrFail($id);
+        $support->status = 'ISSUE FIXED';
+        $support->save();
+
+        return back()->with('success', 'Ticket closed');
+    }
+
 }

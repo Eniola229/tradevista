@@ -269,7 +269,6 @@ $hots = Product::where('status', 'ACTIVE')
                     </p>
                     <div class="mt-4 d-flex">
                         <a href="{{ url('results') }}"><button class="site-btn me-2">Live Results</button></a>
-                        <a href="{{ route('dashboard') }}"><button  class="site-btn">Register</button></a>
                     </div>
                 </div>
             </div>
