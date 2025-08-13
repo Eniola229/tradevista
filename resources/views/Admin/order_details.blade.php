@@ -48,71 +48,121 @@
     @endif
 
 <div class="container mt-4">
-    <h4 class="mb-4">Order Details</h4>
 
-    <!-- Order Information -->
-    <div class="card p-4 mb-4 shadow">
-        <h4>Order ID: <strong>#{{ $order->transaction_id }}</strong></h4>
-        <p><strong>Customer Name:</strong> {{ $order->user->name }}</p>
-        <p><strong>Email:</strong> {{ $order->user->email }}</p>
-        <p><strong>Total:</strong> ₦{{ number_format($order->total, 2) }}</p>
-        <p><strong>Status:</strong> {{ ucfirst($order->delivery_status) }}</p>
-        <p><strong>Order Note:</strong> {{ ucfirst($order->order_note ?? 'N/A') }}</p>
-
-        <!-- Delivery Status Dropdown -->
-        <label for="delivery_status"><strong>Delivery Status:</strong></label>
-        <select id="delivery_status" class="form-control w-50">
-            <option value="Processing" {{ $order->delivery_status == 'pending' ? 'selected' : '' }}>Processing</option>
-            <option value="shipped" {{ $order->delivery_status == 'shipped' ? 'selected' : '' }}>Shipped</option>
-            <option value="delivered" {{ $order->delivery_status == 'delivered' ? 'selected' : '' }}>Delivered</option>
-        </select>
-        <button class="btn btn-success mt-3" id="update_status">Update Status</button>
-    </div>
-
-    <!-- Shipping Address -->
-    <div class="card mb-4 shadow-sm border-0">
-        <div class="card-body">
-            <h5 class="card-title mb-3 text-primary fw-bold">Shipping Address</h5>
-            <ul class="list-unstyled mb-0">
-                <li><strong>Address:</strong> {{ $order->shipping_address ?? 'N/A' }}</li>
-                <li><strong>Courier:</strong> {{ $order->courier_name ?? 'N/A' }}</li>
-                <li><strong>Charges:</strong> ₦{{ number_format($order->shipping_charges ?? 0, 2) }}</li>
-            </ul>
+    <!-- Order Header -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h6 class="text-muted mb-1">
+                {{ \Carbon\Carbon::parse($order->created_at)->format('D, M j, Y, g:i A') }} 
+                | ID: #{{ $order->transaction_id }}
+            </h6>
+        </div>
+        <div class="d-flex">
+            <select  id="delivery_status" class="form-select form-select-sm me-2" style="width:150px">
+                <option value="processing" {{ $order->delivery_status == 'processing' ? 'selected' : '' }}>Processing</option>
+                <option value="shipped" {{ $order->delivery_status == 'shipped' ? 'selected' : '' }}>Shipped</option>
+                <option value="delivered" {{ $order->delivery_status == 'delivered' ? 'selected' : '' }}>Delivered</option>
+            </select>
+            <button class="btn btn-primary btn-sm" id="update_status">Save</button>
         </div>
     </div>
 
+    <!-- Customer / Pickup / Billing -->
+    <div class="row g-3 mb-4">
+        <!-- Customer -->
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h6 class="fw-bold"><i class="bi bi-person-fill me-1"></i> Customer</h6>
+                    <p class="mb-1"><strong>Full Name:</strong> {{ $order->user->name }}</p>
+                    <p class="mb-1"><strong>Email:</strong> {{ $order->user->email }}</p>
+                    <p class="mb-1"><strong>Mobile Number:</strong> {{ $order->user->phone_number ?? 'N/A' }}</p>
+                    <a href="{{ url('admin/view/user', ['id' => $order->user->id]) }}" class="text-primary small">View profile</a>
+                </div>
+            </div>
+        </div>
 
-    <!-- Order Products -->
-    <h4 class="mt-4">Order Products</h4>
-    <div class="table-responsive">
-        <table class="table table-bordered">
-            <thead class="thead-dark">
-                <tr>
-                    <th>Product</th>
-                    <th>Seller</th>
-                    <th>Seller Address</th>
-                    <th>Seller Mobile</th>
-                    <th>Quantity</th>
-                    <th>Price</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach ($order->orderProducts as $orderProduct)
-                <tr>
-                    <td>{{ $orderProduct->product->product_name }}</td>
-                    <td>{{ $orderProduct->product->seller_info->company_name ?? 'N/A' }}</td>
-                    <td>{{ $orderProduct->product->seller_info->address ?? 'N/A' }}</td>
-                    <td>{{ $orderProduct->product->seller_info->company_mobile_1 ?? 'N/A' }}</td>
-                    <td>{{ $orderProduct->product_qty }}</td>
-                    <td>₦{{ number_format($orderProduct->product_price, 2) }}</td>
-                </tr>
-                @endforeach
-            </tbody>
-        </table>
+        <!-- Pickup -->
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h6 class="fw-bold"><i class="bi bi-truck me-1"></i>Shipping Details</h6>
+                    <p class="mb-1"><strong>Tracking Number:</strong> N/A</p>
+                    <p class="mb-1"><strong>Shipping Type:</strong> ShipBubble</p>
+                    <p class="mb-1"><strong>Shipping Fee:</strong> ₦{{ number_format($order->shipping_charges ?? 0, 2) }}</p>
+                    <p class="mb-0"><strong>Status:</strong> <span class="text-success">Order placed</span></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Billing -->
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h6 class="fw-bold"><i class="bi bi-geo-alt-fill me-1"></i> Shiiping Address</h6>
+                    <p class="mb-1"><strong>City:</strong> {{ $order->city ?? 'N/A' }}</p>
+                    <p class="mb-1"><strong>Address:</strong> {{ $order->shipping_address ?? 'N/A' }}</p>
+                    <p class="mb-1"><strong>Country:</strong> NIGERIA</p>
+                    <a href="#" class="text-primary small">Open map</a>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <!-- Back Button -->
-    <a href="{{ url('admin/orders') }}" class="btn btn-secondary mt-3">Back to Orders</a>
+    <!-- Ordered Products Table -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-0">
+            <h6 class="fw-bold p-3 border-bottom">Ordered Products</h6>
+            <div class="table-responsive">
+                <table class="table mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th>Product Images</th>
+                            <th>Product Name</th>
+                            <th>Product Qty</th>
+                            <th>Amount</th>
+                            <th>Seller Phone Numbers</th>
+                            <th>Seller Address</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($order->orderProducts as $orderProduct)
+                        <tr>
+                            <td>
+                                <img src="{{ asset($orderProduct->product->image_url ?? 'placeholder.jpg') }}" 
+                                     alt="image" width="50">
+                            </td>
+                            <td>{{ $orderProduct->product->product_name }}</td>
+                            <td>{{ $orderProduct->product_qty }}</td>
+                            <td>₦{{ number_format($orderProduct->product_price, 2) }}</td>
+                            <td>{{ $orderProduct->product->seller_info->company_mobile_1 ?? 'N/A' }} - {{ $orderProduct->product->seller_info->company_mobile_2 ?? 'N/A' }}</td>
+                            <td>{{ $orderProduct->product->seller_info->address ?? 'N/A' }}</td>
+                            <td><a href="{{ url('admin/view/user', ['id' => $orderProduct->product->seller_info->user_id]) }}" class="text-primary small">View Seller</a></td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Order Summary -->
+            <div class="p-3 border-top">
+                <h6 class="fw-bold"><i class="bi bi-receipt me-1"></i> Order Summary</h6>
+                <div class="d-flex justify-content-between">
+                    <span>Subtotal:</span>
+                    <span>₦{{ number_format($order->subtotal, 2) }}</span>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <span>Shipping Fee:</span>
+                    <span>₦{{ number_format($order->shipping_charges ?? 0, 2) }}</span>
+                </div>
+                <div class="d-flex justify-content-between fw-bold">
+                    <span>Total:</span>
+                    <span>₦{{ number_format($order->total, 2) }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
   </main>

@@ -167,118 +167,87 @@
         </div>
       </div>
 
-    <div class="container mt-5">
-        <div class="card p-4 shadow-sm">
-            <div class="d-flex flex-column flex-md-row align-items-center justify-content-between mb-3 gap-3">
-                <h4 class="mb-0">Admin Sales Report</h4>
-                <p class="mb-0"><strong>Total Products in Store:</strong> <span id="total-products">Loading...</span></p>
-            </div>
-
-            <div class="chart-container" style="position: relative; height: 400px;">
-                <canvas id="adminSalesChart"></canvas>
-            </div>
-        </div>
+   <div class="container mt-5">
+  <div class="card p-4 shadow-sm">
+    <div class="d-flex flex-column flex-md-row align-items-center justify-content-between mb-3 gap-3">
+      <h4 class="mb-0">Sales Report</h4>
+      <button class="btn btn-primary" onclick="window.print()">Print Report</button>
     </div>
 
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <div class="row text-center mb-4">
+      <div class="col-md-4"><strong>Total Products:</strong> <span id="total-products">0</span></div>
+      <div class="col-md-4"><strong>Sales Volume:</strong> <span id="sales-volume">0</span></div>
+      <div class="col-md-4"><strong>Products Sold:</strong> <span id="products-sold">Loading...</span></div>
+    </div>
 
-    <script>
-        fetch('/admin/sales-report')
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById('total-products').innerText = data.total_products;
+    <h6>Sales Channels</h6>
+    <ul id="sales-channels"></ul>
+    
+    <h6 class="mt-5">Sales Trend</h6>
+    <canvas id="salesTrendChart"></canvas>
 
-                const labels = data.sales.map(item => item.product_name);
-                const quantities = data.sales.map(item => item.quantity_sold);
-                const revenues = data.sales.map(item => item.total_revenue);
+    <h6 class="mt-4">Sales by Product</h6>
+    <canvas id="adminSalesChart"></canvas>
 
-                const nairaFormat = new Intl.NumberFormat('en-NG', {
-                    style: 'currency',
-                    currency: 'NGN'
-                });
+      </div>
+</div>
 
-                const ctx = document.getElementById('adminSalesChart').getContext('2d');
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+fetch('/admin/sales-report')
+  .then(res => res.json())
+  .then(data => {
+    document.getElementById('total-products').innerText = data.total_products;
+    document.getElementById('sales-volume').innerText = data.sales_volume;
+    document.getElementById('products-sold').innerText = data.products_sold.join(', ');
 
-                new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: labels,
-                        datasets: [
-                            {
-                                label: 'Quantity Sold',
-                                data: quantities,
-                                backgroundColor: 'rgba(54, 162, 235, 0.7)',
-                                borderColor: 'rgba(54, 162, 235, 1)',
-                                borderWidth: 1,
-                                yAxisID: 'y'
-                            },
-                            {
-                                label: 'Revenue (₦)',
-                                data: revenues,
-                                backgroundColor: 'rgba(255, 99, 132, 0.7)',
-                                borderColor: 'rgba(255, 99, 132, 1)',
-                                borderWidth: 1,
-                                yAxisID: 'y1'
-                            }
-                        ]
-                    },
-                    options: {
-                        responsive: true,
-                        interaction: {
-                            mode: 'index',
-                            intersect: false
-                        },
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                position: 'left',
-                                title: {
-                                    display: true,
-                                    text: 'Quantity'
-                                }
-                            },
-                            y1: {
-                                beginAtZero: true,
-                                position: 'right',
-                                grid: {
-                                    drawOnChartArea: false
-                                },
-                                ticks: {
-                                    callback: function(value) {
-                                        return nairaFormat.format(value);
-                                    }
-                                },
-                                title: {
-                                    display: true,
-                                    text: 'Revenue (₦)'
-                                }
-                            }
-                        },
-                        plugins: {
-                            tooltip: {
-                                callbacks: {
-                                    label: function(context) {
-                                        if (context.dataset.label.includes('Revenue')) {
-                                            return context.dataset.label + ': ' + nairaFormat.format(context.raw);
-                                        }
-                                        return context.dataset.label + ': ' + context.raw;
-                                    }
-                                }
-                            },
-                            title: {
-                                display: true,
-                                text: 'Sales by Product (All Sellers)'
-                            }
-                        }
-                    }
-                });
-            })
-            .catch(error => {
-                console.error('Error loading admin sales report:', error);
-                alert("Could not load admin sales report.");
-            });
-    </script>
+    const channelsList = document.getElementById('sales-channels');
+    Object.entries(data.sales_channels).forEach(([channel, total]) => {
+      const li = document.createElement('li');
+      li.textContent = `${channel}: ${total}`;
+      channelsList.appendChild(li);
+    });
+
+    const labels = data.sales.map(i => i.product_name);
+    const quantities = data.sales.map(i => i.quantity_sold);
+    const revenues = data.sales.map(i => i.total_revenue);
+
+    const nairaFormat = new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' });
+
+    new Chart(document.getElementById('adminSalesChart'), {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [
+          { label: 'Quantity Sold', data: quantities, backgroundColor: 'rgba(54, 162, 235, 0.7)', yAxisID: 'y' },
+          { label: 'Revenue (₦)', data: revenues, backgroundColor: 'rgba(255, 99, 132, 0.7)', yAxisID: 'y1' }
+        ]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          y: { beginAtZero: true, position: 'left' },
+          y1: { beginAtZero: true, position: 'right', ticks: { callback: v => nairaFormat.format(v) } }
+        }
+      }
+    });
+
+    new Chart(document.getElementById('salesTrendChart'), {
+      type: 'line',
+      data: {
+        labels: data.sales_trend.map(t => t.month),
+        datasets: [{
+          label: 'Revenue Over Time (₦)',
+          data: data.sales_trend.map(t => t.revenue),
+          borderColor: 'rgba(75, 192, 192, 1)',
+          fill: false,
+          tension: 0.1
+        }]
+      }
+    });
+  })
+  .catch(err => console.error(err));
+</script>
 
 <!--       <div class="row mt-4">
         <div class="col-lg-5 mb-lg-0 mb-4">

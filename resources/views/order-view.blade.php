@@ -42,67 +42,103 @@
     @endif
 
 <div class="container my-5">
-    <div class="card p-4 shadow-sm border-0">
-        <h4 class="text-primary fw-bold border-bottom pb-2">Order Details</h4>
-        
-        <div class="card-body">
-            <h5 class="fw-bold">Order ID: <span class="text-muted">#{{ $order->transaction_id }}</span></h5>
-            <p class="mb-2"><strong>Total Price:</strong> <span class="text-dark">₦{{ number_format($order->total, 2) }} (Shipping fee included)</span></p>
-            <p class="mb-2">
-                <strong>Payment Status:</strong> 
-                <span class="fw-bold {{ $order->payment_status === 'PAID' ? 'text-success' : 'text-danger' }}">
-                    {{ $order->payment_status }}
-                </span>
-            </p>
-            <p class="mb-2"><strong>Delivery Status:</strong> <span class="text-info">{{ $order->delivery_status }}</span></p>
-            <p class="mb-2"><strong>Courier Name:</strong> <span class="text-info">{{ $order->courier_name }}</span></p>
-            <p class="mb-2"><strong>Shipping Fee:</strong> <span class="text-dark">₦{{ number_format($order->shipping_charges, 2) }} </span></p>
-            <p class="mb-2"><strong>Date Added:</strong> <span class="text-secondary">{{ $order->created_at->format('F j, Y g:i A') }}</span></p>
-            <p><strong>Order Note:</strong> <span class="text-secondary">{{ $order->order_note ?? 'N/A' }}</span></p>
-        </div>
 
-        <h5 class="mt-4 text-primary fw-bold border-bottom pb-2">Ordered Products</h5>
-
-        <div class="table-responsive">
-            <table class="table table-hover table-bordered align-middle">
-                <thead class="bg-primary text-white">
-                    <tr>
-                        <th>Product Name</th>
-                        <th>Price</th>
-                        <th>Quantity</th>
-                        <th>Total</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @php $totalAmount = 0; @endphp
-                    @foreach($order->orderProducts as $orderProduct)
-                        @php
-                            $subtotal = $orderProduct->product_price * $orderProduct->product_qty;
-                            $totalAmount += $subtotal;
-                        @endphp
-                        <tr>
-                            <td class="fw-medium">{{ $orderProduct->product->product_name ?? 'Unknown Product' }}</td>
-                            <td>₦{{ number_format($orderProduct->product_price, 2) }}</td>
-                            <td class="text-center">{{ $orderProduct->product_qty }}</td>
-                            <td class="fw-bold text-success">₦{{ number_format($subtotal, 2) }}</td>
-                        </tr>
-                    @endforeach
-                </tbody>
-                <tfoot>
-                    <tr class="bg-light fw-bold">
-                        <th colspan="3" class="text-end">Grand Total:</th>
-                        <th class="text-dark">₦{{ number_format($totalAmount, 2) }}</th>
-                    </tr>
-                </tfoot>
-            </table>
+    <!-- Order Header -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h6 class="text-muted mb-1">
+                {{ $order->created_at->format('D, M j, Y, g:i A') }} | ID: #{{ $order->transaction_id }}
+            </h6>
         </div>
     </div>
 
+    <!-- Order Summary Cards -->
+    <div class="row g-3 mb-4">
+        <!-- Payment & Price -->
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h6 class="fw-bold"><i class="bi bi-credit-card-2-front me-1"></i> Payment</h6>
+                    <p class="mb-1"><strong>Total Price:</strong> ₦{{ number_format($order->total, 2) }} <small>(incl. shipping)</small></p>
+                    <p class="mb-0">
+                        <strong>Status:</strong> 
+                        <span class="fw-bold {{ $order->payment_status === 'PAID' ? 'text-success' : 'text-danger' }}">
+                            {{ $order->payment_status }}
+                        </span>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Delivery -->
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h6 class="fw-bold"><i class="bi bi-truck me-1"></i> Delivery</h6>
+                    <p class="mb-1"><strong>Status:</strong> <span class="text-info">{{ ucfirst($order->delivery_status) }}</span></p>
+                    <p class="mb-1"><strong>Courier Name:</strong> {{ $order->courier_name ?? 'N/A' }}</p>
+                    <p class="mb-0"><strong>Shipping Fee:</strong> ₦{{ number_format($order->shipping_charges, 2) }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Order Info -->
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h6 class="fw-bold"><i class="bi bi-info-circle me-1"></i> Order Info</h6>
+                    <p class="mb-1"><strong>Date Added:</strong> {{ $order->created_at->format('F j, Y g:i A') }}</p>
+                    <p class="mb-0"><strong>Order Note:</strong> {{ $order->order_note ?? 'N/A' }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ordered Products Table -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-0">
+            <h6 class="fw-bold p-3 border-bottom">Ordered Products</h6>
+            <div class="table-responsive">
+                <table class="table mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th>Product Name</th>
+                            <th>Price</th>
+                            <th>Quantity</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @php $totalAmount = 0; @endphp
+                        @foreach($order->orderProducts as $orderProduct)
+                            @php
+                                $subtotal = $orderProduct->product_price * $orderProduct->product_qty;
+                                $totalAmount += $subtotal;
+                            @endphp
+                            <tr>
+                                <td>{{ $orderProduct->product->product_name ?? 'Unknown Product' }}</td>
+                                <td>₦{{ number_format($orderProduct->product_price, 2) }}</td>
+                                <td>{{ $orderProduct->product_qty }}</td>
+                                <td class="fw-bold text-success">₦{{ number_format($subtotal, 2) }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                    <tfoot>
+                        <tr class="bg-light fw-bold">
+                            <td colspan="3" class="text-end">Grand Total:</td>
+                            <td>₦{{ number_format($totalAmount, 2) }}</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Back Button -->
     <div class="text-center mt-4">
         <a href="{{ url('/user/orders') }}" class="btn btn-primary px-4 py-2 shadow-sm fw-bold">Back to Orders</a>
     </div>
 </div>
-
 
     </main>
 

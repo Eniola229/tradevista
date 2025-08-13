@@ -26,7 +26,7 @@ public function index()
 
     // Attach seller details from the setup table
     foreach ($orders as $order) {
-        foreach ($order->orderProducts as $orderProduct) { // ✅ Fixed relationship name
+        foreach ($order->orderProducts as $orderProduct) { 
             // Fetch seller details from the setup table using user_id
             $sellerInfo = DB::table('setups')->where('user_id', $orderProduct->product->user_id)->first();
             $orderProduct->product->seller_info = $sellerInfo; // Attach seller info dynamically

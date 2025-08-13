@@ -13,6 +13,7 @@ use Illuminate\Http\RedirectResponse;
 use App\Models\User;
 use App\Models\Product;
 use App\Models\OrderProduct;
+use App\Models\Order;
 use App\Models\Waitlist;
 use App\Models\Withdraw;
 
@@ -112,30 +113,43 @@ class AdminAuthController extends Controller
         return view('admin.dashboard', compact("users", "productCount", "userCount", "totalBalance", 'pendingProductCount', 'withdrawCount'));
     }
 
-    public function generateAdminSalesReport()
-    {
-        // Total products in the system
-        $totalProducts = Product::count();
+public function generateAdminSalesReport()
+{
+    $totalProducts = Product::count();
 
-        // Get sales data grouped by product
-        $salesData = OrderProduct::with('product')
-            ->selectRaw('product_id, SUM(product_qty) as product_total, SUM(product_qty * product_price) as total_revenue')
-            ->groupBy('product_id')
-            ->get();
+    $salesData = OrderProduct::with('product')
+        ->selectRaw('product_id, SUM(product_qty) as product_total, SUM(product_qty * product_price) as total_revenue')
+        ->groupBy('product_id')
+        ->get();
 
-        $report = $salesData->map(function ($item) {
-            return [
-                'product_name' => $item->product->product_name ?? 'Unknown',
-                'quantity_sold' => $item->product_total,
-                'total_revenue' => $item->total_revenue,
-            ];
-        });
+    $salesVolume = $salesData->sum('product_total');
+    $productsSold = $salesData->pluck('product.product_name')->filter()->values();
 
-        return response()->json([
-            'total_products' => $totalProducts,
-            'sales' => $report,
-        ]);
-    }
+    // Since all sales are online
+    $salesChannels = [
+        'Online' => Order::count()
+    ];
+
+    $salesTrend = OrderProduct::selectRaw("DATE_FORMAT(created_at, '%b %Y') as month, SUM(product_qty * product_price) as revenue")
+        ->groupBy('month')
+        ->orderByRaw("MIN(created_at)")
+        ->get();
+
+    $report = $salesData->map(fn ($item) => [
+        'product_name' => $item->product->product_name ?? 'Unknown',
+        'quantity_sold' => $item->product_total,
+        'total_revenue' => $item->total_revenue,
+    ]);
+
+    return response()->json([
+        'total_products' => $totalProducts,
+        'sales_volume'   => $salesVolume,
+        'products_sold'  => $productsSold,
+        'sales_channels' => $salesChannels,
+        'sales_trend'    => $salesTrend,
+        'sales'          => $report,
+    ]);
+}
 
 
     /**
