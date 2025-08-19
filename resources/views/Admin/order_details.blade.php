@@ -93,7 +93,7 @@
                     <p class="mb-0"><strong>Status:</strong> <span class="text-success">Order placed</span></p>
                 </div>
             </div>
-        </div>
+        </div>nnn
 
         <!-- Billing -->
         <div class="col-md-4">

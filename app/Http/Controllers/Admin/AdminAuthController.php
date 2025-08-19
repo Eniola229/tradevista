@@ -16,6 +16,8 @@ use App\Models\OrderProduct;
 use App\Models\Order;
 use App\Models\Waitlist;
 use App\Models\Withdraw;
+use Illuminate\Support\Facades\DB;
+
 
 class AdminAuthController extends Controller
 {
@@ -113,43 +115,33 @@ class AdminAuthController extends Controller
         return view('admin.dashboard', compact("users", "productCount", "userCount", "totalBalance", 'pendingProductCount', 'withdrawCount'));
     }
 
-public function generateAdminSalesReport()
-{
-    $totalProducts = Product::count();
+    public function generateAdminSalesReport()
+    {
+        $totalOrders = Order::count();
 
-    $salesData = OrderProduct::with('product')
-        ->selectRaw('product_id, SUM(product_qty) as product_total, SUM(product_qty * product_price) as total_revenue')
-        ->groupBy('product_id')
-        ->get();
+        // Total revenue
+        $totalRevenue = \App\Models\OrderProduct::sum(\DB::raw('product_qty * product_price'));
 
-    $salesVolume = $salesData->sum('product_total');
-    $productsSold = $salesData->pluck('product.product_name')->filter()->values();
+        // Average order value
+        $averageOrderValue = $totalOrders > 0 ? $totalRevenue / $totalOrders : 0;
 
-    // Since all sales are online
-    $salesChannels = [
-        'Online' => Order::count()
-    ];
+        // Refunds (if payment_status column is used to track them)
+        $refunds = Order::where('payment_status', 'refunded')
+            ->with('orderProducts')
+            ->get()
+            ->sum(function ($order) {
+                return $order->orderProducts->sum(function ($op) {
+                    return $op->product_qty * $op->product_price;
+                });
+            });
 
-    $salesTrend = OrderProduct::selectRaw("DATE_FORMAT(created_at, '%b %Y') as month, SUM(product_qty * product_price) as revenue")
-        ->groupBy('month')
-        ->orderByRaw("MIN(created_at)")
-        ->get();
-
-    $report = $salesData->map(fn ($item) => [
-        'product_name' => $item->product->product_name ?? 'Unknown',
-        'quantity_sold' => $item->product_total,
-        'total_revenue' => $item->total_revenue,
-    ]);
-
-    return response()->json([
-        'total_products' => $totalProducts,
-        'sales_volume'   => $salesVolume,
-        'products_sold'  => $productsSold,
-        'sales_channels' => $salesChannels,
-        'sales_trend'    => $salesTrend,
-        'sales'          => $report,
-    ]);
-}
+        return response()->json([
+            'total_revenue'        => $totalRevenue,
+            'total_orders'         => $totalOrders,
+            'average_order_value'  => $averageOrderValue,
+            'refunds'              => $refunds,
+        ]);
+    }
 
 
     /**

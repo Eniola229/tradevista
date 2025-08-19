@@ -166,85 +166,43 @@
           </div>
         </div>
       </div>
-
-   <div class="container mt-5">
+<div class="container mt-5">
   <div class="card p-4 shadow-sm">
     <div class="d-flex flex-column flex-md-row align-items-center justify-content-between mb-3 gap-3">
-      <h4 class="mb-0">Sales Report</h4>
+      <h4 class="mb-0">Sales Summary Report</h4>
       <button class="btn btn-primary" onclick="window.print()">Print Report</button>
     </div>
 
-    <div class="row text-center mb-4">
-      <div class="col-md-4"><strong>Total Products:</strong> <span id="total-products">0</span></div>
-      <div class="col-md-4"><strong>Sales Volume:</strong> <span id="sales-volume">0</span></div>
-      <div class="col-md-4"><strong>Products Sold:</strong> <span id="products-sold">Loading...</span></div>
-    </div>
+    <p><strong>Purpose:</strong> Shows total sales, orders, and revenue over a specific period.</p>
 
-    <h6>Sales Channels</h6>
-    <ul id="sales-channels"></ul>
-    
-    <h6 class="mt-5">Sales Trend</h6>
-    <canvas id="salesTrendChart"></canvas>
-
-    <h6 class="mt-4">Sales by Product</h6>
-    <canvas id="adminSalesChart"></canvas>
-
-      </div>
+    <h6>Key Metrics:</h6>
+    <ul class="list-group">
+      <li class="list-group-item d-flex justify-content-between align-items-center">
+        <strong>Total Revenue:</strong> <span id="total-revenue">₦0</span>
+      </li>
+      <li class="list-group-item d-flex justify-content-between align-items-center">
+        <strong>Number of Orders:</strong> <span id="total-orders">0</span>
+      </li>
+      <li class="list-group-item d-flex justify-content-between align-items-center">
+        <strong>Average Order Value (AOV):</strong> <span id="aov">₦0</span>
+      </li>
+      <li class="list-group-item d-flex justify-content-between align-items-center">
+        <strong>Refunds/Returns Value:</strong> <span id="refunds">₦0</span>
+      </li>
+    </ul>
+  </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 fetch('/admin/sales-report')
   .then(res => res.json())
   .then(data => {
-    document.getElementById('total-products').innerText = data.total_products;
-    document.getElementById('sales-volume').innerText = data.sales_volume;
-    document.getElementById('products-sold').innerText = data.products_sold.join(', ');
-
-    const channelsList = document.getElementById('sales-channels');
-    Object.entries(data.sales_channels).forEach(([channel, total]) => {
-      const li = document.createElement('li');
-      li.textContent = `${channel}: ${total}`;
-      channelsList.appendChild(li);
-    });
-
-    const labels = data.sales.map(i => i.product_name);
-    const quantities = data.sales.map(i => i.quantity_sold);
-    const revenues = data.sales.map(i => i.total_revenue);
-
     const nairaFormat = new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' });
 
-    new Chart(document.getElementById('adminSalesChart'), {
-      type: 'bar',
-      data: {
-        labels: labels,
-        datasets: [
-          { label: 'Quantity Sold', data: quantities, backgroundColor: 'rgba(54, 162, 235, 0.7)', yAxisID: 'y' },
-          { label: 'Revenue (₦)', data: revenues, backgroundColor: 'rgba(255, 99, 132, 0.7)', yAxisID: 'y1' }
-        ]
-      },
-      options: {
-        responsive: true,
-        scales: {
-          y: { beginAtZero: true, position: 'left' },
-          y1: { beginAtZero: true, position: 'right', ticks: { callback: v => nairaFormat.format(v) } }
-        }
-      }
-    });
-
-    new Chart(document.getElementById('salesTrendChart'), {
-      type: 'line',
-      data: {
-        labels: data.sales_trend.map(t => t.month),
-        datasets: [{
-          label: 'Revenue Over Time (₦)',
-          data: data.sales_trend.map(t => t.revenue),
-          borderColor: 'rgba(75, 192, 192, 1)',
-          fill: false,
-          tension: 0.1
-        }]
-      }
-    });
+    document.getElementById('total-revenue').innerText = nairaFormat.format(data.total_revenue || 0);
+    document.getElementById('total-orders').innerText = data.total_orders || 0;
+    document.getElementById('aov').innerText = nairaFormat.format(data.average_order_value || 0);
+    document.getElementById('refunds').innerText = nairaFormat.format(data.refunds || 0);
   })
   .catch(err => console.error(err));
 </script>
