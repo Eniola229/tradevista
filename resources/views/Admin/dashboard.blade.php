@@ -166,46 +166,121 @@
           </div>
         </div>
       </div>
-<div class="container mt-5">
-  <div class="card p-4 shadow-sm">
-    <div class="d-flex flex-column flex-md-row align-items-center justify-content-between mb-3 gap-3">
-      <h4 class="mb-0">Sales Summary Report</h4>
-      <button class="btn btn-primary" onclick="window.print()">Print Report</button>
+
+  <div class="container my-5">
+    <div class="card p-4 shadow-sm">
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-start mb-4">
+        <h3>Sales Report</h3>
+        <div class="d-flex gap-2">
+          <button class="btn btn-primary" onclick="window.print()">Print</button>
+          <button class="btn btn-success" onclick="downloadReport()">Download</button>
+        </div>
+      </div>
+      <form id="filterForm" class="row g-3 mb-4">
+        <div class="col-md-3">
+          <label>From</label>
+          <input type="date" id="from_date" class="form-control">
+        </div>
+        <div class="col-md-3">
+          <label>To</label>
+          <input type="date" id="to_date" class="form-control">
+        </div>
+        <div class="col-md-2 align-self-end">
+          <button type="submit" class="btn btn-primary w-100">Filter</button>
+        </div>
+      </form>
+
+      <!-- KPI Cards -->
+      <div class="row text-center mb-4" id="kpi-cards">
+        <div class="col">
+          <div class="bg-light p-3 rounded">
+            <h6>Total Revenue</h6>
+            <h4 id="kpi-revenue">₦0</h4>
+          </div>
+        </div>
+        <div class="col">
+          <div class="bg-light p-3 rounded">
+            <h6>Orders</h6>
+            <h4 id="kpi-orders">0</h4>
+          </div>
+        </div>
+        <div class="col">
+          <div class="bg-light p-3 rounded">
+            <h6>AOV</h6>
+            <h4 id="kpi-aov">₦0</h4>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chart & Table -->
+      <div class="row">
+        <div class="col-md-8 mb-4">
+          <canvas id="salesChart"></canvas>
+        </div>
+        <div class="col-md-4">
+          <div class="table-responsive">
+            <table class="table table-bordered text-center">
+              <thead class="table-light">
+                <tr><th>Date</th><th>Sales</th></tr>
+              </thead>
+              <tbody id="sales-table">
+                <tr><td colspan="2">Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
     </div>
-
-    <p><strong>Purpose:</strong> Shows total sales, orders, and revenue over a specific period.</p>
-
-    <h6>Key Metrics:</h6>
-    <ul class="list-group">
-      <li class="list-group-item d-flex justify-content-between align-items-center">
-        <strong>Total Revenue:</strong> <span id="total-revenue">₦0</span>
-      </li>
-      <li class="list-group-item d-flex justify-content-between align-items-center">
-        <strong>Number of Orders:</strong> <span id="total-orders">0</span>
-      </li>
-      <li class="list-group-item d-flex justify-content-between align-items-center">
-        <strong>Average Order Value (AOV):</strong> <span id="aov">₦0</span>
-      </li>
-      <li class="list-group-item d-flex justify-content-between align-items-center">
-        <strong>Refunds/Returns Value:</strong> <span id="refunds">₦0</span>
-      </li>
-    </ul>
   </div>
-</div>
 
-<script>
-fetch('/admin/sales-report')
-  .then(res => res.json())
-  .then(data => {
-    const nairaFormat = new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' });
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+  const nairaFormat = new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' });
+  const ctx = document.getElementById('salesChart').getContext('2d');
+  let chart = new Chart(ctx, {
+    type: 'line',
+    data: { labels: [], datasets: [{ label: 'Daily Sales', data: [], borderColor: '#007bff', backgroundColor: 'rgba(0,123,255,0.1)' }] },
+    options: { scales: { x: { title: { display: true, text: 'Date' }}, y: { title: { display: true, text: 'Sales (₦)' }}}, responsive: true }
+  });
 
-    document.getElementById('total-revenue').innerText = nairaFormat.format(data.total_revenue || 0);
-    document.getElementById('total-orders').innerText = data.total_orders || 0;
-    document.getElementById('aov').innerText = nairaFormat.format(data.average_order_value || 0);
-    document.getElementById('refunds').innerText = nairaFormat.format(data.refunds || 0);
-  })
-  .catch(err => console.error(err));
-</script>
+  function fetchData(from = '', to = '') {
+    let url = '/admin/sales-report';
+    if (from && to) url += `?from=${from}&to=${to}`;
+
+    fetch(url).then(res => res.json()).then(data => {
+      document.getElementById('kpi-revenue').innerText = nairaFormat.format(data.kpi.total_revenue);
+      document.getElementById('kpi-orders').innerText = data.kpi.total_orders;
+      document.getElementById('kpi-aov').innerText = nairaFormat.format(data.kpi.aov);
+
+      chart.data.labels = data.daily.map(r => r.date);
+      chart.data.datasets[0].data = data.daily.map(r => r.value);
+      chart.update();
+
+      let tbody = document.getElementById('sales-table');
+      tbody.innerHTML = '';
+      if (data.daily.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="2">No data</td></tr>';
+      } else {
+        data.daily.forEach(r => {
+          tbody.innerHTML += `<tr><td>${r.date}</td><td>${nairaFormat.format(r.value)}</td></tr>`;
+        });
+      }
+    }).catch(console.error);
+  }
+
+  function downloadReport() {
+    const from = document.getElementById('from_date').value;
+    const to = document.getElementById('to_date').value;
+    window.location.href = `/admin/sales-report/download?from=${from}&to=${to}`;
+  }
+
+  document.getElementById('filterForm').addEventListener('submit', e => {
+    e.preventDefault();
+    fetchData(document.getElementById('from_date').value, document.getElementById('to_date').value);
+  });
+
+  document.addEventListener('DOMContentLoaded', () => fetchData());
+  </script>
 
 <!--       <div class="row mt-4">
         <div class="col-lg-5 mb-lg-0 mb-4">

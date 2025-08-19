@@ -115,33 +115,29 @@ class AdminAuthController extends Controller
         return view('admin.dashboard', compact("users", "productCount", "userCount", "totalBalance", 'pendingProductCount', 'withdrawCount'));
     }
 
-    public function generateAdminSalesReport()
+    public function generateAdminSalesReport(Request $request)
     {
-        $totalOrders = Order::count();
+        $from = $request->query('from');
+        $to = $request->query('to');
 
-        // Total revenue
-        $totalRevenue = \App\Models\OrderProduct::sum(\DB::raw('product_qty * product_price'));
+        $base = Order::select(
+            DB::raw('DATE(created_at) as date'),
+            DB::raw('SUM(total) as value')
+        )->groupBy('date')->orderBy('date');
 
-        // Average order value
-        $averageOrderValue = $totalOrders > 0 ? $totalRevenue / $totalOrders : 0;
+        if ($from && $to) {
+            $base->whereBetween('created_at', [$from, $to]);
+        }
 
-        // Refunds (if payment_status column is used to track them)
-        $refunds = Order::where('payment_status', 'refunded')
-            ->with('orderProducts')
-            ->get()
-            ->sum(function ($order) {
-                return $order->orderProducts->sum(function ($op) {
-                    return $op->product_qty * $op->product_price;
-                });
-            });
+        $daily = $base->get();
+        $kpi = [
+            'total_revenue' => $daily->sum('value'),
+            'total_orders'  => Order::count(),
+            'aov'           => $daily->count() ? $daily->sum('value') / $daily->count() : 0,
+        ];
 
-        return response()->json([
-            'total_revenue'        => $totalRevenue,
-            'total_orders'         => $totalOrders,
-            'average_order_value'  => $averageOrderValue,
-            'refunds'              => $refunds,
-        ]);
-    }
+        return response()->json(['kpi' => $kpi, 'daily' => $daily]);
+}
 
 
     /**
