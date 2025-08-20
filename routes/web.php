@@ -165,6 +165,7 @@ Route::get('admin/logout', [AdminAuthController::class, 'logout'])->name('admin-
 Route::middleware('auth:admin')->prefix('admin')->group(function () {
  Route::get('/dashboard', [AdminAuthController::class, 'dashboard'])->name('admin-dashboard'); 
  Route::get('/sales-report', [AdminAuthController::class, 'generateAdminSalesReport']);
+ Route::get('/sales-report/download', [AdminAuthController::class, 'downloadSalesReport']);
  Route::get('/team', [TeamController::class, 'team'])->name('admin-team'); 
  Route::get('/edit/{id}', [TeamController::class, 'edit'])->name('admin-team-edit'); 
  Route::get('/delete/{id}', [TeamController::class, 'delete'])->name('admin-team-edit'); 

@@ -115,30 +115,71 @@ class AdminAuthController extends Controller
         return view('admin.dashboard', compact("users", "productCount", "userCount", "totalBalance", 'pendingProductCount', 'withdrawCount'));
     }
 
+    // Sales Report JSON API
     public function generateAdminSalesReport(Request $request)
     {
         $from = $request->query('from');
         $to = $request->query('to');
 
-        $base = Order::select(
-            DB::raw('DATE(created_at) as date'),
-            DB::raw('SUM(total) as value')
-        )->groupBy('date')->orderBy('date');
-
+        // Base query for date filtering
+        $filterQuery = Order::query();
         if ($from && $to) {
-            $base->whereBetween('created_at', [$from, $to]);
+            $filterQuery->whereBetween('created_at', [$from, $to]);
         }
 
-        $daily = $base->get();
-        $kpi = [
-            'total_revenue' => $daily->sum('value'),
-            'total_orders'  => Order::count(),
-            'aov'           => $daily->count() ? $daily->sum('value') / $daily->count() : 0,
-        ];
+        // Daily grouped sales
+        $daily = (clone $filterQuery)
+            ->select(
+                DB::raw('DATE(created_at) as date'),
+                DB::raw('SUM(total) as value')
+            )
+            ->groupBy(DB::raw('DATE(created_at)'))
+            ->orderBy(DB::raw('DATE(created_at)'), 'ASC')
+            ->get();
 
-        return response()->json(['kpi' => $kpi, 'daily' => $daily]);
-}
+        // KPI values (separate query to avoid groupBy issues)
+        $totalRevenue = $filterQuery->sum('total');
+        $totalOrders = $filterQuery->count();
+        $aov = $totalOrders > 0 ? ($totalRevenue / $totalOrders) : 0;
 
+        return response()->json([
+            'kpi' => [
+                'total_revenue' => $totalRevenue,
+                'total_orders'  => $totalOrders,
+                'aov'           => $aov,
+            ],
+            'daily' => $daily
+        ]);
+    }
+
+    // Download Sales Report as CSV
+    public function downloadSalesReport(Request $request)
+    {
+        $from = $request->query('from');
+        $to = $request->query('to');
+
+        // Base query for date filtering
+        $filterQuery = Order::query();
+        if ($from && $to) {
+            $filterQuery->whereBetween('created_at', [$from, $to]);
+        }
+
+        // Retrieve orders
+        $orders = (clone $filterQuery)
+            ->select('id', 'created_at', 'total')
+            ->orderBy('created_at', 'ASC')
+            ->get();
+
+        // Prepare CSV content
+        $csv = "Order ID,Date,Total\n";
+        foreach ($orders as $order) {
+            $csv .= "{$order->id},{$order->created_at},{$order->total}\n";
+        }
+
+        return response($csv)
+            ->header('Content-Type', 'text/csv')
+            ->header('Content-Disposition', 'attachment; filename=\"sales_report.csv\"');
+    }
 
     /**
      * Create a new admin instance.
