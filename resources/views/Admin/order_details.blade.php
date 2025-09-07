@@ -88,12 +88,12 @@
                 <div class="card-body">
                     <h6 class="fw-bold"><i class="bi bi-truck me-1"></i>Shipping Details</h6>
                     <p class="mb-1"><strong>Tracking Number:</strong> N/A</p>
-                    <p class="mb-1"><strong>Shipping Type:</strong> ShipBubble</p>
+                    <p class="mb-1"><strong>Courier Name:</strong> {{ $order->courier_name }}</p>
                     <p class="mb-1"><strong>Shipping Fee:</strong> ₦{{ number_format($order->shipping_charges ?? 0, 2) }}</p>
                     <p class="mb-0"><strong>Status:</strong> <span class="text-success">Order placed</span></p>
                 </div>
             </div>
-        </div>nnn
+        </div>
 
         <!-- Billing -->
         <div class="col-md-4">

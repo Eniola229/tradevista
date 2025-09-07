@@ -16,6 +16,9 @@ use App\Models\Review;
 use App\Models\Cart;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\ContactSellerMail;
+
 
 
 class AdminProductController extends Controller
@@ -67,5 +70,27 @@ class AdminProductController extends Controller
         return redirect()->route('admin.products')->with('success', 'Product deleted successfully.');
     }
 
+    public function send(Request $request, Product $product)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email',
+            'message' => 'required|string|max:1000',
+        ]);
+
+        $sellerEmail = $product->user->email; 
+
+        Mail::send('emails.contact-seller', [
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'bodyMessage' => $validated['message'],
+            'product' => $product->product_name,
+        ], function ($message) use ($sellerEmail, $product) {
+            $message->to($sellerEmail)
+                    ->subject('Official Message from TradeVista Hub – Product: ' . $product->product_name);
+        });
+
+        return back()->with('message', 'Your message has been sent to the seller!');
+    }
 
 }

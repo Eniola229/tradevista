@@ -248,7 +248,7 @@ $hots = Product::where('status', 'ACTIVE')
 <!-- Banner Section End -->
 
 <!---Start of Contest banner--->
-<section class="discount mt-3 mb-3">
+<!-- <section class="discount mt-3 mb-3">
     <div class="container">
         <div class="row">
             <div class="col-lg-6 p-0">
@@ -274,7 +274,7 @@ $hots = Product::where('status', 'ACTIVE')
             </div>
         </div>
     </div>
-</section>
+</section> -->
 <!----End of contest banner---->
 
 <!-- Product Section Begin -->

@@ -107,7 +107,7 @@
                                     <input type="text" value="1" name="quantity" id="number_qaun" class="number_qaun" >
                                 </div>
                             </div>         
-                                <a href="#" class="cart-btn product-btn"  id="addCart" data-product-id="{{ $product->id }}"><span class="icon_bag_alt"></span> Add to cart</a>
+                                <a href="#" class="site-btn"  id="addCart" data-product-id="{{ $product->id }}"><span class="icon_bag_alt"></span> Add to cart</a>
                             </form>
                                 <ul>
                                 <form class="wishlistForm" action="{{ route('addWishlist') }}" method="GET">

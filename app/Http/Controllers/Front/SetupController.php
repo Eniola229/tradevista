@@ -25,10 +25,22 @@ class SetupController extends Controller
                         ->orderBy('created_at', 'desc')
                         ->paginate(10);
 
+        $uploaded = Product::where('user_id', $userInfo->id)->exists();
+
+        $hasUpgraded = Payment::where('user_id', $userInfo->id)
+            ->where('description', 'SELLER ACCOUNT SETUP FEE')
+            ->where('status', 'PAID')
+            ->exists();
+
         $pendingPayment = Payment::where('user_id', $userInfo->id)
                          ->where('description', 'SELLER ACCOUNT SETUP FEE')
                          ->where('status', 'PENDING')
                          ->first();
+        $successPayment = Payment::where('user_id', $userInfo->id)
+                         ->where('description', 'SELLER ACCOUNT SETUP FEE')
+                         ->where('status', 'PAID')
+                         ->first();
+
         $pendingOrder = Order::where('user_id', $userInfo->id)
                          ->where('delivery_status', 'Processing')
                          ->count();
@@ -43,7 +55,7 @@ class SetupController extends Controller
 
         $contestant = \App\Models\Contestant::where('email', auth()->user()->email)->first();
 
-        return view('dashboard', compact('setup', 'DeliveredOrder', 'pendingOrder', 'payments', 'pendingPayment', 'productCount', 'notifications', 'contestant'));
+        return view('dashboard', compact('setup', 'DeliveredOrder', 'pendingOrder', 'payments', 'pendingPayment', 'productCount', 'notifications', 'contestant', 'hasUpgraded', 'uploaded'));
 
     }
 
@@ -137,48 +149,48 @@ class SetupController extends Controller
                 ]);
             }
  
-            // Check if a pending payment exists with description 'SELLER ACCOUNT SETUP FEE'
-            $payment = Payment::where('user_id', $user->id)
-                              ->where('description', 'SELLER ACCOUNT SETUP FEE')
-                              ->where('status', 'PENDING')
-                              ->first();
+            // // Check if a pending payment exists with description 'SELLER ACCOUNT SETUP FEE'
+            // $payment = Payment::where('user_id', $user->id)
+            //                   ->where('description', 'SELLER ACCOUNT SETUP FEE')
+            //                   ->where('status', 'PENDING')
+            //                   ->first();
 
-            if ($payment) {
-                // Update existing pending payment
-                $payment->update([
-                    'amount' => 2875, 
-                    'payment_method' => 'PAYSTACK',
-                ]);
-            } else {
-                // Create a new pending payment record if none exists
-                $payment = Payment::create([
-                    'user_id' => $user->id,
-                    'currency' => 'NGN',
-                    'description' => 'SELLER ACCOUNT SETUP FEE',
-                    'amount' => 2875,
-                    'payment_method' => 'PAYSTACK',
-                    'status' => 'PENDING',
-                ]);
-            }
+            // if ($payment) {
+            //     // Update existing pending payment
+            //     $payment->update([
+            //         'amount' => 2875, 
+            //         'payment_method' => 'PAYSTACK',
+            //     ]);
+            // } else {
+            //     // Create a new pending payment record if none exists
+            //     $payment = Payment::create([
+            //         'user_id' => $user->id,
+            //         'currency' => 'NGN',
+            //         'description' => 'SELLER ACCOUNT SETUP FEE',
+            //         'amount' => 2875,
+            //         'payment_method' => 'PAYSTACK',
+            //         'status' => 'PENDING',
+            //     ]);
+            // }
 
-            // Initialize Paystack payment
-            $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . env('PAYSTACK_SECRET_KEY'),
-            ])->post('https://api.paystack.co/transaction/initialize', [
-                'email' => $user->email,
-                'amount' => 2875 * 100,
-                'currency' => 'NGN',
-                'callback_url' => route('payment.callback'),
-            ]);
+            // // Initialize Paystack payment
+            // $response = Http::withHeaders([
+            //     'Authorization' => 'Bearer ' . env('PAYSTACK_SECRET_KEY'),
+            // ])->post('https://api.paystack.co/transaction/initialize', [
+            //     'email' => $user->email,
+            //     'amount' => 2875 * 100,
+            //     'currency' => 'NGN',
+            //     'callback_url' => route('payment.callback'),
+            // ]);
 
-            $data = $response->json();
-            if ($data['status'] ?? false) {
-                return redirect($data['data']['authorization_url']);
-            }
+            // $data = $response->json();
+            // if ($data['status'] ?? false) {
+            //     return redirect($data['data']['authorization_url']);
+            // }
 
-            $payment->status = 'FAILED';
-            $payment->save();
-            return redirect()->back()->with('error', 'Payment initialization failed 1.');
+            // $payment->status = 'FAILED';
+            // $payment->save();
+           return redirect()->route('dashboard')->with('message', 'Great! Seller setup completed. Start selling...');
         } else {
             // Save Buyer Setup Data
             Setup::create([
@@ -284,57 +296,57 @@ class SetupController extends Controller
             'company_image' => 'nullable|image|mimes:jpg,png,jpeg,gif|max:2048',
         ]);
 
-        // If upgrading from BUYER to SELLER and company name was empty, require payment
-        if ($previousAccountType == "BUYER" && $request->account_type == "SELLER" && empty($previousName)) {
+        // // If upgrading from BUYER to SELLER and company name was empty
+        // if ($previousAccountType == "BUYER" && $request->account_type == "SELLER" && empty($previousName)) {
             
-            // Check if a pending payment exists
-            $payment = Payment::where('user_id', $user->id)
-                ->where('description', 'SELLER ACCOUNT SETUP FEE')
-                ->where('status', 'PENDING')
-                ->first();
+        //     // Check if a pending payment exists
+        //     $payment = Payment::where('user_id', $user->id)
+        //         ->where('description', 'SELLER ACCOUNT SETUP FEE')
+        //         ->where('status', 'PENDING')
+        //         ->first();
 
-            if (!$payment) {
-                // Create a new payment record
-                $payment = Payment::create([
-                    'user_id' => $user->id,
-                    'currency' => 'NGN',
-                    'description' => 'SELLER ACCOUNT SETUP FEE',
-                    'amount' => 2875,
-                    'payment_method' => 'PAYSTACK',
-                    'status' => 'PENDING',
-                ]);
-            }
+        //     if (!$payment) {
+        //         // Create a new payment record
+        //         $payment = Payment::create([
+        //             'user_id' => $user->id,
+        //             'currency' => 'NGN',
+        //             'description' => 'SELLER ACCOUNT SETUP FEE',
+        //             'amount' => 2875,
+        //             'payment_method' => 'PAYSTACK',
+        //             'status' => 'PENDING',
+        //         ]);
+        //     }
 
-            // Store update request details in the session
-            session(['update_setup_data' => $request->except('company_image')]);
+        //     // Store update request details in the session
+        //     session(['update_setup_data' => $request->except('company_image')]);
 
-            // Store the image in session if uploaded
-            if ($request->hasFile('company_image')) {
-                $imagePath = $request->file('company_image')->store('temp_images'); // Temporarily store
-                session(['company_image_path' => $imagePath]);
-            }
+        //     // Store the image in session if uploaded
+        //     if ($request->hasFile('company_image')) {
+        //         $imagePath = $request->file('company_image')->store('temp_images'); // Temporarily store
+        //         session(['company_image_path' => $imagePath]);
+        //     }
 
-            // Redirect to Paystack only if no previous successful payment exists
-            if ($payment->status !== 'PAID') {
-                $response = Http::withHeaders([
-                    'Authorization' => 'Bearer ' . env('PAYSTACK_SECRET_KEY'),
-                ])->post('https://api.paystack.co/transaction/initialize', [
-                    'email' => $user->email,
-                    'amount' => 2875 * 100, // Convert to kobo
-                    'currency' => 'NGN',
-                    'callback_url' => route('payment.callback'), // Redirect to a callback after payment
-                ]);
+        //     // Redirect to Paystack only if no previous successful payment exists
+        //     if ($payment->status !== 'PAID') {
+        //         $response = Http::withHeaders([
+        //             'Authorization' => 'Bearer ' . env('PAYSTACK_SECRET_KEY'),
+        //         ])->post('https://api.paystack.co/transaction/initialize', [
+        //             'email' => $user->email,
+        //             'amount' => 2875 * 100, // Convert to kobo
+        //             'currency' => 'NGN',
+        //             'callback_url' => route('payment.callback'), // Redirect to a callback after payment
+        //         ]);
 
-                $data = $response->json();
-                if ($data['status'] ?? false) {
-                    return redirect($data['data']['authorization_url']); // Redirect to Paystack
-                }
+        //         $data = $response->json();
+        //         if ($data['status'] ?? false) {
+        //             return redirect($data['data']['authorization_url']); // Redirect to Paystack
+        //         }
 
-                // If payment fails, mark as failed and stop the update
-                $payment->update(['status' => 'FAILED']);
-                return redirect()->back()->with('error', 'Payment initialization failed.');
-            }
-        }
+        //         // If payment fails, mark as failed and stop the update
+        //         $payment->update(['status' => 'FAILED']);
+        //         return redirect()->back()->with('error', 'Payment initialization failed.');
+        //     }
+        // }
 
         // **Proceed to update the fields**
         $setup->fill($request->except('company_image'));
@@ -394,6 +406,66 @@ class SetupController extends Controller
 
         return redirect()->route('dashboard')->with('error', 'Payment verification failed.');
     }
+   
+    public function initiateUpgrade(Request $request)
+    {
+        $user = Auth::user();
 
+        // Create a pending payment record
+        $payment = Payment::create([
+            'user_id' => $user->id,
+            'currency' => 'NGN',
+            'description' => 'SELLER ACCOUNT SETUP FEE',
+            'amount' => 3000, // Amount in Naira
+            'payment_method' => 'PAYSTACK',
+            'status' => 'PENDING',
+        ]);
+
+        // Prepare Paystack request
+        $callbackUrl = route('upgrade.callback'); // Add this route in web.php
+
+        $response = Http::withHeaders([
+            'Authorization' => 'Bearer ' . env('PAYSTACK_SECRET_KEY')
+        ])->post('https://api.paystack.co/transaction/initialize', [
+            'email' => $user->email,
+            'amount' => $payment->amount * 100, 
+            'reference' => $payment->id, 
+            'callback_url' => $callbackUrl,
+        ]);
+
+        $result = $response->json();
+
+        if (!$result['status']) {
+            return back()->with('error', 'Payment initialization failed. Please try again.');
+        }
+
+        return redirect($result['data']['authorization_url']);
+    }
+
+  
+    public function handleCallback(Request $request)
+    {
+        $reference = $request->reference;
+
+        // Verify payment from Paystack
+        $response = Http::withHeaders([
+            'Authorization' => 'Bearer ' . env('PAYSTACK_SECRET_KEY')
+        ])->get("https://api.paystack.co/transaction/verify/{$reference}");
+
+        $result = $response->json();
+
+        if ($result['status'] && $result['data']['status'] === 'success') {
+            // Update payment record
+            $payment = Payment::find($reference);
+            if ($payment) {
+                $payment->status = 'PAID';
+                $payment->save();
+            }
+
+            return redirect()->route('dashboard')->with('message', 'Your account has been upgraded to Premium!');
+        }
+
+        return redirect()->route('dashboard')->with('error', 'Payment verification failed.');
+    }
 
 }

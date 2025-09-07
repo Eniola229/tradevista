@@ -140,6 +140,32 @@
                                 Delete
                             </button>
  -->
+                            <div class="container my-4" style="max-width: 450px;">
+                                <div class="card shadow-sm border-0 rounded-3">
+                                    <div class="card-body">
+                                        <h5 class="card-title text-center mb-3">Contact Seller (Support Team)</h5>
+                                        <form action="{{ route('contact.seller', $product->id) }}" method="POST">
+                                            @csrf
+                                            <div class="mb-3">
+                                                <label class="form-label">Your Name</label>
+                                                <input type="text" name="name" class="form-control form-control-sm" placeholder="Enter your name" value="{{ Auth::user()->name }}" required>
+                                            </div>
+
+                                            <div class="mb-3">
+                                                <label class="form-label">Your Email</label>
+                                                <input type="email" name="email" class="form-control form-control-sm" placeholder="Enter your email" value="{{ Auth::user()->email }}" required>
+                                            </div>
+
+                                            <div class="mb-3">
+                                                <label class="form-label">Your Message</label>
+                                                <textarea name="message" class="form-control form-control-sm" rows="3" placeholder="Type your message" required></textarea>
+                                            </div>
+
+                                            <button type="submit" class="btn btn-primary w-100 btn-sm">Send Message</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
 
                          
 

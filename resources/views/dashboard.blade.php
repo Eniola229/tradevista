@@ -326,10 +326,9 @@
      @if($setup->account_type == 'SELLER')
       <div class="d-flex flex-column flex-md-row align-items-center justify-content-between mt-4 p-4 rounded shadow-sm gap-3">
         <h2 class="h5 text-dark mb-0">Upload a new product</h2>
-        <a href="{{ url('add-edit-product') }}">
-          <button class="btn btn-primary">Click here</button>
-        </a>
+        <button class="btn btn-primary" id="uploadBtn">Click here</button>
       </div>
+
 <style>
   .chart-wrapper {
     width: 100%;
@@ -366,124 +365,6 @@
     </div>
   </div>
 </div>
-
-
-  <!-- Chart.js CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-  fetch('/sales-report')
-    .then(response => response.json())
-    .then(data => {
-      document.getElementById('total-products').innerText = data.total_products;
-
-      const labels = data.sales.map(item => item.product_name);
-      const quantities = data.sales.map(item => item.quantity_sold);
-      const revenues = data.sales.map(item => item.total_revenue);
-
-      const nairaFormat = new Intl.NumberFormat('en-NG', {
-        style: 'currency',
-        currency: 'NGN'
-      });
-
-      const ctx = document.getElementById('salesChart').getContext('2d');
-
-      new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: labels,
-          datasets: [
-            {
-              label: 'Quantity Sold',
-              data: quantities,
-              backgroundColor: 'rgba(54, 162, 235, 0.7)',
-              borderColor: 'rgba(54, 162, 235, 1)',
-              borderWidth: 1,
-              yAxisID: 'y'
-            },
-            {
-              label: 'Revenue (₦)',
-              data: revenues,
-              backgroundColor: 'rgba(40, 167, 69, 0.7)',
-              borderColor: 'rgba(40, 167, 69, 1)',
-              borderWidth: 1,
-              yAxisID: 'y1'
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          interaction: {
-            mode: 'index',
-            intersect: false
-          },
-          layout: {
-            padding: {
-              top: 10,
-              bottom: 10,
-              left: 10,
-              right: 10
-            }
-          },
-          scales: {
-            x: {
-              ticks: {
-                maxRotation: 20,
-                minRotation: 0,
-                autoSkip: false
-              }
-            },
-            y: {
-              beginAtZero: true,
-              position: 'left',
-              title: {
-                display: true,
-                text: 'Quantity'
-              }
-            },
-            y1: {
-              beginAtZero: true,
-              position: 'right',
-              grid: {
-                drawOnChartArea: false
-              },
-              title: {
-                display: true,
-                text: 'Revenue (₦)'
-              },
-              ticks: {
-                callback: function(value) {
-                  return nairaFormat.format(value);
-                }
-              }
-            }
-          },
-          plugins: {
-            title: {
-              display: true,
-              text: 'Sales by Product'
-            },
-            tooltip: {
-              callbacks: {
-                label: function(context) {
-                  if (context.dataset.label === 'Revenue (₦)') {
-                    return context.dataset.label + ': ' + nairaFormat.format(context.raw);
-                  }
-                  return context.dataset.label + ': ' + context.raw;
-                }
-              }
-            }
-          }
-        }
-      });
-    })
-    .catch(error => {
-      console.error('Error loading report:', error);
-      alert("Could not load sales report.");
-    });
-</script>
-
 
       @endif
       @endif
@@ -677,10 +558,6 @@
               <div class="card-body position-relative z-index-1 d-flex flex-column h-100 p-3">
                 <h5 class="text-white font-weight-bolder mb-4 pt-2">Complete Setting up your account</h5>
                 <p class="text-white">By seting up your account you choose, between being a<strong>SELLER</strong> or <strong>BUYER</strong></p>
-                <a class="text-white text-sm font-weight-bold mb-0 icon-move-right mt-auto" href="javascript:;">
-                  By being a <strong>SELLER</strong> you have to pay a sum of <strong>₦2,875</strong> for acount set up
-                  <i class="fas fa-arrow-right text-sm ms-1" aria-hidden="true"></i>
-                </a>
               </div>
             </div>
           </div>
@@ -891,6 +768,30 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
+  document.getElementById('uploadBtn').addEventListener('click', function () {
+      let uploaded = @json($uploaded);
+      let hasUpgraded = @json($hasUpgraded);
+
+      if (uploaded && !hasUpgraded) {
+          Swal.fire({
+              icon: 'warning',
+              title: 'Upgrade Required',
+              html: `
+                  <p>You have already used your free trial.</p>
+                  <p>Please upgrade to <strong>Premium</strong> for <strong>₦3,000</strong> to continue uploading.</p>
+              `,
+              showCancelButton: true,
+              confirmButtonText: 'Upgrade Now',
+              cancelButtonText: 'Cancel'
+          }).then((result) => {
+              if (result.isConfirmed) {
+                  window.location.href = "{{ route('upgrade.account') }}"; // Paystack upgrade URL
+              }
+          });
+      } else {
+          window.location.href = "{{ url('add-edit-product') }}";
+      }
+  });
 
 let debounceTimer;
 
@@ -1043,6 +944,122 @@ $(document).on('click', '.suggestion-item', function () {
       Scrollbar.init(document.querySelector('#sidenav-scrollbar'), options);
     }
   </script>
+    <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  fetch('/sales-report')
+    .then(response => response.json())
+    .then(data => {
+      document.getElementById('total-products').innerText = data.total_products;
+
+      const labels = data.sales.map(item => item.product_name);
+      const quantities = data.sales.map(item => item.quantity_sold);
+      const revenues = data.sales.map(item => item.total_revenue);
+
+      const nairaFormat = new Intl.NumberFormat('en-NG', {
+        style: 'currency',
+        currency: 'NGN'
+      });
+
+      const ctx = document.getElementById('salesChart').getContext('2d');
+
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: 'Quantity Sold',
+              data: quantities,
+              backgroundColor: 'rgba(54, 162, 235, 0.7)',
+              borderColor: 'rgba(54, 162, 235, 1)',
+              borderWidth: 1,
+              yAxisID: 'y'
+            },
+            {
+              label: 'Revenue (₦)',
+              data: revenues,
+              backgroundColor: 'rgba(40, 167, 69, 0.7)',
+              borderColor: 'rgba(40, 167, 69, 1)',
+              borderWidth: 1,
+              yAxisID: 'y1'
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: {
+            mode: 'index',
+            intersect: false
+          },
+          layout: {
+            padding: {
+              top: 10,
+              bottom: 10,
+              left: 10,
+              right: 10
+            }
+          },
+          scales: {
+            x: {
+              ticks: {
+                maxRotation: 20,
+                minRotation: 0,
+                autoSkip: false
+              }
+            },
+            y: {
+              beginAtZero: true,
+              position: 'left',
+              title: {
+                display: true,
+                text: 'Quantity'
+              }
+            },
+            y1: {
+              beginAtZero: true,
+              position: 'right',
+              grid: {
+                drawOnChartArea: false
+              },
+              title: {
+                display: true,
+                text: 'Revenue (₦)'
+              },
+              ticks: {
+                callback: function(value) {
+                  return nairaFormat.format(value);
+                }
+              }
+            }
+          },
+          plugins: {
+            title: {
+              display: true,
+              text: 'Sales by Product'
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  if (context.dataset.label === 'Revenue (₦)') {
+                    return context.dataset.label + ': ' + nairaFormat.format(context.raw);
+                  }
+                  return context.dataset.label + ': ' + context.raw;
+                }
+              }
+            }
+          }
+        }
+      });
+    })
+    .catch(error => {
+      console.error('Error loading report:', error);
+      alert("Could not load sales report.");
+    });
+</script>
+
   <!-- Github buttons -->
   <script async defer src="https://buttons.github.io/buttons.js"></script>
   <!-- Control Center for Soft Dashboard: parallax effects, scripts for the example pages etc -->

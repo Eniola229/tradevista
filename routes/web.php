@@ -109,6 +109,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/address/{id}', [ProfileController::class, 'updateaddress']);
     Route::put('/avatar', [ProfileController::class, 'updateAvatar']);
     Route::put('/setup/{id}', [SetupController::class, 'update'])->name('update.setup');
+    Route::get('/upgrade-account', [SetupController::class, 'initiateUpgrade'])->name('upgrade.account');
+    Route::get('/upgrade-callback', [SetupController::class, 'handleCallback'])->name('upgrade.callback');
     //DASHBOARD
     Route::get('dashboard', [SetupController::class, 'setup'])->name('dashboard');
     Route::get('/sales-report', [SetupController::class, 'generateSalesReport']);
@@ -179,6 +181,7 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
  Route::get('/referer', [AdminRefererController::class, 'index'])->name('user.referer');
  Route::get('/products', [AdminProductController::class, 'index'])->name('admin.products');
  Route::get('/view/product/{id}', [AdminProductController::class, 'view'])->name('admin.view-products');
+ Route::post('/contact-seller/{product}', [AdminProductController::class, 'send'])->name('contact.seller');
  Route::get('/change-product-status', [AdminProductController::class, 'changeStatus']);
  Route::get('/delete-product', [AdminProductController::class, 'deleteProduct'])->name('admin.deleteProduct');
  Route::get('/users', [UsersController::class, 'index'])->name('admin.users');

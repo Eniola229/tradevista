@@ -341,6 +341,7 @@ use App\Models\Product;
                         <hr>
                         <li>Shipping Fee <span id="selected-shipping-fee">₦ 0.00</span></li>
                         <li>Total <span  id="totalAmount">₦ {{ number_format($subTotal, 2) }}</span></li>
+                        <input type="hidden" name="courier_name" id="courier_name">
                     </ul>
                 </div>
                 <button type="submit" id="placeOrderBtn" class="site-btn">Place Order</button>
@@ -468,7 +469,7 @@ document.addEventListener('DOMContentLoaded', function () {
               <div class="card-body d-flex flex-column flex-md-row align-items-md-center justify-content-between">
                 <div class="form-check" style="flex-grow: 1;">
                   <input class="form-check-input shipping-radio" type="radio" name="shippingMethod"
-                    value="${courier.courier_id}" data-total="${courier.total}" id="ship-${index}" ${index === 0 ? 'checked' : ''}>
+                    value="${courier.courier_id}" data-total="${courier.total}" data-courier-name="${courier.courier_name}" id="ship-${index}" ${index === 0 ? 'checked' : ''}>
                   <label class="form-check-label" for="ship-${index}" style="cursor: pointer;">
                     <strong>${courier.courier_name}</strong><br>
                     <span>₦${Number(courier.total).toLocaleString()}</span><br>
@@ -487,11 +488,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
         shippingMethodsContainer.innerHTML = html;
 
+        function handleShippingChange() {
+            updateTotalWithShipping();
+            updateCourierName();
+        }
+
         document.querySelectorAll('.shipping-radio').forEach(input => {
-            input.addEventListener('change', updateTotalWithShipping);
+            input.addEventListener('change', handleShippingChange);
         });
 
-        updateTotalWithShipping();
     }
 
     function updateTotalWithShipping() {
@@ -509,6 +514,17 @@ document.addEventListener('DOMContentLoaded', function () {
             totalDisplay.textContent = newTotal.toLocaleString();
         }
     }
+
+    function updateCourierName() {
+        const selected = document.querySelector('.shipping-radio:checked');
+        const shippingName = selected ? selected.dataset.courierName : 'N/A';
+
+        const courierNameInput = document.querySelector('input[name="courier_name"]');
+        if (courierNameInput) {
+            courierNameInput.value = shippingName;
+        }
+    }
+
 
     function getCartItemsWithDimensions() {
         // Convert object to array of product objects
@@ -758,6 +774,7 @@ $(document).ready(function () {
             shipping_fee: parseFloat($('#selected-shipping-fee').text().replace('₦', '').replace(/,/g, '')),
             reference: reference,
             order_note: $('input[name="order_note"]').val(),
+            courier_name: $('input[name="courier_name"]').val(),
             _token: "{{ csrf_token() }}"
         };
 

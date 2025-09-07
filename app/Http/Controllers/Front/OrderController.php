@@ -45,7 +45,7 @@ public function getUserOrders()
             'phone'       => 'required',
             'email'       => 'required|email',
             'stateCode'   => 'required',
-            'cityName'    => 'required',
+            'cityName'    => 'nullable',
             'zip'         => 'required',
             'shipping_address' => 'required',
             'order_note' => 'nullable',
@@ -108,7 +108,7 @@ public function getUserOrders()
             'total'            => $totalAmount,
             'order_note' => $request->order_note,
             'shipping_charges' => $shippingFee,
-            'courier_name' => "N/A",
+            'courier_name' => $request->courier_name,
         ]);
 
         // Retrieve cart items from the database
