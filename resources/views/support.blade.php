@@ -158,85 +158,91 @@
 @foreach ($supports as $support)
   <!-- Reply Modal -->
   <div class="modal fade" id="replyModal{{ $support->id }}" tabindex="-1" aria-labelledby="replyModalLabel{{ $support->id }}" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title text-primary" id="replyModalLabel{{ $support->id }}">Your Support Ticket</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title text-primary" id="replyModalLabel{{ $support->id }}">Your Support Ticket</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body">
+        <p><strong>Ticket ID:</strong> {{ $support->ticket_id }}</p>
+        <p><strong>Status:</strong> {{ $support->status }}</p>
+        <p><strong>Issue Type:</strong> {{ $support->problem_type }}</p>
+        <p>Attended to by: <strong>{{ $support->attendant->name ?? 'N/A' }}</strong></p>
+        <hr>
+
+        <!-- 🗨️ Conversation Thread -->
+        <div 
+          class="conversation-thread mb-4"
+          style="max-height: 300px; overflow-y: auto; background-color: #f8f9fa; padding: 10px; border-radius: 5px;"
+          data-support-id="{{ $support->id }}"
+          data-fetch-url="{{ route('support.messages.fetch', $support->id) }}"
+          id="conversation-{{ $support->id }}" 
+        >
+          <!-- Messages will be loaded here -->
         </div>
 
-        <div class="modal-body">
-          <p><strong>Ticket ID:</strong> {{ $support->ticket_id }}</p>
-          <p><strong>Status:</strong> {{ $support->status }}</p>
-          <p><strong>Issue Type:</strong> {{ $support->problem_type }}</p>
-          <p>Attended to by: <strong>{{ $support->attendant->name ?? 'N/A' }}</strong></p>
-          <hr>
+        <!-- ✍️ Reply Form -->
+        <form class="user-reply-form" data-support-id="{{ $support->id }}">
+          @csrf
+          <div class="mb-3">
+            <label class="form-label fw-bold">Your Reply</label>
+            <textarea name="message" class="form-control" rows="3" placeholder="Type your message..." required></textarea>
+          </div>
 
-          <!-- 🗨️ Conversation Thread -->
-            <div 
-              class="conversation-thread mb-4"
-              style="max-height: 300px; overflow-y: auto; background-color: #f8f9fa; padding: 10px; border-radius: 5px;"
-              data-support-id="{{ $support->id }}"
-              data-fetch-url="{{ route('support.messages.fetch', $support->id) }}"
-              id="conversation-{{ $support->id }}" 
-            >
-              <!-- Messages will be loaded here -->
-            </div>
+          <div class="d-flex justify-content-between">
+            <button type="button" class="btn btn-secondary fw-bold" data-bs-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-primary fw-bold">Send Reply</button>
+          </div>
+        </form>
 
-            <!-- ✍️ Reply Form -->
-            <form class="user-reply-form" data-support-id="{{ $support->id }}">
-              @csrf
-              <div class="mb-3">
-                <label class="form-label fw-bold">Your Reply</label>
-                <textarea name="message" class="form-control" rows="3" placeholder="Type your message..." required></textarea>
-              </div>
-              <button type="submit" class="btn btn-primary">Send Reply</button>
-            </form>
-
-        </div>
       </div>
     </div>
   </div>
+</div>
 @endforeach
 
+<!-- Support Ticket Modal -->
+<div class="modal fade" id="supportTicketModal" tabindex="-1" aria-labelledby="supportTicketModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold text-primary" id="supportTicketModalLabel">Report an Issue</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="supportTicketForm" class="p-4 border rounded bg-light" method="POST" action="{{ route('support.ticket.submit') }}" enctype="multipart/form-data">
+                    @csrf
+                    <div class="mb-3">
+                        <label for="problemType" class="form-label fw-bold">Type of Issue</label>
+                        <select class="form-select" name="problem_type" id="problemType" required>
+                            <option value="" selected disabled>Select an issue</option>
+                            <option value="billing">Billing</option>
+                            <option value="technical">Technical Issue</option>
+                            <option value="account">Account Issue</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="message" class="form-label fw-bold">Message</label>
+                        <textarea class="form-control" name="message" id="message" rows="4" placeholder="Describe your issue" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="image" class="form-label fw-bold">Attach Image (Optional)</label>
+                        <input type="file" class="form-control" name="image" id="image" accept="image/*">
+                    </div>
 
-        <!-- Support Ticket Modal -->
-        <div class="modal fade" id="supportTicketModal" tabindex="-1" aria-labelledby="supportTicketModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title fw-bold text-primary" id="supportTicketModalLabel">Report an Issue</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <div class="d-flex justify-content-between">
+                        <button type="button" class="btn btn-secondary fw-bold" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" id="submitBtn" class="btn btn-primary fw-bold">Submit Ticket</button>
                     </div>
-                    <div class="modal-body">
-                      <form id="supportTicketForm" class="p-4 border rounded bg-light" method="POST" action="{{ route('support.ticket.submit') }}" enctype="multipart/form-data">
-                          @csrf
-                          <div class="mb-3">
-                              <label for="problemType" class="form-label fw-bold">Type of Issue</label>
-                              <select class="form-select" name="problem_type" id="problemType" required>
-                                  <option value="" selected disabled>Select an issue</option>
-                                  <option value="billing">Billing</option>
-                                  <option value="technical">Technical Issue</option>
-                                  <option value="account">Account Issue</option>
-                                  <option value="other">Other</option>
-                              </select>
-                          </div>
-                          <div class="mb-3">
-                              <label for="message" class="form-label fw-bold">Message</label>
-                              <textarea class="form-control" name="message" id="message" rows="4" placeholder="Describe your issue" required></textarea>
-                          </div>
-                          <div class="mb-3">
-                              <label for="image" class="form-label fw-bold">Attach Image (Optional)</label>
-                              <input type="file" class="form-control" name="image" id="image" accept="image/*">
-                          </div>
-                          <button type="submit" id="submitBtn" class="btn btn-primary w-100 fw-bold">
-                              Submit Ticket
-                          </button>
-                      </form>
-                    </div>
-                </div>
+                </form>
             </div>
         </div>
+    </div>
+</div>
+
         
           </div>
         </div>

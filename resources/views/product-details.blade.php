@@ -61,7 +61,10 @@
                 </div>
                 <div class="col-lg-6">
                     <div class="product__details__text">
-                        <h3>{{ $product->product_name }} <h6>Brand: {{ $setup->company_name }}</h6></h3>
+                        <h3 class="product-name">{{ $product->product_name }} <button class="site-btn" id="shareBtn">
+                          <span style="color:white;" class="social_share"></span>
+                        </button>
+                        <h6>Brand: {{ $setup->company_name }}</h6></h3>
                         <h6>Address: {{ $setup->address }}</h6><br>
                        <span>We recommend placing all orders online</span>
                         <h6>{{ $setup->company_mobile_1 }} | {{ $setup->company_mobile_1 }}</h6>
@@ -283,6 +286,33 @@
 @include('components.footer')
 </html>
 
+
+<script>
+  document.getElementById('shareBtn').addEventListener('click', async () => {
+    const productName = document.querySelector('.product-name')?.innerText || 'this product';
+    
+    const shareData = {
+      title: "TradeVista Hub",
+      text: `Check out ${productName} on TradeVista Hub 👇`,
+      url: window.location.href
+    };
+
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+      } catch (err) {
+        console.log('Sharing canceled or failed:', err);
+      }
+    } else {
+      try {
+        await navigator.clipboard.writeText(`${shareData.text} ${shareData.url}`);
+        alert('✅ Link copied to clipboard!');
+      } catch (err) {
+        alert('❌ Sharing not supported. Copy failed.');
+      }
+    }
+  });
+</script>
 
 
 <script type="text/javascript">
